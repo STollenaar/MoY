@@ -157,6 +157,7 @@ public class Party implements Listener{
 	}
 
 	public  Set<UUID> partyfecther(UUID member){
+		//if errors happend check this
 		Set<UUID> members = new HashSet<UUID>();
 			if(Partymembers.get(member) == null){
 				return null;

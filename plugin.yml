@@ -1,0 +1,29 @@
+name: MistsOfYsir
+main: com.tollenaar.stephen.MistsOfYsir.MoY
+version: B.1.7.9
+authors: [guitargun]
+description: the ultimate plugin
+depend: [Citizens, MistCore] 
+softdepend: [Citizens]
+commands: 
+     party:
+             description: make a party
+             usage: /<command>
+     skill:
+             description: opens the skill inventory
+             usage: /<command>
+     qnpc:
+             description: main command for the npc systems
+             usage: /<command>
+     lvl:
+             description: just a test
+             usage: /<command>
+     event:
+             description: event parameters
+             usage: /<command> 
+     quest:
+             description: active quests
+             usage: /<command>
+     test:
+             description: debug this
+             usage: /<command>			 

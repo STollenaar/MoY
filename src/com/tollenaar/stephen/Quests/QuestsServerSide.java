@@ -190,7 +190,8 @@ public class QuestsServerSide extends Quest {
 	public void spawnNpc(Location location, String name, int uniqueid, String skin) {
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.createNPC(EntityType.PLAYER, name);
-		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, skin);
+		
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, NPCSkin.getNonPlayerProfile(skin).getName());
 		npc.spawn(location);
 		UUID npcuuid = npc.getUniqueId();
 		spawnlocation.put(npcuuid, location);

@@ -29,6 +29,8 @@ import com.tollenaar.stephen.Quests.QuestKill;
 import com.tollenaar.stephen.Quests.QuestTalkto;
 import com.tollenaar.stephen.Quests.QuestsServerSide;
 import com.tollenaar.stephen.Quests.Warps;
+import com.tollenaar.stephen.Travel.HarborWaitLocations;
+import com.tollenaar.stephen.Travel.TripLocations;
 
 import code.husky.mysql.MySQL;
 
@@ -217,8 +219,144 @@ public class DbStuff {
 							+ "locationz INTEGER NOT NULL,"
 							+ "world VARCHAR(50) NOT NULL);");
 
+			// harborwaiting
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Harbors ("
+					+ "id INTEGER PRIMARY KEY," + "locationx INTEGER NOT NULL,"
+					+ "locationy INTEGER NOT NULL,"
+					+ "locationz INTEGER NOT NULL,"
+					+ "world VARCHAR(50) NOT NULL),"
+					+ "type VARCHAR(16) NOT NULL;");
+
+			// trip
+			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Trips ("
+					+ "id INTEGER PRIMARY KEY," + "locationx INTEGER NOT NULL,"
+					+ "locationy INTEGER NOT NULL,"
+					+ "locationz INTEGER NOT NULL,"
+					+ "world VARCHAR(50) NOT NULL),"
+					+ "type VARCHAR(16) NOT NULL;");
+
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void saveharbors() {
+		String insert = "INSERT INTO Mist_Harbors (`id`, `type`, `locationx`, `locationy`, `locationz`, `world`) VALUES (?,?,?,?,?,?);";
+
+		String update = "UPDATE  Mist_Harbors SET `type`=?, `locationx`=?, `locationy`=?, `locationz`=?, `world`=? WHERE `id`=?;";
+		String select = "SELECT `type` FROM Mist_Harbors WHERE `id`=?;";
+
+		for (int id : questers.AllHarbors()) {
+			HarborWaitLocations h = questers.returnharbor(id);
+			PreparedStatement pst = null;
+			try {
+				pst = con.prepareStatement(select);
+				pst.setInt(1, id);
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					pst.close();
+					pst = con.prepareStatement(update);
+					pst.setString(1, h.getType());
+					pst.setInt(2, (int) h.getLocation().getX());
+					pst.setInt(3, (int) h.getLocation().getY());
+					pst.setInt(4, (int) h.getLocation().getZ());
+					pst.setString(5, h.getLocation().getWorld().getName());
+					pst.setInt(6, id);
+					pst.execute();
+				} else {
+					pst.close();
+					pst = con.prepareStatement(insert);
+					pst.setInt(1, id);
+					pst.setString(2, h.getType());
+					pst.setInt(3, (int) h.getLocation().getX());
+					pst.setInt(4, (int) h.getLocation().getY());
+					pst.setInt(5, (int) h.getLocation().getZ());
+					pst.setString(6, h.getLocation().getWorld().getName());
+					pst.execute();
+				}
+			} catch (SQLException e) {
+				this.plugin.getLogger().severe(e.getMessage());
+				plugin.getLogger().info(
+						"There was a error during the savings of the data to the database: "
+								+ e.getMessage());
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+
+			finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+		}
+	}
+
+	public void savetrips() {
+		String insert = "INSERT INTO Mist_Trips (`id`, `type`, `locationx`, `locationy`, `locationz`, `world`) VALUES (?,?,?,?,?,?);";
+
+		String update = "UPDATE  Mist_Trips SET `type`=?, `locationx`=?, `locationy`=?, `locationz`=?, `world`=? WHERE `id`=?;";
+		String select = "SELECT `type` FROM Mist_Trips WHERE `id`=?;";
+
+		for (int id : questers.AllTrips()) {
+			TripLocations h = questers.returntrip(id);
+			PreparedStatement pst = null;
+			try {
+				pst = con.prepareStatement(select);
+				pst.setInt(1, id);
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					pst.close();
+					pst = con.prepareStatement(update);
+					pst.setString(1, h.getType());
+					pst.setInt(2, (int) h.getLocation().getX());
+					pst.setInt(3, (int) h.getLocation().getY());
+					pst.setInt(4, (int) h.getLocation().getZ());
+					pst.setString(5, h.getLocation().getWorld().getName());
+					pst.setInt(6, id);
+					pst.execute();
+				} else {
+					pst.close();
+					pst = con.prepareStatement(insert);
+					pst.setInt(1, id);
+					pst.setString(2, h.getType());
+					pst.setInt(3, (int) h.getLocation().getX());
+					pst.setInt(4, (int) h.getLocation().getY());
+					pst.setInt(5, (int) h.getLocation().getZ());
+					pst.setString(6, h.getLocation().getWorld().getName());
+					pst.execute();
+				}
+			} catch (SQLException e) {
+				this.plugin.getLogger().severe(e.getMessage());
+				plugin.getLogger().info(
+						"There was a error during the savings of the data to the database: "
+								+ e.getMessage());
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+
+			finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
 		}
 	}
 
@@ -1799,7 +1937,7 @@ public class DbStuff {
 
 	public void saveall() {
 		plugin.getLogger().info(
-				Ansi.ansi().fg(Ansi.Color.GREEN) + "SAVING STUFF"
+				Ansi.ansi().fg(Ansi.Color.GREEN) + "SAVING"
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));
 		saveplayerdata();
 		savepartydata();
@@ -1818,6 +1956,83 @@ public class DbStuff {
 		savenpcdata();
 		savemining();
 		savewood();
+		saveharbors();
+		savetrips();
+		plugin.getLogger().info(
+				Ansi.ansi().fg(Ansi.Color.GREEN) + "SAVING COMPLETE"
+						+ Ansi.ansi().fg(Ansi.Color.WHITE));
+	}
+
+	public void loadharbors() {
+		String loading = "SELECT * FROM Mist_Harbors;";
+		PreparedStatement pst = null;
+		try {
+			pst = con.prepareStatement(loading);
+			ResultSet rs = pst.executeQuery();
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				String type = rs.getString("type");
+				int x = rs.getInt("locationx");
+				int y = rs.getInt("locationy");
+				int z = rs.getInt("locationz");
+				String world = rs.getString("world");
+				Location l = new Location(Bukkit.getWorld(world), x, y, z);
+				questers.loadhardbor(id, type, l);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+	}
+
+	public void loadtrips() {
+		String loading = "SELECT * FROM Mist_Trips;";
+		PreparedStatement pst = null;
+		try {
+			pst = con.prepareStatement(loading);
+			ResultSet rs = pst.executeQuery();
+			while (rs.next()) {
+				int id = rs.getInt("id");
+				String type = rs.getString("type");
+				int x = rs.getInt("locationx");
+				int y = rs.getInt("locationy");
+				int z = rs.getInt("locationz");
+				String world = rs.getString("world");
+				Location l = new Location(Bukkit.getWorld(world), x, y, z);
+				questers.loadtrip(id, type, l);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
 	}
 
 	public void loadpartydata() {
@@ -2654,7 +2869,7 @@ public class DbStuff {
 
 	public void loadall() {
 		plugin.getLogger().info(
-				Ansi.ansi().fg(Ansi.Color.GREEN) + "LOADING STUFF"
+				Ansi.ansi().fg(Ansi.Color.GREEN) + "LOADING"
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));
 		opencon();
 
@@ -2679,7 +2894,13 @@ public class DbStuff {
 
 		loadmining();
 		loadwood();
+		loadharbors();
+		loadtrips();
+		plugin.getLogger().info(
+				Ansi.ansi().fg(Ansi.Color.GREEN) + "LOADING COMPLETE"
+						+ Ansi.ansi().fg(Ansi.Color.WHITE));
 		closecon();
+
 	}
 
 	public void closecon() {

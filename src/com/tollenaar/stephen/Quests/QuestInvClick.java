@@ -95,7 +95,8 @@ public class QuestInvClick implements Listener {
 						questers.despawnNPC(npcuuid);
 						event.setCancelled(true);
 						player.closeInventory();
-					}else if(event.getCurrentItem().getItemMeta().getDisplayName().equals("NPC skinName")){
+					} else if (event.getCurrentItem().getItemMeta()
+							.getDisplayName().equals("NPC skinName")) {
 						event.setCancelled(true);
 						player.closeInventory();
 						player.sendMessage("Type the new npc skin name");
@@ -168,7 +169,7 @@ public class QuestInvClick implements Listener {
 				} else if (clickinv.getName().equals("AllWarps")) {
 					if (name.equals("Create New")) {
 						event.setCancelled(true);
-						
+
 						if (questers.warplists.get(npcuuid) != null) {
 							event.setCancelled(true);
 							return;
@@ -611,7 +612,7 @@ public class QuestInvClick implements Listener {
 						questers.allwarps(player,
 								questers.warplists.get(npcuuid), npcuuid);
 					}
-					
+
 					if (item.getItemMeta().getDisplayName()
 							.equals("Type of transportation")) {
 						event.setCancelled(true);
@@ -644,11 +645,13 @@ public class QuestInvClick implements Listener {
 					}
 
 				}
+
 				if (!event.isCancelled()) {
 					event.setCancelled(true);
 				}
 			} else if (clickinv.getName().equals("NPCNames")) {
-				System.out.println(Thread.currentThread().getStackTrace()[1] + " " + event.getCurrentItem());
+				System.out.println(Thread.currentThread().getStackTrace()[1]
+						+ " " + event.getCurrentItem());
 				if (event.getCurrentItem() != null) {
 					if (event.getCurrentItem().getItemMeta() != null) {
 						if (event.getWhoClicked() != null) {
@@ -663,25 +666,68 @@ public class QuestInvClick implements Listener {
 									.getItem(npcinv.getSize() - 1)
 									.getItemMeta().getLore().get(0));
 							ItemStack item = event.getCurrentItem();
-							int id = Integer.parseInt(item.getItemMeta().getLore().get(1));
-							int questn = Integer.parseInt(npcinv.getItem(npcinv.getSize()-1).getItemMeta().getLore().get(1));
-									questers.targetnpcs
-											.put(npcuid,
-													id);
-									questers.returntalkto(
-											questn).setNpcid(id);
-									questers.npcpos
-											.remove(player.getUniqueId());
-									player.closeInventory();
-									questers.returntalkto(
-											questn)
-											.npcsettingstalkto(npcuuid, player);
-									event.setCancelled(true);
-								}
+							int id = Integer.parseInt(item.getItemMeta()
+									.getLore().get(1));
+							int questn = Integer.parseInt(npcinv
+									.getItem(npcinv.getSize() - 1)
+									.getItemMeta().getLore().get(1));
+							questers.targetnpcs.put(npcuid, id);
+							questers.returntalkto(questn).setNpcid(id);
+							questers.npcpos.remove(player.getUniqueId());
+							player.closeInventory();
+							questers.returntalkto(questn).npcsettingstalkto(
+									npcuuid, player);
+							event.setCancelled(true);
 						}
+					}
 				}
 				event.setCancelled(true);
+			} else if (clickinv.getName().equals("Wait Location info")
+					|| clickinv.getName().equals("Trip Location info")) {
+				ItemStack item = event.getCurrentItem();
+				String name = item.getItemMeta().getDisplayName();
+				Player player = (Player) event.getWhoClicked();
+				String id = event.getClickedInventory().getItem(0)
+						.getItemMeta().getLore().get(0);
+				if (clickinv.getName().equals("Trip Location info")) {
+					if (name.equals("Trip Type")) {
+						player.closeInventory();
+						player.sendMessage("boat, oxcart or dragoncoach. type 1 type");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add("trip");
+						temp.add("type");
+						temp.add(id);
+						questers.npcpos.put(player.getUniqueId(), temp);
+					} else if (name.equals("Trip Location")) {
+						player.closeInventory();
+						player.sendMessage("go to the loction and type save");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add("trip");
+						temp.add("location");
+						temp.add(id);
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+				} else if (clickinv.getName().equals("Wait Location info")) {
+					if (name.equals("Trip Type")) {
+						player.closeInventory();
+						player.sendMessage("boat, oxcart or dragoncoach. type 1 type");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add("harbor");
+						temp.add("type");
+						temp.add(id);
+						questers.npcpos.put(player.getUniqueId(), temp);
+					} else if (name.equals("Trip Location")) {
+						player.closeInventory();
+						player.sendMessage("go to the loction and type save");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add("harbor");
+						temp.add("location");
+						temp.add(id);
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+				}
 			}
+
 		}
 	}
 
@@ -716,9 +762,9 @@ public class QuestInvClick implements Listener {
 					 * going to send the player his confirmation etc.
 					 */
 					player.closeInventory();
-					player.sendMessage(ChatColor.BLUE + "["
-							+ ChatColor.BLUE + "YQuest" + ChatColor.BLUE
-							+ "] " + ChatColor.GRAY + message);
+					player.sendMessage(ChatColor.BLUE + "[" + ChatColor.BLUE
+							+ "YQuest" + ChatColor.BLUE + "] " + ChatColor.GRAY
+							+ message);
 					if (!quetstype.equals("talkto")) {
 						if (questers.progress.get(player.getUniqueId()) != null) {
 							if (questers.progress.get(player.getUniqueId())
@@ -740,15 +786,17 @@ public class QuestInvClick implements Listener {
 						}
 					}
 				} else {
-					int Number2 = Integer.parseInt(item.getItemMeta().getLore().get(item.getItemMeta().getLore().size()-2));
+					int Number2 = Integer.parseInt(item.getItemMeta().getLore()
+							.get(item.getItemMeta().getLore().size() - 2));
 					player.closeInventory();
-					tr.boardcheck(npcuuid, number, player, questers.returnwarp(Number2).getStartloc());
+					tr.boardcheck(npcuuid, number, player,
+							questers.returnwarp(Number2).getStartloc());
 				}
 				event.setCancelled(true);
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void QuestBlockers(InventoryClickEvent event) {
 		Inventory clickedinv = event.getClickedInventory();

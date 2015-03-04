@@ -570,11 +570,10 @@ public class Quest {
 	private HashMap<Integer, QuestTalkto> talktoquests = new HashMap<Integer, QuestTalkto>();
 
 	private HashMap<Integer, Warps> warplist = new HashMap<Integer, Warps>();
-	
+
 	private HashMap<Integer, TripLocations> triplocations = new HashMap<Integer, TripLocations>();
-	
+
 	private HashMap<Integer, HarborWaitLocations> harborlocation = new HashMap<Integer, HarborWaitLocations>();
-	
 
 	public HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>> progress = new HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>>();
 
@@ -582,15 +581,14 @@ public class Quest {
 		return progress.get(playeruuid).get(type).get(number);
 	}
 
-	
-	
-	public void removetrip(int number){
+	public void removetrip(int number) {
 		triplocations.remove(number);
 	}
-	public void removeharbor(int number){
+
+	public void removeharbor(int number) {
 		harborlocation.remove(number);
 	}
-	
+
 	public void removekill(int number) {
 		killquests.remove(number);
 		plugin.database.deletekill(number);
@@ -612,10 +610,10 @@ public class Quest {
 		plugin.database.deletewarp(number);
 	}
 
-	public int createnewtrip(){
+	public int createnewtrip() {
 		int i = 0;
-		for(; i <= triplocations.size(); i++){
-			if(triplocations.get(i) == null){
+		for (; i <= triplocations.size(); i++) {
+			if (triplocations.get(i) == null) {
 				break;
 			}
 		}
@@ -623,11 +621,11 @@ public class Quest {
 		triplocations.put(i, trip);
 		return i;
 	}
-	
-	public int createnewharbor(){
+
+	public int createnewharbor() {
 		int i = 0;
-		for(; i <= harborlocation.size(); i++){
-			if(harborlocation.get(i) == null){
+		for (; i <= harborlocation.size(); i++) {
+			if (harborlocation.get(i) == null) {
 				break;
 			}
 		}
@@ -635,7 +633,7 @@ public class Quest {
 		harborlocation.put(i, trip);
 		return i;
 	}
-	
+
 	public int createnewkill() {
 		int i = 0;
 		for (; i <= killquests.size(); i++) {
@@ -724,6 +722,14 @@ public class Quest {
 		}
 	}
 
+	public TripLocations returntrip(int number) {
+		return triplocations.get(number);
+	}
+
+	public HarborWaitLocations returnharbor(int number) {
+		return harborlocation.get(number);
+	}
+
 	public void loadkill(int number, String name, String reward, String delay,
 			int minlvl, String message, String prereq, int count, String monster) {
 		QuestKill kill = new QuestKill(number);
@@ -781,8 +787,20 @@ public class Quest {
 		warplist.put(number, warp);
 	}
 
-	
-	
+	public void loadhardbor(int id, String type, Location loc) {
+		HarborWaitLocations h = new HarborWaitLocations(id);
+		h.setLocation(loc);
+		h.setType(type);
+		harborlocation.put(id, h);
+	}
+
+	public void loadtrip(int id, String type, Location loc) {
+		TripLocations t = new TripLocations(id);
+		t.setLocation(loc);
+		t.setType(type);
+		triplocations.put(id, t);
+	}
+
 	public void allkill(Player player, HashSet<Integer> quests, UUID npcuuid) {
 		int rowcount = 0;
 		if (quests != null) {
@@ -1294,6 +1312,14 @@ public class Quest {
 
 	public Set<Integer> AllWarpId() {
 		return warplist.keySet();
+	}
+
+	public Set<Integer> AllHarbors() {
+		return harborlocation.keySet();
+	}
+
+	public Set<Integer> AllTrips() {
+		return triplocations.keySet();
 	}
 
 	private String returnname(String type, int number) {

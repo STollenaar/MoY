@@ -21,6 +21,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.tollenaar.stephen.MistsOfYsir.MoY;
+import com.tollenaar.stephen.Travel.HarborWaitLocations;
+import com.tollenaar.stephen.Travel.TripLocations;
 
 @SuppressWarnings("deprecation")
 public class QuestChat extends QuestInvClick implements Listener {
@@ -374,6 +376,38 @@ public class QuestChat extends QuestInvClick implements Listener {
 					questers.npcpos.remove(player.getUniqueId());
 				}
 				event.setCancelled(true);
+			}else if(info.get(0).equals("trip")){
+				if(info.get(1).equals("type")){
+					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
+						int id = Integer.parseInt(info.get(info.size()-1));
+						TripLocations t = questers.returntrip(id);
+						t.setType(typed);
+						questers.npcpos.remove(player.getUniqueId());
+					}
+				}else if(info.get(1).equals("location")){
+					if(typed.equals("save")){
+						int id = Integer.parseInt(info.get(info.size()-1));
+						TripLocations t = questers.returntrip(id);
+						t.setLocation(player.getLocation());
+						questers.npcpos.remove(player.getUniqueId());
+					}
+				}
+			}else if(info.get(0).equals("harbor")){
+				if(info.get(1).equals("type")){
+					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
+						int id = Integer.parseInt(info.get(info.size()-1));
+						HarborWaitLocations t = questers.returnharbor(id);
+						t.setType(typed);
+						questers.npcpos.remove(player.getUniqueId());
+					}
+				}else if(info.get(1).equals("location")){
+					if(typed.equals("save")){
+						int id = Integer.parseInt(info.get(info.size()-1));
+						HarborWaitLocations t = questers.returnharbor(id);
+						t.setLocation(player.getLocation());
+						questers.npcpos.remove(player.getUniqueId());
+					}
+				}
 			}
 		}
 	}

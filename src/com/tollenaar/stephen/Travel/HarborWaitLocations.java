@@ -73,6 +73,7 @@ public class HarborWaitLocations {
 		player.openInventory(inv);
 	}
 
+
 	public static HashSet<HarborWaitLocations> getLocations() {
 		return locations;
 	}

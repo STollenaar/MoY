@@ -69,7 +69,6 @@ public class TripLocations {
 		}
 		
 		
-		
 		player.openInventory(inv);
 	}
 

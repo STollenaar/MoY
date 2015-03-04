@@ -20,14 +20,13 @@ public class Warps {
 	
 	private String name;
 
-	private Location endlocation;
-	private Location harborwaiting;
-	private Location trip;
+	private Location startloc;
 	
 	private String type;
 	
 	private double costs;
 
+	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
 	
 	public void npcsettingswarplists(UUID npcuuid, Player player) {
 
@@ -35,7 +34,7 @@ public class Warps {
 		// title
 		ItemStack title = new ItemStack(Material.BOOK);
 		{
-
+				type.contains("thingy");
 			List<String> temp = new ArrayList<String>();
 			temp.add(name);
 			ItemMeta tem = title.getItemMeta();
@@ -48,29 +47,16 @@ public class Warps {
 		ItemStack transport = new ItemStack(Material.BOAT);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add("X: " +trip.getX());
-			temp.add("Y: " + trip.getY());
-			temp.add("Z: " + trip.getZ());
-			temp.add("World: " + trip.getWorld().getName());
+			temp.add("X: " +startloc.getX());
+			temp.add("Y: " + startloc.getY());
+			temp.add("Z: " + startloc.getZ());
+			temp.add("World: " + startloc.getWorld().getName());
 			ItemMeta tem = transport.getItemMeta();
-			tem.setDisplayName("Transportation Location");
+			tem.setDisplayName("Start Location");
 			tem.setLore(temp);
 			transport.setItemMeta(tem);
 		}
-		// endlocation
-		ItemStack end = new ItemStack(Material.COMPASS);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add("X: " + endlocation.getX());
-			temp.add("Y: " + endlocation.getY());
-			temp.add("Z: " + endlocation.getZ());
-			temp.add("World: " + endlocation.getWorld().getName());
-
-			ItemMeta tem = end.getItemMeta();
-			tem.setDisplayName("End Location");
-			tem.setLore(temp);
-			end.setItemMeta(tem);
-		}
+		
 		// type
 		ItemStack typei = new ItemStack(Material.MINECART);
 		{
@@ -81,20 +67,7 @@ public class Warps {
 			tem.setLore(temp);
 			typei.setItemMeta(tem);
 		}
-		// fakeboat
-		ItemStack fake = new ItemStack(Material.WATER_BUCKET);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add("X: " + harborwaiting.getX());
-			temp.add("Y: " + harborwaiting.getY());
-			temp.add("Z: " + harborwaiting.getZ());
-			temp.add("World: " + harborwaiting.getWorld().getName());
-			
-			ItemMeta tem = fake.getItemMeta();
-			tem.setDisplayName("Boarded Harbor");
-			tem.setLore(temp);
-			fake.setItemMeta(tem);
-		}
+		
 		// costs
 		ItemStack money = new ItemStack(Material.GOLD_NUGGET);
 		{
@@ -129,8 +102,6 @@ public class Warps {
 
 		warpinv.addItem(title);
 		warpinv.addItem(transport);
-		warpinv.addItem(end);
-		warpinv.addItem(fake);
 		warpinv.addItem(typei);
 		warpinv.addItem(money);
 		warpinv.setItem(warpinv.getSize() - 2, delete);
@@ -140,15 +111,13 @@ public class Warps {
 	}
 	
 	
-	public Warps(int number) {
+	public Warps(int number, Location l) {
 		this.warpid = number;
 		this.name = "title";
-		Location t = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
-		this.endlocation = t;
-		this.harborwaiting = t;
-		this.trip = t;
+		this.startloc = l;
 		this.type = "none";
 		this.costs = 0.0;
+		allwarps.add(this);
 	}
 
 	
@@ -159,6 +128,16 @@ public class Warps {
 
 
 
+	public static ArrayList<Warps> TypeReturned(String type){
+		ArrayList<Warps> thewarps = new ArrayList<Warps>();
+		for(Warps w : allwarps){
+			if(w.GetType().contains(type)){
+				thewarps.add(w);
+			}
+		}
+		return thewarps;
+	}
+	
 	public void setCosts(double costs2) {
 		this.costs = costs2;
 	}
@@ -181,32 +160,15 @@ public class Warps {
 		this.name = name;
 	}
 
-	public Location getEndlocation() {
-		return endlocation;
-	}
-
-	public void setEndlocation(Location endlocation) {
-		this.endlocation = endlocation;
-	}
-
-	public Location getHarborwaiting() {
-		return harborwaiting;
-	}
-
-	public void setHarborwaiting(Location harborwaiting) {
-		this.harborwaiting = harborwaiting;
-	}
-
-	public Location getTrip() {
-		return trip;
-	}
-
-	public void setTrip(Location trip) {
-		this.trip = trip;
-	}
+	
 
 	public int getWarpid() {
 		return warpid;
+	}
+
+
+	public Location getStartloc() {
+		return startloc;
 	}
 
 }

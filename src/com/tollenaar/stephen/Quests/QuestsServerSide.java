@@ -40,7 +40,7 @@ public class QuestsServerSide extends Quest {
 	public HashMap<UUID, HashSet<Integer>> killquests = new HashMap<UUID, HashSet<Integer>>();
 	public HashMap<UUID, HashSet<Integer>> harvestquests = new HashMap<UUID, HashSet<Integer>>();
 	public HashMap<UUID, HashSet<Integer>> talktoquests = new HashMap<UUID, HashSet<Integer>>();
-	public HashMap<UUID, HashSet<Integer>> warplists = new HashMap<UUID, HashSet<Integer>>();
+	public HashMap<UUID, Integer> warplists = new HashMap<UUID, Integer>();
 
 	// active npc's
 	public HashMap<UUID, Integer> activenpc = new HashMap<UUID, Integer>(); // to
@@ -233,9 +233,6 @@ public class QuestsServerSide extends Quest {
 				talktoquests.remove(npcuuid);
 			}
 			if (warplists.get(npcuuid) != null) {
-				for (int quest : warplists.get(npcuuid)) {
-					removewarp(quest);
-				}
 				warplists.remove(npcuuid);
 			}
 			if (activenpc.get(npcuuid) != null) {

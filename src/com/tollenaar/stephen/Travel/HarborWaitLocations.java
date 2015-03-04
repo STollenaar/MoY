@@ -14,12 +14,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class HarborWaitLocations {
 	
 	public static HashSet<HarborWaitLocations> locations = new HashSet<HarborWaitLocations>();
+	public static HashSet<HarborWaitLocations> inuse = new HashSet<HarborWaitLocations>();
 	
 	
-	public HarborWaitLocations(){
-		id = locations.size()-1;
-		type = "undefined";
-		location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
+	public HarborWaitLocations(int id){
+		this.id = id;
+		this.type = "undefined";
+		this.location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
 		locations.add(this);
 	}
 	
@@ -102,6 +103,14 @@ public class HarborWaitLocations {
 
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+
+	public static HashSet<HarborWaitLocations> getInuse() {
+		return inuse;
+	}
+
+	public static void setInuse(HashSet<HarborWaitLocations> inuse) {
+		HarborWaitLocations.inuse = inuse;
 	}
 
 

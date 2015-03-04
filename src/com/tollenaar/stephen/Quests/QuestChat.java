@@ -357,24 +357,6 @@ public class QuestChat extends QuestInvClick implements Listener {
 					warp.setName(typed);
 					pass = true;
 					break;
-				case "transportloc":
-					if (typed.equalsIgnoreCase("save")) {
-						warp.setTrip(player.getLocation());
-						pass = true;
-					}
-					break;
-				case "harborloc":
-					if (typed.equalsIgnoreCase("save")) {
-						warp.setHarborwaiting(player.getLocation());
-						pass = true;
-					}
-					break;
-				case "endloc":
-					if (typed.equalsIgnoreCase("save")) {
-						warp.setEndlocation(player.getLocation());
-						pass = true;
-					}
-					break;
 				case "type":
 					warp.SetType(typed);
 					pass = true;

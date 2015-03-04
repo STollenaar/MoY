@@ -1,4 +1,4 @@
-package com.tollenaar.stephen.MistsOfYsir;
+package com.tollenaar.stephen.Commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import com.earth2me.essentials.OfflinePlayer;
+import com.tollenaar.stephen.MistsOfYsir.Filewriters;
+import com.tollenaar.stephen.MistsOfYsir.MoY;
+import com.tollenaar.stephen.MistsOfYsir.Party;
 import com.tollenaar.stephen.PlayerInfo.Playerinfoding;
 import com.tollenaar.stephen.PlayerInfo.Playerstats;
 import com.tollenaar.stephen.Quests.QuestsServerSide;

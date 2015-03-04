@@ -32,7 +32,7 @@ public class Filewriters {
 	private File TravelDragonlogout;
 	
 	private File utilitiesyml;
-	protected FileConfiguration utilitiesconfig;
+	public FileConfiguration utilitiesconfig;
 	private File desserter;
 	
 	

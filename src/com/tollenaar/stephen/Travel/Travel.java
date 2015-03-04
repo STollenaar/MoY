@@ -73,9 +73,12 @@ public class Travel implements Listener {
 																							// needed
 																							// for
 																							// events
+	private HashMap<Integer, HarborWaitLocations> tempwaiting = new HashMap<Integer, HarborWaitLocations>();
+	private HashMap<Integer, TripLocations> temptrip = new HashMap<Integer, TripLocations>();
 
 	@SuppressWarnings("deprecation")
-	public void boardcheck(UUID npcuuid, int questnumber, Player player) {
+	public void boardcheck(UUID npcuuid, int questnumber, Player player,
+			Location end) {
 		double needed = questers.returnwarp(questnumber).getCosts();
 		int seconds = Calendar.getInstance().get(Calendar.SECOND);
 		int minutes = 10; // Calendar.getInstance().get(Calendar.MINUTE);
@@ -145,7 +148,7 @@ public class Travel implements Listener {
 						+ "YTravel" + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
 
-				tempboard(npcuuid, questnumber, player, time, type);
+				tempboard(npcuuid, questnumber, player, time, type, end);
 
 			} else {
 				String message = fw.GetUtilityLine("AlmostLeaving");
@@ -154,12 +157,12 @@ public class Travel implements Listener {
 				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
 						+ npc.getName() + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
-				tempboard(npcuuid, questnumber, player, time, type);
+				tempboard(npcuuid, questnumber, player, time, type, end);
 			}
 		} else {
 			try {
 				if (Economy.hasEnough(player.getName(), needed)) {
-					travel(npcuuid, questnumber, player, type);
+					travel(npcuuid, questnumber, player, type, end);
 					Economy.subtract(player.getName(), needed);
 				} else {
 					player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -177,33 +180,66 @@ public class Travel implements Listener {
 	}
 
 	public void tempboard(final UUID npcuuid, final int questnumber,
-			final Player player, int time, final String type) {
-		Location harbor = questers.returnwarp(questnumber).getHarborwaiting();
+			final Player player, int time, final String type, final Location end) {
+		Location harbor = null;
+		if (tempwaiting.get(questnumber) == null) {
+			for (HarborWaitLocations l : HarborWaitLocations.locations) {
+				if (l.getType().equals(type)) {
+					harbor = l.getLocation();
+					HarborWaitLocations.inuse.add(l);
+					tempwaiting.put(questnumber, l);
+					HarborWaitLocations.locations.remove(l);
+					
+					break;
+				}
+			}
+		} else {
+			harbor = tempwaiting.get(questnumber).getLocation();
+		}
 		player.teleport(harbor);
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 				new Runnable() {
 					public void run() {
-						travel(npcuuid, questnumber, player, type);
+						travel(npcuuid, questnumber, player, type, end);
 					}
 				}, time * 20L);
 		schedulerstor.put(player.getUniqueId(), id);
 
 	}
 
-	public void travel(UUID npcuuid, int questnumber, final Player player,
-			final String type) {
+	public void travel(UUID npcuuid, final int questnumber, final Player player,
+			final String type, final Location end) {
+		for (HarborWaitLocations l : HarborWaitLocations.inuse) {
+			if (l.getType().equals(type)) {
+				HarborWaitLocations.locations.add(l);
+				HarborWaitLocations.inuse.remove(l);
+				tempwaiting.remove(questnumber);
+				
+				break;
+			}
+		}
+		if(temptrip.get(questnumber) == null){
+			for(TripLocations l : TripLocations.locations){
+				if(l.getType().equals(type)){
+					TripLocations.inuse.add(l);
+					temptrip.put(questnumber, l);
+					TripLocations.locations.remove(l);
+					break;
+				}
+			}
+		}
+
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.getByUniqueId(npcuuid);
 		final Location start = npc.getEntity().getLocation();
 
-		final Location end = questers.returnwarp(questnumber).getEndlocation();
-
-		int time = traveltime(npcuuid, questnumber, type);
+		int time = traveltime(npcuuid, questnumber, type, end);
 
 		travelevent.put(player.getUniqueId(), true); // CHANGE THIS ONE RELEASE
 		startlocations.put(player.getUniqueId(), npc.getStoredLocation());
 		typeleave.put(player.getUniqueId(), type);
 		destinationlocations.put(player.getUniqueId(), end);
+
 		player.teleport(start);
 		String message;
 		if (type.equals("boat")) {
@@ -228,13 +264,18 @@ public class Travel implements Listener {
 		}
 		final int time2 = timetemp;
 		final String endmessage = mestemp;
+
 		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
 				+ "YTravel" + ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
 				+ message);
+
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 				new Runnable() {
 					public void run() {
-
+						TripLocations.locations.add(temptrip.get(questnumber));
+						TripLocations.inuse.remove(temptrip.get(questnumber));
+						temptrip.remove(questnumber);
+						
 						if (!endmessage.equals("EVENT")) {
 							player.teleport(end);
 							player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -246,34 +287,25 @@ public class Travel implements Listener {
 							startlocations.remove(player.getUniqueId());
 						} else {
 							if (type.equals("boat")) {
-								player.sendMessage(ChatColor.DARK_PURPLE
-										+ "["
-										+ ChatColor.GOLD
-										+ "YTravel"
-										+ ChatColor.DARK_PURPLE
-										+ "] "
+								player.sendMessage(ChatColor.DARK_PURPLE + "["
+										+ ChatColor.GOLD + "YTravel"
+										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TravelEvent"));
 								boat.eventint(player, start, end, time2);
 							}
 							if (type.equals("oxcart")) {
-								player.sendMessage(ChatColor.DARK_PURPLE
-										+ "["
-										+ ChatColor.GOLD
-										+ "YTravel"
-										+ ChatColor.DARK_PURPLE
-										+ "] "
+								player.sendMessage(ChatColor.DARK_PURPLE + "["
+										+ ChatColor.GOLD + "YTravel"
+										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TavelEvent"));
 								cart.eventint(player, start, end, time2);
 							}
 							if (type.equals("dragoncoach")) {
-								player.sendMessage(ChatColor.DARK_PURPLE
-										+ "["
-										+ ChatColor.GOLD
-										+ "YTravel"
-										+ ChatColor.DARK_PURPLE
-										+ "] "
+								player.sendMessage(ChatColor.DARK_PURPLE + "["
+										+ ChatColor.GOLD + "YTravel"
+										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TravelEvent"));
 								dragon.eventint(player, start, end, time2);
@@ -325,23 +357,24 @@ public class Travel implements Listener {
 			}
 		}
 	}
+
 	@EventHandler
-	public void onplayerjoind(PlayerJoinEvent event){
+	public void onplayerjoind(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 		if (Bukkit.getServer().getPluginManager().getPlugin("MistsOfYsir") != null) {
 			File direct = new File(Bukkit.getServer().getPluginManager()
 					.getPlugin("MistsOfYsir").getDataFolder(), "desserters");
 			if (direct.exists()) {
 				for (File content : direct.listFiles()) {
-					if (content.getName().replace(".txt", "").equals(player.getUniqueId().toString())) {
+					if (content.getName().replace(".txt", "")
+							.equals(player.getUniqueId().toString())) {
 						Scanner reader;
 						try {
 							reader = new Scanner(content);
 							player.sendMessage(ChatColor.DARK_PURPLE + "["
 									+ ChatColor.GOLD + "YTravel"
 									+ ChatColor.DARK_PURPLE + "] "
-									+ ChatColor.AQUA
-									+ reader.nextLine());
+									+ ChatColor.AQUA + reader.nextLine());
 							reader.close();
 							content.delete();
 							break;
@@ -354,11 +387,11 @@ public class Travel implements Listener {
 		}
 	}
 
-	public int traveltime(UUID npcuuid, int questnumber, String type) {
+	public static int traveltime(UUID npcuuid, int questnumber, String type,
+			Location end) {
 
 		NPC npc = CitizensAPI.getNPCRegistry().getByUniqueId(npcuuid);
 		Location start = npc.getEntity().getLocation();
-		Location end = questers.returnwarp(questnumber).getEndlocation();
 
 		double sx = start.getX();
 		double sy = start.getY();
@@ -403,6 +436,7 @@ public class Travel implements Listener {
 
 		double time2 = Math.ceil(time);
 		int timeint = (int) time2;
+		System.out.println(timeint);
 		return timeint;
 	}
 

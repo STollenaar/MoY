@@ -12,6 +12,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.tollenaar.stephen.Commands.CommandsEvent;
+import com.tollenaar.stephen.Commands.CommandsNPC;
+import com.tollenaar.stephen.Commands.CommandsParty;
+import com.tollenaar.stephen.Commands.CommandsPlayerinfo;
 import com.tollenaar.stephen.PlayerInfo.LevelSystems;
 import com.tollenaar.stephen.PlayerInfo.Playerinfoding;
 import com.tollenaar.stephen.PlayerInfo.Skillimprovement;
@@ -139,12 +143,12 @@ public class MoY extends JavaPlugin {
 			pm.registerEvents(new ProgressKill(this), this);
 			pm.registerEvents(new ProgressHarvest(this), this);
 
-			getCommand("party").setExecutor(new Commandexe(this));
-			getCommand("skill").setExecutor(new Commandexe(this));
-			getCommand("qnpc").setExecutor(new Commandexe(this));
-			getCommand("lvl").setExecutor(new Commandexe(this));
-			getCommand("event").setExecutor(new Commandexe(this));
-			getCommand("quest").setExecutor(new Commandexe(this));
+			getCommand("party").setExecutor(new CommandsParty(this));
+			getCommand("skill").setExecutor(new CommandsPlayerinfo(this));
+			getCommand("qnpc").setExecutor(new CommandsNPC(this));
+			getCommand("lvl").setExecutor(new CommandsPlayerinfo(this));
+			getCommand("event").setExecutor(new CommandsEvent(this));
+			getCommand("quest").setExecutor(new CommandsPlayerinfo(this));
 			re.playerevent();
 		}
 	}

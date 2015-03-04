@@ -14,12 +14,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class TripLocations {
 	
 	public static HashSet<TripLocations> locations = new HashSet<TripLocations>();
+	public static HashSet<TripLocations> inuse = new HashSet<TripLocations>();
 	
 	
-	public TripLocations(){
-		id = locations.size()-1;
-		type = "undefined";
-		location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
+	public TripLocations(int id){
+		this.id = id;
+		this.type = "undefined";
+		this.location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
 		locations.add(this);
 	}
 	
@@ -102,6 +103,14 @@ public class TripLocations {
 
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+
+	public static HashSet<TripLocations> getInuse() {
+		return inuse;
+	}
+
+	public static void setInuse(HashSet<TripLocations> inuse) {
+		TripLocations.inuse = inuse;
 	}
 
 

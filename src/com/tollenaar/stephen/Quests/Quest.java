@@ -24,6 +24,8 @@ import org.bukkit.material.Wool;
 
 import com.tollenaar.stephen.MistsOfYsir.MoY;
 import com.tollenaar.stephen.PlayerInfo.Playerstats;
+import com.tollenaar.stephen.Travel.HarborWaitLocations;
+import com.tollenaar.stephen.Travel.TripLocations;
 
 public class Quest {
 
@@ -568,6 +570,11 @@ public class Quest {
 	private HashMap<Integer, QuestTalkto> talktoquests = new HashMap<Integer, QuestTalkto>();
 
 	private HashMap<Integer, Warps> warplist = new HashMap<Integer, Warps>();
+	
+	private HashMap<Integer, TripLocations> triplocations = new HashMap<Integer, TripLocations>();
+	
+	private HashMap<Integer, HarborWaitLocations> harborlocation = new HashMap<Integer, HarborWaitLocations>();
+	
 
 	public HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>> progress = new HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>>();
 
@@ -575,6 +582,15 @@ public class Quest {
 		return progress.get(playeruuid).get(type).get(number);
 	}
 
+	
+	
+	public void removetrip(int number){
+		triplocations.remove(number);
+	}
+	public void removeharbor(int number){
+		harborlocation.remove(number);
+	}
+	
 	public void removekill(int number) {
 		killquests.remove(number);
 		plugin.database.deletekill(number);
@@ -591,10 +607,35 @@ public class Quest {
 	}
 
 	public void removewarp(int number) {
+		Warps.allwarps.remove(warplist.get(number));
 		warplist.remove(number);
 		plugin.database.deletewarp(number);
 	}
 
+	public int createnewtrip(){
+		int i = 0;
+		for(; i <= triplocations.size(); i++){
+			if(triplocations.get(i) == null){
+				break;
+			}
+		}
+		TripLocations trip = new TripLocations(i);
+		triplocations.put(i, trip);
+		return i;
+	}
+	
+	public int createnewharbor(){
+		int i = 0;
+		for(; i <= harborlocation.size(); i++){
+			if(harborlocation.get(i) == null){
+				break;
+			}
+		}
+		HarborWaitLocations trip = new HarborWaitLocations(i);
+		harborlocation.put(i, trip);
+		return i;
+	}
+	
 	public int createnewkill() {
 		int i = 0;
 		for (; i <= killquests.size(); i++) {
@@ -638,14 +679,14 @@ public class Quest {
 		return i;
 	}
 
-	public int createnewwarp() {
+	public int createnewwarp(Location l) {
 		int i = 0;
 		for (; i <= warplist.size(); i++) {
 			if (warplist.get(i) == null) {
 				break;
 			}
 		}
-		Warps warp = new Warps(i);
+		Warps warp = new Warps(i, l);
 
 		warplist.put(i, warp);
 		return i;
@@ -730,19 +771,18 @@ public class Quest {
 		talktoquests.put(number, temp);
 	}
 
-	public void loadwarps(int number, String name, Location harborwait,
-			Location endlocation, Location trip, double costs, String type) {
-		Warps warp = new Warps(number);
+	public void loadwarps(int number, String name, Location start,
+			double costs, String type) {
+		Warps warp = new Warps(number, start);
 		warp.setCosts(costs);
-		warp.setEndlocation(endlocation);
-		warp.setHarborwaiting(harborwait);
 		warp.setName(name);
-		warp.setTrip(trip);
 		warp.SetType(type);
 
 		warplist.put(number, warp);
 	}
 
+	
+	
 	public void allkill(Player player, HashSet<Integer> quests, UUID npcuuid) {
 		int rowcount = 0;
 		if (quests != null) {
@@ -893,10 +933,10 @@ public class Quest {
 
 	}
 
-	public void allwarps(Player player, HashSet<Integer> quests, UUID npcuuid) {
-		int rowcount = 0;
+	public void allwarps(Player player, Integer quests, UUID npcuuid) {
+		int rowcount = 9;
 		if (quests != null) {
-			rowcount = quests.size();
+			// rowcount = quests.size();
 			if (rowcount % 9 == 0) {
 				rowcount++;
 			}
@@ -909,24 +949,19 @@ public class Quest {
 		}
 
 		Inventory inv = Bukkit.createInventory(null, rowcount, "AllWarps");
-		if (quests != null) {
-			for (Integer i : quests) {
-				if (warplist.get(i) != null) {
-					Warps kill = warplist.get(i);
-					ItemStack title = new ItemStack(Material.BOOK);
-					{
-						ArrayList<String> lore = new ArrayList<String>();
-						lore.add(Integer.toString(kill.getWarpid()));
-						ItemMeta meta = title.getItemMeta();
-						meta.setLore(lore);
-						meta.setDisplayName(kill.getName());
-						title.setItemMeta(meta);
-					}
-					inv.addItem(title);
-				}
+		Warps kill = warplist.get(quests);
+		if (kill != null) {
+			ItemStack warp = new ItemStack(Material.BOAT);
+			{
+				ItemMeta meta = warp.getItemMeta();
+				ArrayList<String> lore = new ArrayList<String>();
+				lore.add(Integer.toString(kill.getWarpid()));
+				meta.setLore(lore);
+				meta.setDisplayName(kill.getName());
+				warp.setItemMeta(meta);
+				inv.addItem(warp);
 			}
 		}
-
 		Wool wool = new Wool(DyeColor.LIME);
 		ItemStack create = wool.toItemStack();
 		{
@@ -1004,10 +1039,8 @@ public class Quest {
 		String name = returnname(questtype, number);
 		String message = plugin.fw.GetUtilityLine("QuestComplete")
 				.replace("%questname%", name).replace("%npc%", npcname);
-		player.sendMessage(ChatColor.BLUE + "[" + ChatColor.BLUE
-				+ "YQuest" + ChatColor.BLUE + "] " + ChatColor.GRAY
-				+ message);
-
+		player.sendMessage(ChatColor.BLUE + "[" + ChatColor.BLUE + "YQuest"
+				+ ChatColor.BLUE + "] " + ChatColor.GRAY + message);
 
 	}
 
@@ -1177,7 +1210,9 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomkill(Integer.toString(number), player.getUniqueId().toString());
+							plugin.database.deletecomkill(Integer
+									.toString(number), player.getUniqueId()
+									.toString());
 						}
 						break;
 					case "harvest":
@@ -1196,7 +1231,9 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomhar(Integer.toString(number), player.getUniqueId().toString());
+							plugin.database.deletecomhar(Integer
+									.toString(number), player.getUniqueId()
+									.toString());
 						}
 						break;
 					case "talkto":
@@ -1216,7 +1253,9 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomtalk(Integer.toString(number), player.getUniqueId().toString());
+							plugin.database.deletecomtalk(Integer
+									.toString(number), player.getUniqueId()
+									.toString());
 
 						}
 					}

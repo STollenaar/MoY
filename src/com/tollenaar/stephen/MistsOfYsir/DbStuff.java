@@ -94,7 +94,7 @@ public class DbStuff {
 					+ "spawnworld VARCHAR(45) NOT NULL, "
 					+ "walking VARCHAR(6) NOT NULL, " + "killquests TEXT, "
 					+ "harvestquests TEXT, " + "talktoquests TEXT, "
-					+ "warps TEXT);");
+					+ "warps INTEGER);");
 
 			// active quests
 			statement
@@ -170,8 +170,7 @@ public class DbStuff {
 			// warps
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Warp ("
 					+ "id INTEGER PRIMARY KEY, " + "title TEXT NOT NULL, "
-					+ "transportloc TEXT NOT NULL, "
-					+ "endplace TEXT NOT NULL, " + "fakeboat TEXT NOT NULL, "
+					+ "startloc TEXT NOT NULL, "
 					+ "type VARCHAR(45) NOT NULL, " + "costs DOUBLE);");
 
 			// event boat
@@ -473,7 +472,7 @@ public class DbStuff {
 						pst.setString(4, null);
 					}
 					pst.execute();
-					
+
 				} else {
 					pst.close();
 					pst = con.prepareStatement(update);
@@ -1256,11 +1255,11 @@ public class DbStuff {
 
 	public void savewarp() {
 		String insert = "INSERT INTO Mist_Warp (" + "`id`," + "`title`,"
-				+ "`transportloc`," + "`endplace`," + "`fakeboat`," + "`type`,"
-				+ "`costs`) VALUES" + "(?,?,?,?,?,?,?);";
+				+ "`startloc`," + "`type`," + "`costs`) VALUES"
+				+ "(?,?,?,?,?);";
 
 		String update = "UPDATE Mist_Warp SET"
-				+ "`title`=?, `transportloc`=?, `endplace`=?, `fakeboat`=?, `type`=?,"
+				+ "`title`=?, `startloc`=?, `type`=?,"
 				+ "`costs`=? WHERE `id`=?;";
 
 		String test = "SELECT * FROM Mist_Warp WHERE `id`=?;";
@@ -1275,49 +1274,28 @@ public class DbStuff {
 					pst.close();
 					pst = con.prepareStatement(insert);
 					pst.setInt(1, warp.getWarpid());
-					String transport = warp.getTrip().getX() + "-"
-							+ warp.getTrip().getY() + "-"
-							+ warp.getTrip().getZ() + "-"
-							+ warp.getTrip().getWorld().getName();
 					pst.setString(2, warp.getName());
-					String end = warp.getEndlocation().getX() + "-"
-							+ warp.getEndlocation().getY() + "-"
-							+ warp.getEndlocation().getZ() + "-"
-							+ warp.getEndlocation().getWorld().getName();
-					pst.setString(3, transport);
-					String fake = warp.getHarborwaiting().getX() + "-"
-							+ warp.getHarborwaiting().getY() + "-"
-							+ warp.getHarborwaiting().getZ() + "-"
-							+ warp.getHarborwaiting().getWorld().getName();
-					pst.setString(4, end);
-					pst.setString(5, fake);
-					pst.setString(6, warp.GetType());
-					pst.setDouble(7, warp.getCosts());
+					String fake = warp.getStartloc().getX() + "-"
+							+ warp.getStartloc().getY() + "-"
+							+ warp.getStartloc().getZ() + "-"
+							+ warp.getStartloc().getWorld().getName();
+					pst.setString(3, fake);
+					pst.setString(4, warp.GetType());
+					pst.setDouble(5, warp.getCosts());
 
 					pst.execute();
 				} else {
 					pst.close();
 					pst = con.prepareStatement(update);
-
-					String transport = warp.getTrip().getX() + "-"
-							+ warp.getTrip().getY() + "-"
-							+ warp.getTrip().getZ() + "-"
-							+ warp.getTrip().getWorld().getName();
 					pst.setString(1, warp.getName());
-					String end = warp.getEndlocation().getX() + "-"
-							+ warp.getEndlocation().getY() + "-"
-							+ warp.getEndlocation().getZ() + "-"
-							+ warp.getEndlocation().getWorld().getName();
-					pst.setString(2, transport);
-					String fake = warp.getHarborwaiting().getX() + "-"
-							+ warp.getHarborwaiting().getY() + "-"
-							+ warp.getHarborwaiting().getZ() + "-"
-							+ warp.getHarborwaiting().getWorld().getName();
-					pst.setString(3, end);
-					pst.setString(4, fake);
-					pst.setString(5, warp.GetType());
-					pst.setDouble(6, warp.getCosts());
-					pst.setInt(7, warp.getWarpid());
+					String fake = warp.getStartloc().getX() + "-"
+							+ warp.getStartloc().getY() + "-"
+							+ warp.getStartloc().getZ() + "-"
+							+ warp.getStartloc().getWorld().getName();
+					pst.setString(2, fake);
+					pst.setString(3, warp.GetType());
+					pst.setDouble(4, warp.getCosts());
+					pst.setInt(5, warp.getWarpid());
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -1539,7 +1517,8 @@ public class DbStuff {
 				+ "`npcname`," + "`spawnlocationx`," + "`spawnlocationy`,"
 				+ "`spawnlocationz`, " + "`walking`," + "`killquests`,"
 				+ "`harvestquests`," + "`talktoquests`," + "`warps`, "
-				+ "`spawnworld`, `npcskinname`) VALUES (" + "?,?,?,?,?,?,?,?,?,?,?,?);";
+				+ "`spawnworld`, `npcskinname`) VALUES ("
+				+ "?,?,?,?,?,?,?,?,?,?,?,?);";
 
 		String update = "UPDATE Mist_NPCData SET" + "`npcname`=?,"
 				+ "`spawnlocationx`=?," + "`spawnlocationy`=?,"
@@ -1584,13 +1563,7 @@ public class DbStuff {
 			}
 			String warpids = null;
 			if (questers.warplists.get(npc) != null) {
-				for (Integer warp : questers.warplists.get(npc)) {
-					if (warpids == null) {
-						warpids = warp + "_";
-					} else {
-						warpids = warpids + warp + "_";
-					}
-				}
+				warpids = Integer.toString(questers.warplists.get(npc));
 			}
 
 			NPCRegistry registry = CitizensAPI.getNPCRegistry();
@@ -1623,7 +1596,9 @@ public class DbStuff {
 					pst.setString(9, talktoquestids);
 					pst.setString(10, warpids);
 					pst.setString(11, world);
-					pst.setString(12, (String) pc.data().get(pc.PLAYER_SKIN_UUID_METADATA));
+					pst.setString(12,
+							(String) pc.data()
+									.get(pc.PLAYER_SKIN_UUID_METADATA));
 					pst.execute();
 				} else {
 					pst.close();
@@ -1643,7 +1618,9 @@ public class DbStuff {
 					pst.setString(8, talktoquestids);
 					pst.setString(9, warpids);
 					pst.setString(10, world);
-					pst.setString(11, (String) pc.data().get(pc.PLAYER_SKIN_UUID_METADATA));
+					pst.setString(11,
+							(String) pc.data()
+									.get(pc.PLAYER_SKIN_UUID_METADATA));
 					pst.setInt(12, npcid);
 					pst.execute();
 				}
@@ -2052,27 +2029,15 @@ public class DbStuff {
 			while (rs.next()) {
 				int number = rs.getInt("id");
 				String title = rs.getString("title");
-				String[] trans = rs.getString("transportloc").split("-");
-				Location transport = new Location(Bukkit.getWorld(trans[3]),
+				String[] trans = rs.getString("startloc").split("-");
+				Location startloc = new Location(Bukkit.getWorld(trans[3]),
 						Double.parseDouble(trans[0]),
 						Double.parseDouble(trans[1]),
 						Double.parseDouble(trans[2]));
 
-				String[] fake = rs.getString("fakeboat").split("-");
-				Location fakeboat = new Location(Bukkit.getWorld(fake[3]),
-						Double.parseDouble(fake[0]),
-						Double.parseDouble(fake[1]),
-						Double.parseDouble(fake[2]));
-
-				String[] end = rs.getString("endplace").split("-");
-				Location endloc = new Location(Bukkit.getWorld(end[3]),
-						Double.parseDouble(end[0]), Double.parseDouble(end[1]),
-						Double.parseDouble(end[2]));
-
 				double costs = rs.getDouble("costs");
 				String type = rs.getString("type");
-				questers.loadwarps(number, title, fakeboat, endloc, transport,
-						costs, type);
+				questers.loadwarps(number, title, startloc, costs, type);
 
 			}
 		} catch (SQLException e) {
@@ -2264,12 +2229,7 @@ public class DbStuff {
 					questers.talktoquests.put(npc, quests);
 				}
 				if (rs.getString("warps") != null) {
-					String[] killtemp = rs.getString("warps").split("_");
-					HashSet<Integer> quests = new HashSet<Integer>();
-					for (String t : killtemp) {
-						quests.add(Integer.parseInt(t));
-					}
-					questers.warplists.put(npc, quests);
+					questers.warplists.put(npc, rs.getInt("warps"));
 				}
 			}
 		} catch (SQLException e) {

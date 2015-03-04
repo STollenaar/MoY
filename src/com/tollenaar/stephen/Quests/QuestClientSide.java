@@ -1,6 +1,8 @@
 package com.tollenaar.stephen.Quests;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -17,6 +19,7 @@ import org.fusesource.jansi.Ansi;
 
 import com.tollenaar.stephen.MistsOfYsir.MoY;
 import com.tollenaar.stephen.PlayerInfo.Playerstats;
+import com.tollenaar.stephen.Travel.Travel;
 
 public class QuestClientSide {
 	private QuestsServerSide questers;
@@ -27,6 +30,7 @@ public class QuestClientSide {
 
 	// private Main plugin;
 
+	@SuppressWarnings("deprecation")
 	public void avquest(NPC npc, Player player, String npcname) {
 		UUID npcuuid = npc.getUniqueId();
 		int rowcount = 0;
@@ -40,7 +44,8 @@ public class QuestClientSide {
 			rowcount += questers.talktoquests.get(npcuuid).size();
 		}
 		if (questers.warplists.get(npcuuid) != null) {
-			rowcount += questers.warplists.get(npcuuid).size();
+			// rowcount += questers.warplists.get(npcuuid).size();
+			rowcount++;
 		}
 		if (rowcount % 9 == 0) {
 			rowcount++;
@@ -157,22 +162,37 @@ public class QuestClientSide {
 			}
 		}
 		if (questers.warplists.get(npcuuid) != null) {
-			for (Integer i : questers.warplists.get(npcuuid)) {
-				if (i != null) {
-					Warps kill = questers.returnwarp(i);
+			// for (Integer i : questers.warplists.get(npcuuid)) {
+			int i = questers.warplists.get(npcuuid);
+			Warps kill = questers.returnwarp(i);
+			for (String type : kill.GetType().split(",")) {
+				for (Warps w : Warps.TypeReturned(type)) {
+					if (w.getWarpid() != kill.getWarpid()) {
+						ItemStack title = new ItemStack(Material.BOAT);
+						{
+							ArrayList<String> lore = new ArrayList<String>();
+							int time = Travel.traveltime(npcuuid,
+									kill.getWarpid(), type, w.getStartloc());
+							SimpleDateFormat df = new SimpleDateFormat(
+									"mm:ss");
+							Date date = new Date((long) (time*1000));
+							date.setHours(date.getHours()-9);
+							date.setMinutes(date.getMinutes()-30);
+							lore.add("Duration: " + df.format(date));
+							lore.add(Integer.toString(w.getWarpid()));
+							lore.add(Integer.toString(kill.getWarpid()));
+							ItemMeta meta = title.getItemMeta();
+							meta.setLore(lore);
+							meta.setDisplayName(kill.getName() + " - "
+									+ w.getName());
+							title.setItemMeta(meta);
+						}
 
-					ItemStack warp = new ItemStack(Material.BOAT);
-					{
-						ItemMeta meta = warp.getItemMeta();
-						ArrayList<String> lore = new ArrayList<String>();
-						lore.add(Integer.toString(kill.getWarpid()));
-						meta.setLore(lore);
-						meta.setDisplayName(kill.getName());
-						warp.setItemMeta(meta);
-						inv.addItem(warp);
+						inv.addItem(title);
 					}
 				}
 			}
+
 		}
 		if (inv.getItem(inv.getSize() - 1) != null) {
 			Inventory newinv = Bukkit.createInventory(null, rowcount + 9,
@@ -316,12 +336,15 @@ public class QuestClientSide {
 											if (items.getAmount() >= questers
 													.returnharvest(number)
 													.getCount()) {
-												
-													passing = true;
-													break;
+
+												passing = true;
+												break;
 											} else {
 												if (saveditem == null) {
-													saveditem = new ItemStack(items.getType(), items.getAmount(), items.getDurability());
+													saveditem = new ItemStack(
+															items.getType(),
+															items.getAmount(),
+															items.getDurability());
 												} else {
 													saveditem
 															.setAmount(saveditem
@@ -365,8 +388,9 @@ public class QuestClientSide {
 															- item.getAmount() <= 0) {
 														if (item.getAmount()
 																- needed == 0) {
-															player.getInventory().remove(item);
-														player.updateInventory();
+															player.getInventory()
+																	.remove(item);
+															player.updateInventory();
 														} else {
 															item.setAmount(item
 																	.getAmount()
@@ -377,7 +401,8 @@ public class QuestClientSide {
 													} else {
 														needed -= item
 																.getAmount();
-														player.getInventory().remove(item);
+														player.getInventory()
+																.remove(item);
 														player.updateInventory();
 													}
 												}

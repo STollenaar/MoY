@@ -168,15 +168,15 @@ public class QuestInvClick implements Listener {
 				} else if (clickinv.getName().equals("AllWarps")) {
 					if (name.equals("Create New")) {
 						event.setCancelled(true);
-						HashSet<Integer> all;
+						
 						if (questers.warplists.get(npcuuid) != null) {
-							all = questers.warplists.get(npcuuid);
+							event.setCancelled(true);
+							return;
 						} else {
-							all = new HashSet<Integer>();
 						}
-						int n = questers.createnewwarp();
-						all.add(n);
-						questers.warplists.put(npcuuid, all);
+						int n = questers.createnewwarp(player.getLocation());
+
+						questers.warplists.put(npcuuid, n);
 						questers.returnwarp(n).npcsettingswarplists(npcuuid,
 								player);
 					} else {
@@ -606,65 +606,17 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName()
 							.equals("Delete Warp")) {
 						event.setCancelled(true);
-						int questnumber = Integer.parseInt(clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1));
-						questers.warplists.get(npcuuid).remove(questnumber);
+						questers.warplists.remove(npcuuid);
 						player.closeInventory();
 						questers.allwarps(player,
 								questers.warplists.get(npcuuid), npcuuid);
-						questers.removewarp(questnumber);
 					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Transportation Location")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("go to the location and type save");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("transportloc");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("End Location")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("go to the location and type save");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("endloc");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Boarded Harbor")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("go to the location and type save");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("harborloc");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
+					
 					if (item.getItemMeta().getDisplayName()
 							.equals("Type of transportation")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						player.sendMessage("boat, oxcart or dragoncoach. type one type");
+						player.sendMessage("boat, oxcart or dragoncoach. multiple types seperate with ,. ex: boat,oxcart ");
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add("warplists");
 						temp.add(npcuuid.toString());
@@ -788,8 +740,9 @@ public class QuestInvClick implements Listener {
 						}
 					}
 				} else {
+					int Number2 = Integer.parseInt(item.getItemMeta().getLore().get(item.getItemMeta().getLore().size()-2));
 					player.closeInventory();
-					tr.boardcheck(npcuuid, number, player);
+					tr.boardcheck(npcuuid, number, player, questers.returnwarp(Number2).getStartloc());
 				}
 				event.setCancelled(true);
 			}

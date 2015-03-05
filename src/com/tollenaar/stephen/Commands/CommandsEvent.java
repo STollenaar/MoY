@@ -84,15 +84,18 @@ public class CommandsEvent implements CommandExecutor{
 					questers.allharbors(player);
 				}
 			}
+			return true;
 		}else if(cmd.getName().equalsIgnoreCase("Trip")){
 			if(args.length == 1){
 				if(args[0].equals("create")){
-					TripLocations h = questers.returntrip(questers.createnewharbor());
+					int id = questers.createnewtrip();
+					TripLocations h = questers.returntrip(id);
 					h.information(player);
 				}else if(args[0].equals("edit")){
 					questers.alltrips(player);
 				}
 			}
+			return true;
 		}
 		}
 		return false;

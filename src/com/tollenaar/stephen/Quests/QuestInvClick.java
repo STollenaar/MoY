@@ -606,8 +606,12 @@ public class QuestInvClick implements Listener {
 					}
 					if (item.getItemMeta().getDisplayName()
 							.equals("Delete Warp")) {
+						String questnumber = clickinv
+								.getItem(clickinv.getSize() - 1).getItemMeta()
+								.getLore().get(1);
 						event.setCancelled(true);
 						questers.warplists.remove(npcuuid);
+						questers.removewarp(Integer.parseInt(questnumber));
 						player.closeInventory();
 						questers.allwarps(player,
 								questers.warplists.get(npcuuid), npcuuid);
@@ -706,6 +710,9 @@ public class QuestInvClick implements Listener {
 						temp.add("location");
 						temp.add(id);
 						questers.npcpos.put(player.getUniqueId(), temp);
+					}else if(name.equals("Delete")){
+						player.closeInventory();
+						questers.removetrip(Integer.parseInt(id));
 					}
 				} else if (clickinv.getName().equals("Wait Location info")) {
 					if (name.equals("Trip Type")) {
@@ -724,6 +731,9 @@ public class QuestInvClick implements Listener {
 						temp.add("location");
 						temp.add(id);
 						questers.npcpos.put(player.getUniqueId(), temp);
+					}else if(name.equals("Delete")){
+						player.closeInventory();
+						questers.removetrip(Integer.parseInt(id));
 					}
 				}
 				event.setCancelled(true);

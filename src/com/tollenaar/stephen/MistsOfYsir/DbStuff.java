@@ -3524,6 +3524,76 @@ public class DbStuff {
 		}
 	}
 
+	public void deletetrip(int id){
+		String test = "SELECT type FROM Mist_Trips WHERE `id`=?";
+		String delete = "DELETE FROM Mist_Trips WHERE `id`=?";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(test);
+			pst.setInt(1, id);
+			ResultSet rs = pst.executeQuery();
+			if(rs.next()){
+				pst.close();
+				pst = con.prepareStatement(delete);
+				pst.setInt(1, id);
+				pst.execute();
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+
+		}
+	}
+	
+	public void deleteharbor(int id){
+		String test = "SELECT type FROM Mist_Harbors WHERE `id`=?";
+		String delete = "DELETE FROM Mist_Harbors WHERE `id`=?";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(test);
+			pst.setInt(1, id);
+			ResultSet rs = pst.executeQuery();
+			if(rs.next()){
+				pst.close();
+				pst = con.prepareStatement(delete);
+				pst.setInt(1, id);
+				pst.execute();
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+
+		}
+	}
+
 	public void setcon(Connection connect) {
 		con = connect;
 	}

@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Wool;
 
 public class HarborWaitLocations {
 	
@@ -68,6 +70,14 @@ public class HarborWaitLocations {
 			inv.addItem(loc);
 		}
 		
+		Wool wool = new Wool(DyeColor.RED);
+		ItemStack delete = wool.toItemStack();
+		{
+			ItemMeta im = delete.getItemMeta();
+			im.setDisplayName("Delete");
+			delete.setItemMeta(im);
+			inv.setItem(inv.getSize()-1, delete);
+		}
 		
 		
 		player.openInventory(inv);

@@ -583,10 +583,12 @@ public class Quest {
 
 	public void removetrip(int number) {
 		triplocations.remove(number);
+		plugin.database.deletetrip(number);
 	}
 
 	public void removeharbor(int number) {
 		harborlocation.remove(number);
+		plugin.database.deleteharbor(number);
 	}
 
 	public void removekill(int number) {
@@ -827,7 +829,7 @@ public class Quest {
 				lore.add("x: " + h.getLocation().getX());
 				lore.add("y: " + h.getLocation().getY());
 				lore.add("z: " + h.getLocation().getZ());
-				lore.add("World: " + h.getLocation().getWorld());
+				lore.add("World: " + h.getLocation().getWorld().getName());
 				lore.add(Integer.toString(i));
 				im.setLore(lore);
 				item.setItemMeta(im);
@@ -862,7 +864,7 @@ public class Quest {
 					lore.add("x: " + h.getLocation().getX());
 					lore.add("y: " + h.getLocation().getY());
 					lore.add("z: " + h.getLocation().getZ());
-					lore.add("World: " + h.getLocation().getWorld());
+					lore.add("World: " + h.getLocation().getWorld().getName());
 					lore.add(Integer.toString(i));
 					im.setLore(lore);
 					item.setItemMeta(im);

@@ -14,28 +14,20 @@ import com.tollenaar.stephen.MistsOfYsir.MoY;
 public class NPCSkin {
 	private MoY plugin;
 
-	private static final Random random = new Random();
-	private static final String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	private static Method getWorldHandle;
-	private static Method getWorldTileEntity;
-	private static Method setGameProfile;
-
-	public NPCSkin(MoY instance) {
+    private static final Random random = new Random();
+    private static final String chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static Method getWorldHandle;
+    private static Method getWorldTileEntity;
+    private static Method setGameProfile;
+	
+	public NPCSkin(MoY instance){
 		this.plugin = instance;
-		try {
-			getWorldHandle = getCraftClass("CraftWorld").getMethod("getHandle");
-			getWorldTileEntity = getMCClass("WorldServer").getMethod(
-					"getTileEntity", int.class, int.class, int.class);
-			setGameProfile = getMCClass("TileEntitySkull").getMethod(
-					"setGameProfile", GameProfile.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-		}
-
 	}
-
-	private static String returnUrl(String name) {
-		switch (name) {
+	
+	
+	
+	private static String returnUrl(String name){
+		switch(name){
 		case "dawn_nl":
 			return "https://i.imgur.com/wQg8efk.png";
 		case "guitargun":
@@ -44,53 +36,52 @@ public class NPCSkin {
 			return null;
 		}
 	}
+	
+	
+	
+	
+	
+    // Method
+    public static GameProfile getNonPlayerProfile(String name) {
+            GameProfile newSkinProfile = new GameProfile(UUID.randomUUID(), name);
+            newSkinProfile.getProperties().put("textures", new Property("textures", Base64Coder.encodeString("{textures:{SKIN:{url:\"" + returnUrl(name) + "\"}}}")));
+            return newSkinProfile;
+    }
 
-	// Method
-	public static GameProfile getNonPlayerProfile(String name) {
-		GameProfile newSkinProfile = new GameProfile(UUID.randomUUID(), name);
-		newSkinProfile.getProperties().put(
-				"textures",
-				new Property("textures", Base64Coder
-						.encodeString("{textures:{SKIN:{url:\""
-								+ returnUrl(name) + "\"}}}")));
-		return newSkinProfile;
-	}
+    
+    
+    
+//    // Example
+//    public static String getRandomString(int length) {
+//            StringBuilder b = new StringBuilder(length);
+//            for(int j = 0; j < length; j++)
+//                    b.append(chars.charAt(random.nextInt(chars.length())));
+//            return b.toString();
+//    }
 
-	// // Example
-	// public static String getRandomString(int length) {
-	// StringBuilder b = new StringBuilder(length);
-	// for(int j = 0; j < length; j++)
-	// b.append(chars.charAt(random.nextInt(chars.length())));
-	// return b.toString();
-	// }
+    // Refletion
+    private static Class<?> getMCClass(String name) {
+            String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
+            String className = "net.minecraft.server." + version + name;
+            Class<?> clazz = null;
+            try {
+                    clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+            }
+            return clazz;
+    }
 
-	// Refletion
-	private static Class<?> getMCClass(String name) {
-		String version = Bukkit.getServer().getClass().getPackage().getName()
-				.replace(".", ",").split(",")[3]
-				+ ".";
-		String className = "net.minecraft.server." + version + name;
-		Class<?> clazz = null;
-		try {
-			clazz = Class.forName(className);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return clazz;
-	}
-
-	// Refletion
-	private static Class<?> getCraftClass(String name) {
-		String version = Bukkit.getServer().getClass().getPackage().getName()
-				.replace(".", ",").split(",")[3]
-				+ ".";
-		String className = "org.bukkit.craftbukkit." + version + name;
-		Class<?> clazz = null;
-		try {
-			clazz = Class.forName(className);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-		return clazz;
-	}
+    // Refletion
+    private static Class<?> getCraftClass(String name) {
+            String version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3] + ".";
+            String className = "org.bukkit.craftbukkit." + version + name;
+            Class<?> clazz = null;
+            try {
+                    clazz = Class.forName(className);
+            } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+            }
+            return clazz;
+    }
 }

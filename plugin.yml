@@ -24,9 +24,6 @@ commands:
      quest:
              description: active quests
              usage: /<command>
-     harbor:
-             description: harbor waiting things
-             usage: /<command>
-     trip:
-             description: trip things
+     test:
+             description: debug this
              usage: /<command>			 

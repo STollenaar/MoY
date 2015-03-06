@@ -583,12 +583,10 @@ public class Quest {
 
 	public void removetrip(int number) {
 		triplocations.remove(number);
-		plugin.database.deletetrip(number);
 	}
 
 	public void removeharbor(int number) {
 		harborlocation.remove(number);
-		plugin.database.deleteharbor(number);
 	}
 
 	public void removekill(int number) {
@@ -803,77 +801,6 @@ public class Quest {
 		triplocations.put(id, t);
 	}
 
-	
-	public void allharbors(Player player){
-		int rowcount = 0;
-		rowcount = harborlocation.size();
-		if(rowcount % 9 == 0){
-			rowcount++;
-		}
-		while(rowcount % 9 != 0){
-			rowcount++;
-		}
-		if(rowcount ==0){
-			rowcount = 0;
-		}
-		
-		Inventory inv = Bukkit.createInventory(null, rowcount, "AllHarbors");
-		for(int i : harborlocation.keySet()){
-			HarborWaitLocations h = harborlocation.get(i);
-			ItemStack item = new ItemStack(Material.BOAT);
-			{
-				ItemMeta im = item.getItemMeta();
-				im.setDisplayName("Harbor");
-				ArrayList<String> lore =new ArrayList<String>();
-				lore.add(h.getType());
-				lore.add("x: " + h.getLocation().getX());
-				lore.add("y: " + h.getLocation().getY());
-				lore.add("z: " + h.getLocation().getZ());
-				lore.add("World: " + h.getLocation().getWorld().getName());
-				lore.add(Integer.toString(i));
-				im.setLore(lore);
-				item.setItemMeta(im);
-				inv.addItem(item);
-			}
-		}
-		player.openInventory(inv);
-	}
-	
-	public void alltrips(Player player){
-			int rowcount = 0;
-			rowcount = triplocations.size();
-			if(rowcount % 9 == 0){
-				rowcount++;
-			}
-			while(rowcount % 9 != 0){
-				rowcount++;
-			}
-			if(rowcount ==0){
-				rowcount = 0;
-			}
-			
-			Inventory inv = Bukkit.createInventory(null, rowcount, "AllTrips");
-			for(int i : triplocations.keySet()){
-				TripLocations h = triplocations.get(i);
-				ItemStack item = new ItemStack(Material.BOAT);
-				{
-					ItemMeta im = item.getItemMeta();
-					im.setDisplayName("Trip");
-					ArrayList<String> lore =new ArrayList<String>();
-					lore.add(h.getType());
-					lore.add("x: " + h.getLocation().getX());
-					lore.add("y: " + h.getLocation().getY());
-					lore.add("z: " + h.getLocation().getZ());
-					lore.add("World: " + h.getLocation().getWorld().getName());
-					lore.add(Integer.toString(i));
-					im.setLore(lore);
-					item.setItemMeta(im);
-					inv.addItem(item);
-				}
-			}
-			player.openInventory(inv);
-	}
-	
 	public void allkill(Player player, HashSet<Integer> quests, UUID npcuuid) {
 		int rowcount = 0;
 		if (quests != null) {
@@ -891,7 +818,7 @@ public class Quest {
 
 		Inventory inv = Bukkit.createInventory(null, rowcount, "AllKill");
 		if (quests != null) {
-			for (int i : quests) {
+			for (Integer i : quests) {
 				if (killquests.get(i) != null) {
 					QuestKill kill = killquests.get(i);
 					ItemStack title = new ItemStack(Material.BOOK);

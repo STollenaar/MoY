@@ -149,8 +149,6 @@ public class MoY extends JavaPlugin {
 			getCommand("lvl").setExecutor(new CommandsPlayerinfo(this));
 			getCommand("event").setExecutor(new CommandsEvent(this));
 			getCommand("quest").setExecutor(new CommandsPlayerinfo(this));
-			getCommand("trip").setExecutor(new CommandsEvent(this));
-			getCommand("harbor").setExecutor(new CommandsEvent(this));
 			re.playerevent();
 		}
 	}

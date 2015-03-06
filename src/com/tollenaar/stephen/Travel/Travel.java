@@ -189,6 +189,7 @@ public class Travel implements Listener {
 					HarborWaitLocations.inuse.add(l);
 					tempwaiting.put(questnumber, l);
 					HarborWaitLocations.locations.remove(l);
+					
 					break;
 				}
 			}
@@ -196,10 +197,6 @@ public class Travel implements Listener {
 			harbor = tempwaiting.get(questnumber).getLocation();
 		}
 		player.teleport(harbor);
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.getByUniqueId(npcuuid);
-		startlocations.put(player.getUniqueId(), npc.getStoredLocation());
-		typeleave.put(player.getUniqueId(), type);
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 				new Runnable() {
 					public void run() {
@@ -210,22 +207,20 @@ public class Travel implements Listener {
 
 	}
 
-	public void travel(UUID npcuuid, final int questnumber,
-			final Player player, final String type, final Location end) {
-		if (tempwaiting.get(questnumber) != null) {
-			for (HarborWaitLocations l : HarborWaitLocations.inuse) {
-				if (l.getType().equals(type)) {
-					HarborWaitLocations.locations.add(l);
-					HarborWaitLocations.inuse.remove(l);
-					tempwaiting.remove(questnumber);
-
-					break;
-				}
+	public void travel(UUID npcuuid, final int questnumber, final Player player,
+			final String type, final Location end) {
+		for (HarborWaitLocations l : HarborWaitLocations.inuse) {
+			if (l.getType().equals(type)) {
+				HarborWaitLocations.locations.add(l);
+				HarborWaitLocations.inuse.remove(l);
+				tempwaiting.remove(questnumber);
+				
+				break;
 			}
 		}
-		if (temptrip.get(questnumber) == null) {
-			for (TripLocations l : TripLocations.locations) {
-				if (l.getType().equals(type)) {
+		if(temptrip.get(questnumber) == null){
+			for(TripLocations l : TripLocations.locations){
+				if(l.getType().equals(type)){
 					TripLocations.inuse.add(l);
 					temptrip.put(questnumber, l);
 					TripLocations.locations.remove(l);
@@ -234,16 +229,18 @@ public class Travel implements Listener {
 			}
 		}
 
-		final Location start = temptrip.get(questnumber).getLocation();
+		NPCRegistry registry = CitizensAPI.getNPCRegistry();
+		NPC npc = registry.getByUniqueId(npcuuid);
+		final Location start = npc.getEntity().getLocation();
 
 		int time = traveltime(npcuuid, questnumber, type, end);
 
-		travelevent.put(player.getUniqueId(), false); // CHANGE THIS ONE RELEASE
-
+		travelevent.put(player.getUniqueId(), true); // CHANGE THIS ONE RELEASE
+		startlocations.put(player.getUniqueId(), npc.getStoredLocation());
+		typeleave.put(player.getUniqueId(), type);
 		destinationlocations.put(player.getUniqueId(), end);
 
 		player.teleport(start);
-
 		String message;
 		if (type.equals("boat")) {
 			message = boatleaving();
@@ -278,7 +275,7 @@ public class Travel implements Listener {
 						TripLocations.locations.add(temptrip.get(questnumber));
 						TripLocations.inuse.remove(temptrip.get(questnumber));
 						temptrip.remove(questnumber);
-
+						
 						if (!endmessage.equals("EVENT")) {
 							player.teleport(end);
 							player.sendMessage(ChatColor.DARK_PURPLE + "["

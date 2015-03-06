@@ -30,10 +30,11 @@ public class Warps {
 	
 	public void npcsettingswarplists(UUID npcuuid, Player player) {
 
-		Inventory warpinv = Bukkit.createInventory(null, 9, "WarpList");
+		Inventory warpinv = Bukkit.createInventory(null, 18, "WarpList");
 		// title
 		ItemStack title = new ItemStack(Material.BOOK);
 		{
+				type.contains("thingy");
 			List<String> temp = new ArrayList<String>();
 			temp.add(name);
 			ItemMeta tem = title.getItemMeta();

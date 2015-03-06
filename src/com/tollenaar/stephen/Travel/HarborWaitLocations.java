@@ -12,7 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class HarborWaitLocations {
-	
+	//perhaps to change this later on.
 	public static HashSet<HarborWaitLocations> locations = new HashSet<HarborWaitLocations>();
 	public static HashSet<HarborWaitLocations> inuse = new HashSet<HarborWaitLocations>();
 	

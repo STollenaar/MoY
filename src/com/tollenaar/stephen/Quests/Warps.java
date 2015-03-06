@@ -34,7 +34,6 @@ public class Warps {
 		// title
 		ItemStack title = new ItemStack(Material.BOOK);
 		{
-				type.contains("thingy");
 			List<String> temp = new ArrayList<String>();
 			temp.add(name);
 			ItemMeta tem = title.getItemMeta();

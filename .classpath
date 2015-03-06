@@ -3,9 +3,10 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/PermissionsEx.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/Citizens.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/citizens-2.0.11-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/spigot.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/Essentials.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/npclib.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/Citizens.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/citizens-2.0.11-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

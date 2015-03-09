@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 import org.bukkit.block.Block;
@@ -16,20 +17,25 @@ import org.bukkit.entity.Projectile;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Tree;
 
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.gmail.filoghost.holographicdisplays.api.VisibilityManager;
 import com.tollenaar.stephen.MistsOfYsir.Filewriters;
 import com.tollenaar.stephen.MistsOfYsir.MoY;
 import com.tollenaar.stephen.MistsOfYsir.Party;
 
 public class LevelSystems implements Listener {
-	MoY plugin;
-	Filewriters fw;
-	Party party;
+	private MoY plugin;
+	private Filewriters fw;
+	private Party party;
 
+	@EventHandler
 	public void onmonsterdeath(EntityDeathEvent event) {
 		if (event.getEntity() instanceof Monster
 				|| event.getEntity() instanceof Slime
@@ -70,6 +76,25 @@ public class LevelSystems implements Listener {
 					}
 				}
 				partyrewards(player, xp);
+					Location l = event.getEntity().getLocation();
+					l.setY(l.getY()+2);
+					final Hologram holo = HologramsAPI.createHologram(plugin, l);
+					holo.appendTextLine(ChatColor.RED + "Level Progress");
+					holo.appendTextLine( ChatColor.GOLD + "Gained +" + xp
+							+ "xp");
+					holo.appendTextLine(ChatColor.GRAY + "[Progress "
+							+ Playerstats.levelprog.get(player.getUniqueId()) + "/"
+							+ Playerstats.levelprog.get(player.getUniqueId()) * 15
+							+ "]");
+					VisibilityManager vm = holo.getVisibilityManager();
+					vm.showTo(player);
+					
+			
+					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+						public void run(){
+							holo.delete();
+						}
+					}, 2*20L);
 			}
 		}
 	}

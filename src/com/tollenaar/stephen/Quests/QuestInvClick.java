@@ -706,6 +706,9 @@ public class QuestInvClick implements Listener {
 						temp.add("location");
 						temp.add(id);
 						questers.npcpos.put(player.getUniqueId(), temp);
+					} else if (name.equals("Delete")) {
+						player.closeInventory();
+						questers.removetrip(Integer.parseInt(id));
 					}
 				} else if (clickinv.getName().equals("Wait Location info")) {
 					if (name.equals("Trip Type")) {
@@ -724,6 +727,9 @@ public class QuestInvClick implements Listener {
 						temp.add("location");
 						temp.add(id);
 						questers.npcpos.put(player.getUniqueId(), temp);
+					} else if (name.equals("Delete")) {
+						player.closeInventory();
+						questers.removeharbor(Integer.parseInt(id));
 					}
 				}
 			}

@@ -36,15 +36,15 @@ import code.husky.mysql.MySQL;
 
 public class DbStuff {
 	private MoY plugin;
-	Connection con;
-	MySQL MySQl;
+	private Connection con;
+	public MySQL MySQl;
 	private QuestsServerSide questers;
-	Party party;
-	String mysqlpass;
-	String mysqluser;
-	String mysqldb;
-	String mysqlpot;
-	String mysqlhost;
+	private Party party;
+	private String mysqlpass;
+	private String mysqluser;
+	private String mysqldb;
+	private String mysqlpot;
+	private String mysqlhost;
 	private int scheduler;
 	private int dbsaver;
 
@@ -224,16 +224,16 @@ public class DbStuff {
 					+ "id INTEGER PRIMARY KEY," + "locationx INTEGER NOT NULL,"
 					+ "locationy INTEGER NOT NULL,"
 					+ "locationz INTEGER NOT NULL,"
-					+ "world VARCHAR(50) NOT NULL),"
-					+ "type VARCHAR(16) NOT NULL;");
+					+ "world VARCHAR(50) NOT NULL,"
+					+ "type VARCHAR(16) NOT NULL);");
 
 			// trip
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Trips ("
 					+ "id INTEGER PRIMARY KEY," + "locationx INTEGER NOT NULL,"
 					+ "locationy INTEGER NOT NULL,"
 					+ "locationz INTEGER NOT NULL,"
-					+ "world VARCHAR(50) NOT NULL),"
-					+ "type VARCHAR(16) NOT NULL;");
+					+ "world VARCHAR(50) NOT NULL,"
+					+ "type VARCHAR(16) NOT NULL);");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2966,6 +2966,80 @@ public class DbStuff {
 		this.party = instance.party;
 	}
 
+	public void deletetrip(int id){
+		String test = "SELECT * FROM Mist_Trips WHERE `id`=?";
+		String delete = "DELETE FROM Mist_Trips WHERE `id`=?";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(test);
+			pst.setInt(1, id);
+			ResultSet rs = pst.executeQuery();
+			if(rs.next()){
+				pst.close();
+				pst = con.prepareStatement(delete);
+				pst.setInt(1, id);
+				pst.execute();
+			}
+		}catch (SQLException e) {
+			this.plugin.getLogger().severe(e.getMessage());
+			plugin.getLogger().info(
+					"There was a error during the savings of the data to the database: "
+							+ e.getMessage());
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+	}
+	
+	public void deleteharbor(int id){
+		String test = "SELECT * FROM Mist_Harbors WHERE `id`=?";
+		String delete = "DELETE FROM Mist_Harbors WHERE `id`=?";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(test);
+			pst.setInt(1, id);
+			ResultSet rs = pst.executeQuery();
+			if(rs.next()){
+				pst.close();
+				pst = con.prepareStatement(delete);
+				pst.setInt(1, id);
+				pst.execute();
+			}
+		}catch (SQLException e) {
+			this.plugin.getLogger().severe(e.getMessage());
+			plugin.getLogger().info(
+					"There was a error during the savings of the data to the database: "
+							+ e.getMessage());
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+	}
+	
 	public void deletenpc(int npcid) {
 		String test = "SELECT * FROM Mist_NPCData WHERE `npcid`=?;";
 		String delete = "DELETE FROM Mist_NPCData WHERE `npcid`=?";

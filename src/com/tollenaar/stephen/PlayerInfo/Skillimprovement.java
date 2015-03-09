@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeSpecies;
 import org.bukkit.block.Block;
@@ -33,14 +34,22 @@ import org.bukkit.material.Tree;
 
 
 
+
+
+
+
+import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
+import com.gmail.filoghost.holographicdisplays.api.VisibilityManager;
 import com.tollenaar.stephen.MistsOfYsir.MoY;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 public class Skillimprovement implements Listener{
-	MoY plugin;
-	LevelSystems level; 
+	private MoY plugin;
+	private LevelSystems level; 
+	
 	
 	public HashSet<Block> miningblocksplaces = new HashSet<Block>();
 	public HashSet<Block> wooodblocksplaces = new HashSet<Block>();
@@ -321,6 +330,28 @@ public class Skillimprovement implements Listener{
 					}
 				}
 			}
+		}
+		
+		if(!event.isCancelled()){
+			Location l = player.getTargetBlock(null, 1).getLocation();
+			l.setY(l.getY()+1);
+			final Hologram holo = HologramsAPI.createHologram(plugin, l);
+			holo.appendTextLine(ChatColor.RED + "Level Progress");
+			holo.appendTextLine( ChatColor.GOLD + "Gained +" + level.woodxp(block, lowlvl, midlvl, lowmidlvl, highlvl)
+					+ "xp");
+			holo.appendTextLine(ChatColor.GRAY + "[Progress "
+					+ Playerstats.levelprog.get(player.getUniqueId()) + "/"
+					+ Playerstats.levelprog.get(player.getUniqueId()) * 15
+					+ "]");
+			VisibilityManager vm = holo.getVisibilityManager();
+			vm.showTo(player);
+			
+	
+			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+				public void run(){
+					holo.delete();
+				}
+			}, 2*20L);
 		}
 	}
 	
@@ -604,6 +635,27 @@ public class Skillimprovement implements Listener{
 					}
 				}
 			}
+		}
+		if(!event.isCancelled()){
+			Location l = player.getTargetBlock(null, 1).getLocation();
+			l.setY(l.getY()+1);
+			final Hologram holo = HologramsAPI.createHologram(plugin, l);
+			holo.appendTextLine(ChatColor.RED + "Level Progress");
+			holo.appendTextLine( ChatColor.GOLD + "Gained +" + level.miningxp(block)
+					+ "xp");
+			holo.appendTextLine(ChatColor.GRAY + "[Progress "
+					+ Playerstats.levelprog.get(player.getUniqueId()) + "/"
+					+ Playerstats.levelprog.get(player.getUniqueId()) * 15
+					+ "]");
+			VisibilityManager vm = holo.getVisibilityManager();
+			vm.showTo(player);
+			
+	
+			Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+				public void run(){
+					holo.delete();
+				}
+			}, 2*20L);
 		}
 		}
 	

@@ -583,10 +583,12 @@ public class Quest {
 
 	public void removetrip(int number) {
 		triplocations.remove(number);
+		plugin.database.deletetrip(number);
 	}
 
 	public void removeharbor(int number) {
 		harborlocation.remove(number);
+		plugin.database.deleteharbor(number);
 	}
 
 	public void removekill(int number) {

@@ -117,7 +117,6 @@ public class QuestsServerSide extends Quest {
 										}
 									}
 								}
-
 								npc.faceLocation(closest);
 							}
 						tickdelay++;

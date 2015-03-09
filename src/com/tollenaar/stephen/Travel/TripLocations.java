@@ -4,12 +4,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.Wool;
 
 public class TripLocations {
 	
@@ -66,6 +68,13 @@ public class TripLocations {
 			im.setLore(lore);
 			loc.setItemMeta(im);
 			inv.addItem(loc);
+		}
+		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		{
+			ItemMeta im = delete.getItemMeta();
+			im.setDisplayName("Delete");
+			delete.setItemMeta(im);
+			inv.setItem(inv.getSize()-1, delete);
 		}
 		
 		

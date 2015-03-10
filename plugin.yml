@@ -23,7 +23,4 @@ commands:
              usage: /<command> 
      quest:
              description: active quests
-             usage: /<command>
-     test:
-             description: debug this
-             usage: /<command>			 
+             usage: /<command>		 

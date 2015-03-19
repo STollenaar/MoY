@@ -193,6 +193,8 @@ public class QuestsServerSide extends Quest {
 		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, NPCSkin.getNonPlayerProfile(skin).getName());
 		npc.spawn(location);
 		UUID npcuuid = npc.getUniqueId();
+		
+		NPCSkin.getNonPlayerProfile(skin);
 		spawnlocation.put(npcuuid, location);
 		npclocation.put(npcuuid, location);
 		if (uniqueid != -1) {

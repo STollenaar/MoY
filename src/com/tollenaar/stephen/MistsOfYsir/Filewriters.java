@@ -13,7 +13,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class Filewriters {
-	MoY plugin;
+	private MoY plugin;
 	
 	private File dummymessages;
 	
@@ -37,11 +37,11 @@ public class Filewriters {
 	
 	
 	public void filecheck() {
-		File direct = new File(Bukkit.getServer().getPluginManager().getPlugin("MistsOfYsir").getDataFolder(), "messages");
+		File direct = new File(plugin.getDataFolder(), "messages");
 		if (!direct.exists()) {
 			direct.mkdir();
 		}
-		desserter = new File(Bukkit.getServer().getPluginManager().getPlugin("MistsOfYsir").getDataFolder(), "desserters");
+		desserter = new File(plugin.getDataFolder(), "desserters");
 		if(!desserter.exists()){
 			desserter.mkdir();
 		}

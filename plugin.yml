@@ -1,6 +1,6 @@
 name: MistsOfYsir
-main: com.tollenaar.stephen.MistsOfYsir.MoY
-version: B.1.7.9
+main: MoY.tollenaar.stephen.MistsOfYsir.MoY
+version: B.1.8
 authors: [guitargun]
 description: the ultimate plugin
 depend: [Citizens, MistCore] 

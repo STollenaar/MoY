@@ -53,9 +53,12 @@ public final class ProgListener implements Listener {
 				currentlvl = Playerstats.smelting.get(event.getPlayer());
 				currentprog = Playerstats.smeltingprog.get(event.getPlayer());
 				break;
-			default:
-				currentprog = 0;
+			case 5:
+				currentlvl = Playerstats.fishing.get(event.getPlayer());
+				currentprog = Playerstats.fishingprog.get(event.getPlayer());
 				break;
+			default:
+				return;
 			}
 			if (currentlvl != 50) {
 				if (currentprog + xp >= currentlvl * 10) {
@@ -90,8 +93,12 @@ public final class ProgListener implements Listener {
 				Playerstats.smelting.put(event.getPlayer(), currentlvl);
 				Playerstats.smeltingprog.put(event.getPlayer(), currentprog);
 				break;
-			default:
+			case 5:
+				Playerstats.fishing.put(event.getPlayer(), currentlvl);
+				Playerstats.fishingprog.put(event.getPlayer(), currentprog);
 				break;
+			default:
+				return;
 			}
 			ArrayList<String> groups = new ArrayList<String>();
 			for (String in : user.getGroupNames()) {

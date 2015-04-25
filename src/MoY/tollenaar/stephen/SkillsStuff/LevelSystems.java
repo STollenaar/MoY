@@ -8,8 +8,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.TreeSpecies;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -20,8 +18,6 @@ import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Tree;
 
 import MoY.tollenaar.stephen.MistsOfYsir.Filewriters;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
@@ -150,127 +146,7 @@ public class LevelSystems implements Listener {
 		}
 	}
 
-	public int fishingxp(ItemStack item, int junk, int treasure) {
-		if (item.getType() != Material.RAW_FISH) {
-			if (junk == 1) {
-				return 1;
-			} else {
-				return 5 * item.getAmount();
-			}
-		} else if (item.getDurability() == 0) {
-			return 1 * item.getAmount();
-		} else if (item.getDurability() == 1) {
-			return 2 * item.getAmount();
-		} else if (item.getDurability() == 2) {
-			return 2 * item.getAmount();
-		} else if (item.getDurability() == 3) {
-			return 3 * item.getAmount();
-		} else {
-			return 1;
-		}
-	}
-
-	public int miningxp(Block item) {
-		if (item.getType() == Material.COAL_ORE) {
-			return 2;
-		} else if (item.getType() == Material.IRON_ORE) {
-			return 4;
-		} else if (item.getType() == Material.GOLD_ORE) {
-			return 7;
-		} else if (item.getType() == Material.LAPIS_ORE) {
-			return 3;
-		} else if (item.getType() == Material.REDSTONE_ORE) {
-			return 2;
-		} else if (item.getType() == Material.DIAMOND_ORE) {
-			return 10;
-		} else {
-			return 1;
-		}
-
-	}
-
-	public int woodxp(Block item, ArrayList<TreeSpecies> lowlvl,
-			ArrayList<TreeSpecies> midlvl, ArrayList<TreeSpecies> midhighlvl,
-			ArrayList<TreeSpecies> highlvl) {
-		TreeSpecies log;
-		if (item.getType() == Material.LOG) {
-			log = ((Tree) item.getState().getData()).getSpecies();
-		} else {
-			@SuppressWarnings("deprecation")
-			short data = item.getData();
-			if (data == 0 || data == 4 || data == 8 || data == 12) {
-				log = TreeSpecies.ACACIA;
-			} else {
-				log = TreeSpecies.DARK_OAK;
-			}
-		}
-		if (lowlvl.contains(log)) {
-			return 1;
-		} else if (midlvl.contains(log)) {
-			return 1;
-		} else if (midhighlvl.contains(log)) {
-			return 2;
-		} else {
-			return 3;
-		}
-
-	}
-
-	public int smeltingxp(ItemStack item) {
-		if (item.getType() == Material.GOLD_INGOT) {
-			return 3;
-		} else if (item.getType() == Material.IRON_INGOT) {
-			return 2;
-		} else {
-			return 1;
-		}
-	}
-
-	public int succes(int playerlvl, ItemStack item,
-			ArrayList<Material> lowlvl, ArrayList<Material> midlowlvl,
-			ArrayList<Material> midlvl, ArrayList<Material> midhighlvl,
-			ArrayList<Material> highlvl) {
-		if (playerlvl <= 10) {
-			if (lowlvl.contains(item.getType())) {
-				return 82;
-			} else if (midlowlvl.contains(item.getType())) {
-				return 20;
-			} else if (midlvl.contains(item.getType())) {
-				return 17;
-			} else if (midhighlvl.contains(item.getType())) {
-				return 14;
-			} else {
-				return 11;
-			}
-		} else if (playerlvl <= 20) {
-			if (midlowlvl.contains(item.getType())) {
-				return 82;
-			} else if (midlvl.contains(item.getType())) {
-				return 20;
-			} else if (midhighlvl.contains(item.getType())) {
-				return 17;
-			} else {
-				return 14;
-			}
-		} else if (playerlvl <= 30) {
-			if (midlvl.contains(item.getType())) {
-				return 78;
-			} else if (midhighlvl.contains(item.getType())) {
-				return 20;
-			} else {
-				return 17;
-			}
-		} else if (playerlvl <= 40) {
-			if (midhighlvl.contains(item.getType())) {
-				return 82;
-			} else {
-				return 20;
-			}
-		} else {
-			return 78;
-		}
-
-	}
+	
 
 	private int skelzomblvl(Monster ent) {
 		Material chest = ent.getEquipment().getChestplate().getType();

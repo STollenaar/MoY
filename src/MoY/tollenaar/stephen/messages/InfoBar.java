@@ -46,13 +46,13 @@ public class InfoBar {
 		default:
 			prog = 0;
 			lvl = 0;
+			break;
 		}
 		String message = message(type, prog, lvl, block);
 		playermessage.put(player, new Message(plugin, message, player));
 	}
 
 	public void makemessage(UUID player, int type) {
-
 		int prog;
 		int lvl;
 		switch (type) {
@@ -68,9 +68,14 @@ public class InfoBar {
 			lvl = Playerstats.smelting.get(player);
 			prog = Playerstats.smeltingprog.get(player);
 			break;
+		case 5:
+			lvl = Playerstats.fishing.get(player);
+			prog = Playerstats.fishingprog.get(player);
+			break;
 		default:
 			prog = 0;
 			lvl = 0;
+			break;
 		}
 		String message = message(type, prog, lvl);
 		playermessage.put(player, new Message(plugin, message, player));
@@ -100,12 +105,12 @@ public class InfoBar {
 			break;
 		case 1:
 			message = ChatColor.GRAY + "Progression Woodcutting: "
-					+ ChatColor.GREEN + prog + "/" + lvl*10;
+					+ ChatColor.GREEN + prog + "/" + lvl * 10;
 			break;
 
 		case 2:
 			message = ChatColor.GRAY + "Progression Mining: " + ChatColor.GREEN
-					+ prog + "/" + lvl*10;
+					+ prog + "/" + lvl * 10;
 
 			break;
 		default:
@@ -121,16 +126,21 @@ public class InfoBar {
 		case 3:
 			message = ChatColor.GRAY
 					+ "Cooking succesful, progress increased: "
-					+ ChatColor.GREEN + prog + "/" + lvl*10;
+					+ ChatColor.GREEN + prog + "/" + lvl * 10;
 			break;
 		case -3:
 			message = ChatColor.GRAY + "Cooking failed, progress stayed: "
-					+ ChatColor.GREEN + prog + "/" + lvl*10;
+					+ ChatColor.GREEN + prog + "/" + lvl * 10;
 			break;
 		case 4:
 			message = ChatColor.GRAY
 					+ "Smelting Succesful, progress increased: "
-					+ ChatColor.GREEN + prog + "/" + lvl*10;
+					+ ChatColor.GREEN + prog + "/" + lvl * 10;
+			break;
+		case 5:
+			message = ChatColor.GRAY
+					+ "Fishing Succesful, progress increased: "
+					+ ChatColor.GREEN + prog + "/" + lvl * 10;
 			break;
 		default:
 			message = "";

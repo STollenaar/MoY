@@ -2,6 +2,7 @@ package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -84,8 +85,30 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}
 					break;
 				case "reward":
-					kill.setReward(typed);
-					pass = true;
+						if(typed.contains("add")){
+							typed = typed.replace("add", "");
+							kill.setReward(typed);
+						}else {
+							try{
+								
+								int line = Integer.parseInt(Character.toString(typed.charAt(0)));
+								typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
+								if(line >= 0){
+								List<String> rew = kill.getReward();
+								if(rew.size()-1 <= line){
+									rew.set(line, typed);
+									kill.setReward(rew);
+									pass = true;
+								}else{
+									pass = false;
+								}
+								}else{
+									pass = false;
+								}
+							}catch(NumberFormatException ex){
+								pass = false;
+							}
+						}
 					break;
 				case "repeat":
 					kill.setDelay(typed);
@@ -179,10 +202,30 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}
 					break;
 				case "reward":
-					kill.setReward(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
-					break;
+					if(typed.contains("add")){
+						typed = typed.replace("add", "");
+						kill.setReward(typed);
+					}else {
+						try{
+							
+							int line = Integer.parseInt(Character.toString(typed.charAt(0)));
+							typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
+							if(line >= 0){
+							List<String> rew = kill.getReward();
+							if(rew.size()-1 <= line){
+								rew.set(line, typed);
+								kill.setReward(rew);
+								questers.npcpos.remove(player.getUniqueId());
+							}else{
+								return;
+							}
+							}else{
+								return;
+							}
+						}catch(NumberFormatException ex){
+							return;
+						}
+					}
 				case "repeat":
 					kill.setDelay(typed);
 					questers.npcpos.remove(player.getUniqueId());
@@ -301,9 +344,30 @@ public class QuestChat extends QuestInvClick implements Listener {
 					event.setCancelled(true);
 					break;
 				case "reward":
-					talk.setReward(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					if(typed.contains("add")){
+						typed = typed.replace("add", "");
+						talk.setReward(typed);
+					}else {
+						try{
+							
+							int line = Integer.parseInt(Character.toString(typed.charAt(0)));
+							typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
+							if(line >= 0){
+							List<String> rew = talk.getReward();
+							if(rew.size()-1 <= line){
+								rew.set(line, typed);
+								talk.setReward(rew);
+								questers.npcpos.remove(player.getUniqueId());
+							}else{
+								return;
+							}
+							}else{
+								return;
+							}
+						}catch(NumberFormatException ex){
+							return;
+						}
+					}
 					break;
 				case "repeat":
 					talk.setDelay(typed);

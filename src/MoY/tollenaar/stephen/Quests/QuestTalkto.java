@@ -1,8 +1,10 @@
 package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
 
 
 import org.bukkit.Bukkit;
@@ -21,7 +23,7 @@ public class QuestTalkto {
 	
 	private int npcid;
 	
-	private String reward;
+	private List<String> reward;
 	
 	private String delay;
 	private String message;
@@ -34,7 +36,7 @@ public class QuestTalkto {
 		this.questnumber = number;
 		this.name = "title";
 		this.npcid = 0;
-		this.reward = "unknown";
+		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
 		this.delay = "0s";
 		this.message = "message";
 		this.minlvl = 0;
@@ -70,7 +72,9 @@ public class QuestTalkto {
 		ItemStack rewardi = new ItemStack(Material.GOLD_INGOT);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add(reward);
+			for(String in : reward){
+				temp.add(in);
+			}
 			ItemMeta tem = rewardi.getItemMeta();
 			tem.setDisplayName("Reward");
 			tem.setLore(temp);
@@ -165,11 +169,14 @@ public class QuestTalkto {
 		this.npcid = npcid;
 	}
 
-	public String getReward() {
+	public List<String> getReward() {
 		return reward;
 	}
 
 	public void setReward(String reward) {
+		this.reward.add(reward);
+	}
+	public void setReward(List<String> reward){
 		this.reward = reward;
 	}
 

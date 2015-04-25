@@ -7,12 +7,10 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import net.citizensnpcs.api.npc.NPC;
-import net.minecraft.server.v1_8_R1.NBTTagCompound;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -64,47 +62,31 @@ public class QuestClientSide {
 			for (Integer i : questers.killquests.get(npcuuid)) {
 				if (i != null) {
 
-					if (check("kill", i, player, npcname)) {
-						QuestKill kill = questers.returnkill(i);
-						boolean pass = false;
-						if (!kill.getPrereq().split("=")[0].equals("none")) {
-							if (check(kill.getPrereq().split("=")[0],
-									Integer.parseInt(kill.getPrereq()
-											.split("=")[1].trim()), player,
-									npcname)) {
-								pass = true;
-							}
-						} else {
+					QuestKill kill = questers.returnkill(i);
+					boolean pass = false;
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (!check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname)&& check("kill", i, player, npcname)) {
 							pass = true;
 						}
-						if (pass) {
-							ItemStack killquest = new ItemStack(
-									Material.DIAMOND_SWORD);
-							{
-								ItemMeta meta = killquest.getItemMeta();
-								meta.setDisplayName(kill.getName());
-								ArrayList<String> lore = new ArrayList<String>();
-								lore.add(kill.getMessage());
-								lore.add(Integer.toString(kill.getQuestnumber()));
-								meta.setLore(lore);
-								killquest.setItemMeta(meta);
-								
-								net.minecraft.server.v1_8_R1.ItemStack nms = CraftItemStack.asNMSCopy(killquest);
-								NBTTagCompound tag = null;
-								if(nms.getTag() != null)tag = nms.getTag();
-								else
-								{
-								    nms.setTag(new NBTTagCompound());
-								    nms.setTag(tag);
-								}
-								int x = 1;
-								for(String l : meta.getLore()){
-									tag.setString("Lore" + x,  l);
-									x++;
-								}
-								killquest = CraftItemStack.asCraftMirror(nms);
-								inv.addItem(killquest);
-							}
+					}  else {
+						if(check("kill", i, player, npcname)){
+						pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack killquest = new ItemStack(
+								Material.DIAMOND_SWORD);
+						{
+							ItemMeta meta = killquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							killquest.setItemMeta(meta);
+							inv.addItem(killquest);
 						}
 					}
 				}
@@ -113,32 +95,31 @@ public class QuestClientSide {
 		if (questers.harvestquests.get(npcuuid) != null) {
 			for (Integer i : questers.harvestquests.get(npcuuid)) {
 				if (i != null) {
-					if (check("harvest", i, player, npcname)) {
-						QuestHarvest kill = questers.returnharvest(i);
-						boolean pass = false;
-						if (!kill.getPrereq().split("=")[0].equals("none")) {
-							if (check(kill.getPrereq().split("=")[0],
-									Integer.parseInt(kill.getPrereq()
-											.split("=")[1].trim()), player,
-									npcname)) {
-								pass = true;
-							}
-						} else {
+					QuestHarvest kill = questers.returnharvest(i);
+					boolean pass = false;
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (!check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname)&& check("harvest", i, player, npcname)) {
 							pass = true;
 						}
-						if (pass) {
-							ItemStack harvestquest = new ItemStack(
-									Material.DIAMOND_PICKAXE);
-							{
-								ItemMeta meta = harvestquest.getItemMeta();
-								meta.setDisplayName(kill.getName());
-								ArrayList<String> lore = new ArrayList<String>();
-								lore.add(kill.getMessage());
-								lore.add(Integer.toString(kill.getQuestnumber()));
-								meta.setLore(lore);
-								harvestquest.setItemMeta(meta);
-								inv.addItem(harvestquest);
-							}
+					} else {
+						if(check("harvest", i, player, npcname)){
+						pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack harvestquest = new ItemStack(
+								Material.DIAMOND_PICKAXE);
+						{
+							ItemMeta meta = harvestquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							harvestquest.setItemMeta(meta);
+							inv.addItem(harvestquest);
 						}
 					}
 				}
@@ -147,32 +128,31 @@ public class QuestClientSide {
 		if (questers.talktoquests.get(npcuuid) != null) {
 			for (Integer i : questers.talktoquests.get(npcuuid)) {
 				if (i != null) {
-					if (check("talkto", i, player, npcname)) {
-						QuestTalkto kill = questers.returntalkto(i);
-						boolean pass = false;
-						if (!kill.getPrereq().split("=")[0].equals("none")) {
-							if (check(kill.getPrereq().split("=")[0],
-									Integer.parseInt(kill.getPrereq()
-											.split("=")[1].trim()), player,
-									npcname)) {
-								pass = true;
-							}
-						} else {
+					QuestTalkto kill = questers.returntalkto(i);
+					boolean pass = false;
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (!check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname)&& check("talkto", i, player, npcname)) {
 							pass = true;
 						}
-						if (pass) {
-							ItemStack talktoquest = new ItemStack(
-									Material.FEATHER);
-							{
-								ItemMeta meta = talktoquest.getItemMeta();
-								meta.setDisplayName(kill.getName());
-								ArrayList<String> lore = new ArrayList<String>();
-								lore.add(kill.getMessage());
-								lore.add(Integer.toString(kill.getQuestnumber()));
-								meta.setLore(lore);
-								talktoquest.setItemMeta(meta);
-								inv.addItem(talktoquest);
-							}
+					}  else {
+						if(check("talkto", i, player, npcname)){
+						pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack talktoquest = new ItemStack(Material.FEATHER);
+						{
+							ItemMeta meta = talktoquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add(kill.getMessage());
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							talktoquest.setItemMeta(meta);
+							inv.addItem(talktoquest);
 						}
 					}
 				}
@@ -190,14 +170,13 @@ public class QuestClientSide {
 							ArrayList<String> lore = new ArrayList<String>();
 							int time = Travel.traveltime(npcuuid,
 									kill.getWarpid(), type, w.getStartloc());
-							SimpleDateFormat df = new SimpleDateFormat(
-									"mm:ss");
-							Date date = new Date((long) (time*1000));
-							date.setHours(date.getHours()-9);
-							date.setMinutes(date.getMinutes()-30);
+							SimpleDateFormat df = new SimpleDateFormat("mm:ss");
+							Date date = new Date((long) (time * 1000));
+							date.setHours(date.getHours() - 9);
+							date.setMinutes(date.getMinutes() - 30);
 							lore.add("Duration: " + df.format(date));
-							lore.add(Integer.toString(w.getWarpid()));
-							lore.add(Integer.toString(kill.getWarpid()));
+							lore.add("§" + Integer.toString(w.getWarpid()));
+							lore.add("§" + Integer.toString(kill.getWarpid()));
 							ItemMeta meta = title.getItemMeta();
 							meta.setLore(lore);
 							meta.setDisplayName(kill.getName() + " - "
@@ -221,8 +200,11 @@ public class QuestClientSide {
 			{
 				ItemMeta meta = npcinfo.getItemMeta();
 				ArrayList<String> lore = new ArrayList<String>();
-				lore.add(npcuuid.toString());
-				meta.setDisplayName("NPC Information");
+				String builder = "";
+				for (String in : npcuuid.toString().split("")) {
+					builder += "§" + in;
+				}
+				lore.add(builder);
 				meta.setLore(lore);
 				npcinfo.setItemMeta(meta);
 				newinv.setItem(newinv.getSize() - 1, npcinfo);
@@ -232,8 +214,11 @@ public class QuestClientSide {
 			{
 				ItemMeta meta = npcinfo.getItemMeta();
 				ArrayList<String> lore = new ArrayList<String>();
-				lore.add(npcuuid.toString());
-				meta.setDisplayName("NPC Information");
+				String builder = "";
+				for (String in : npcuuid.toString().split("")) {
+					builder += "§" + in;
+				}
+				lore.add(builder);
 				meta.setLore(lore);
 				npcinfo.setItemMeta(meta);
 				inv.setItem(inv.getSize() - 1, npcinfo);
@@ -263,8 +248,6 @@ public class QuestClientSide {
 				if (Playerstats.activequests.get(playeruuid).get(type)
 						.contains(number)) {
 					pass = false;
-				} else {
-					pass = true;
 				}
 			}
 		}
@@ -281,20 +264,18 @@ public class QuestClientSide {
 								.get(type).get(i) == number) {
 							if (type.equals("kill")) {
 
-								String reward = questers
-										.returnkill(number)
-										.getReward()
-										.replace(
-												"player",
-												Bukkit.getPlayer(playeruuid)
-														.getName());
 								System.out.println(Ansi.ansi().fg(
 										Ansi.Color.RED)
 										+ "QUEST COMPLETE"
 										+ Ansi.ansi().fg(Ansi.Color.WHITE));
-								Bukkit.dispatchCommand(
-										Bukkit.getConsoleSender(), reward);
-
+								for (String in : questers.returnkill(number)
+										.getReward()) {
+									String reward = in.replace("player", Bukkit
+											.getPlayer(playeruuid).getName());
+									reward = reward.replaceFirst(" ", "");
+									Bukkit.dispatchCommand(
+											Bukkit.getConsoleSender(), reward);
+								}
 								Playerstats.completedquests.get(playeruuid)
 										.get(type).remove(i);
 
@@ -426,20 +407,21 @@ public class QuestClientSide {
 											}
 										}
 									}
-
-									String reward = questers
-											.returnharvest(number)
-											.getReward()
-											.replace(
-													"player",
-													Bukkit.getPlayer(playeruuid)
-															.getName());
 									System.out.println(Ansi.ansi().fg(
 											Ansi.Color.RED)
 											+ "QUEST COMPLETE"
 											+ Ansi.ansi().fg(Ansi.Color.WHITE));
-									Bukkit.dispatchCommand(
-											Bukkit.getConsoleSender(), reward);
+									for (String in : questers.returnharvest(
+											number).getReward()) {
+										String reward = in.replace("player",
+												Bukkit.getPlayer(playeruuid)
+														.getName());
+										reward = reward.replaceFirst(" ", "");
+										Bukkit.dispatchCommand(
+												Bukkit.getConsoleSender(),
+												reward);
+									}
+
 									player.sendMessage(ChatColor.DARK_PURPLE
 											+ "[" + ChatColor.GOLD + npcname
 											+ ChatColor.DARK_PURPLE + "] "
@@ -491,19 +473,18 @@ public class QuestClientSide {
 									pass = false;
 								}
 							} else {
-								String reward = questers
-										.returntalkto(number)
-										.getReward()
-										.replace(
-												"player",
-												Bukkit.getPlayer(playeruuid)
-														.getName());
 								System.out.println(Ansi.ansi().fg(
 										Ansi.Color.RED)
 										+ "QUEST COMPLETE"
 										+ Ansi.ansi().fg(Ansi.Color.WHITE));
-								Bukkit.dispatchCommand(
-										Bukkit.getConsoleSender(), reward);
+								for (String in : questers.returntalkto(number)
+										.getReward()) {
+									String reward = in.replace("player", Bukkit
+											.getPlayer(playeruuid).getName());
+									reward = reward.replaceFirst(" ", "");
+									Bukkit.dispatchCommand(
+											Bukkit.getConsoleSender(), reward);
+								}
 								player.sendMessage(ChatColor.DARK_PURPLE + "["
 										+ ChatColor.GOLD + npcname
 										+ ChatColor.DARK_PURPLE + "] "
@@ -548,7 +529,11 @@ public class QuestClientSide {
 						.get(number) != null) {
 					pass = false;
 				}
+			} else {
+				pass = false;
 			}
+		} else {
+			pass = false;
 		}
 		return pass;
 	}

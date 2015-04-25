@@ -1,6 +1,7 @@
 package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class QuestHarvest extends Quest {
 
 	private String name;
 
-	private String reward;
+	private List<String> reward;
 
 	private int count;
 	private int minlvl;
@@ -90,7 +91,9 @@ public class QuestHarvest extends Quest {
 		ItemStack rewardc = new ItemStack(Material.GOLD_INGOT);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add(reward);
+			for(String in : reward){
+				temp.add(in);
+			}
 			ItemMeta tem = rewardc.getItemMeta();
 			tem.setDisplayName("Reward");
 			tem.setLore(temp);
@@ -181,7 +184,7 @@ public class QuestHarvest extends Quest {
 		this.prereq = "none=0";
 		this.itemid = "1";
 		this.message = "message";
-		this.reward = "unknown";
+		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
 	}
 
 	public int getQuestnumber() {
@@ -196,12 +199,12 @@ public class QuestHarvest extends Quest {
 		this.name = name;
 	}
 
-	public String getReward() {
+	public List<String> getReward() {
 		return reward;
 	}
 
 	public void setReward(String reward) {
-		this.reward = reward;
+		this.reward.add(reward);
 	}
 
 	public int getCount() {
@@ -250,6 +253,10 @@ public class QuestHarvest extends Quest {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	
+	public void setReward(List<String> reward){
+		this.reward = reward;
 	}
 
 }

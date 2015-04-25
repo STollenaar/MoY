@@ -26,7 +26,7 @@ public final class ProgListener implements Listener {
 
 	@SuppressWarnings("deprecation")
 	@EventHandler
-	public void MiningListener(MiningProgEvent event) {
+	public void MiningListener(ProgEvent event) {
 		Player player = Bukkit.getPlayer(event.getPlayer());
 		PermissionUser user = PermissionsEx.getUser(player);
 		int currentlvl = 0;
@@ -57,10 +57,14 @@ public final class ProgListener implements Listener {
 				currentlvl = Playerstats.fishing.get(event.getPlayer());
 				currentprog = Playerstats.fishingprog.get(event.getPlayer());
 				break;
+			case 6:
+				currentlvl = Playerstats.level.get(event.getPlayer());
+				currentprog = Playerstats.levelprog.get(event.getPlayer());
+				break;
 			default:
 				return;
 			}
-			if (currentlvl != 50) {
+			if (currentlvl != 50 && event.getType() != 6) {
 				if (currentprog + xp >= currentlvl * 10) {
 					currentlvl++;
 					while (currentprog < currentlvl * 10 && xp > 0) {
@@ -71,8 +75,22 @@ public final class ProgListener implements Listener {
 					if (xp > 0) {
 						currentprog = xp;
 					}
+				} else {
+					currentprog += xp;
+				}
+			}else if(event.getType() == 6 && currentlvl != 140){
+				if(currentprog + xp >= currentlvl * 15){
+					currentlvl++;
+						while(currentprog < currentlvl*15 && xp > 0){
+							currentprog++;
+							xp--;
+						}
+					currentprog = 0;
+					if(xp > 0){
+						currentprog = xp;
+					}
 				}else{
-					currentprog+= xp;
+					currentprog += xp;
 				}
 			}
 
@@ -97,6 +115,10 @@ public final class ProgListener implements Listener {
 				Playerstats.fishing.put(event.getPlayer(), currentlvl);
 				Playerstats.fishingprog.put(event.getPlayer(), currentprog);
 				break;
+			case 6:
+				Playerstats.level.put(event.getPlayer(), currentlvl);
+				Playerstats.levelprog.put(event.getPlayer(), currentprog);
+				break;
 			default:
 				return;
 			}
@@ -108,11 +130,15 @@ public final class ProgListener implements Listener {
 				dubbledrop(currentlvl, event.getBlock());
 			}
 		}
-		if (currentlvl != 50 && event.getBlock() != null) {
-			info.makemessage(event.getPlayer(), event.getType(),
-					event.getBlock());
-		}else if(currentlvl != 50){
-			info.makemessage(event.getPlayer(), event.getType());
+		
+		
+		if (!event.getQ()) {
+			if (currentlvl != 50 && event.getBlock() != null) {
+				info.makemessage(event.getPlayer(), event.getType(),
+						event.getBlock());
+			} else if (currentlvl != 50 || event.getType() == 6) {
+				info.makemessage(event.getPlayer(), event.getType());
+			}
 		}
 	}
 

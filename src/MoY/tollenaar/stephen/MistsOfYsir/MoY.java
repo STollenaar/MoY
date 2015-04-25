@@ -17,6 +17,7 @@ import MoY.tollenaar.stephen.Commands.CommandsEvent;
 import MoY.tollenaar.stephen.Commands.CommandsNPC;
 import MoY.tollenaar.stephen.Commands.CommandsParty;
 import MoY.tollenaar.stephen.Commands.CommandsPlayerinfo;
+import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfoding;
 import MoY.tollenaar.stephen.Quests.ProgressHarvest;
 import MoY.tollenaar.stephen.Quests.ProgressKill;
@@ -69,7 +70,7 @@ public class MoY extends JavaPlugin {
 		plugin = this;
 		q = new Quest(this);
 
-		fw = new Filewriters(this);
+		
 		party = new Party(this);
 		lvl = new LevelSystems(this);
 		skill = new Skillimprovement(this);
@@ -77,6 +78,7 @@ public class MoY extends JavaPlugin {
 		re = new RandomEvents(this);
 
 		questers = new QuestsServerSide(this);
+		fw = new Filewriters(this);
 		qqc = new QuestClientSide(this);
 		qinteract = new Questinteracts(this);
 
@@ -158,6 +160,7 @@ public class MoY extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		database.saveall();
+		fw.saveall();
 		for (UUID uuid : questers.uniquenpcid.values()) {
 			NPCRegistry registry = CitizensAPI.getNPCRegistry();
 			NPC npc = registry.getByUniqueId(uuid);
@@ -165,7 +168,7 @@ public class MoY extends JavaPlugin {
 			registry.deregister(npc);
 		}
 		re.cancelsced();
-		fw.saveall();
+		
 	}
 
 }

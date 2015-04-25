@@ -1,5 +1,6 @@
 package MoY.tollenaar.stephen.Commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
+import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfoding;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
@@ -118,6 +120,40 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				return true;
 			}
 			
+		}else{
+			if(cmd.getName().equalsIgnoreCase("skill")){
+				if(args.length == 3){
+					try {
+						Player player = Bukkit.getPlayer(args[2]);
+						int newlvl = Integer.parseInt(args[1]);
+						int type = 0;
+						if (args[0].equalsIgnoreCase("wood")) {
+						type =1;
+						} else if (args[0].equalsIgnoreCase("mining")) {
+						type = 2;
+						} else if (args[0].equalsIgnoreCase("fishing")) {
+						type = 5;
+						} else if (args[0].equalsIgnoreCase("cooking")) {
+						type = 3;
+						} else if (args[0].equalsIgnoreCase("smelting")) {
+						type = 4;
+						} else if (args[0].equalsIgnoreCase("strength")) {
+							Playerstats.Strengthscore.put(
+									player.getUniqueId(), newlvl);
+						} else if (args[0].equalsIgnoreCase("dex")) {
+							Playerstats.Dexscore.put(player.getUniqueId(),
+									newlvl);
+						}
+						if(type != 0){
+							ProgEvent e = new ProgEvent(player.getUniqueId(), type, Integer.parseInt(args[1]), true);
+							Bukkit.getServer().getPluginManager().callEvent(e);
+						}
+					} catch (NumberFormatException ex) {
+						sender.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
+					}
+					return true;
+				}
+			}
 		}
 			return false;
 	}

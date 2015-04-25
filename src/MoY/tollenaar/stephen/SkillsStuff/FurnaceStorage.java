@@ -9,7 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import MoY.tollenaar.stephen.CEvents.MiningProgEvent;
+import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.messages.InfoBar;
@@ -62,13 +62,13 @@ public class FurnaceStorage {
 		UUID first = returnfirst(players.keySet());
 		players.put(first, players.get(first) - 1);
 
-		MiningProgEvent e;
+		ProgEvent e;
 
 		if (item.getType().isEdible()) {
-			e = new MiningProgEvent(first, 3, Edibles.GetEdible(item)
+			e = new ProgEvent(first, 3, Edibles.GetEdible(item)
 					.SuccesCalc(Playerstats.cooking.get(first)));
 		} else {
-			e = new MiningProgEvent(first, item.getType(), null, 4);
+			e = new ProgEvent(first, item.getType(), null, 4);
 		}
 		Bukkit.getServer().getPluginManager().callEvent(e);
 		save();

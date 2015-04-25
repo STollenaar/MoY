@@ -1,4 +1,4 @@
-package MoY.tollenaar.stephen.MistsOfYsir;
+package MoY.tollenaar.stephen.Files;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -17,11 +18,18 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.Quests.QuestHarvest;
+import MoY.tollenaar.stephen.Quests.QuestKill;
+import MoY.tollenaar.stephen.Quests.QuestTalkto;
+import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 import MoY.tollenaar.stephen.SkillsStuff.FurnaceStorage;
 
 public class Filewriters {
 	private MoY plugin;
-
+	private QuestsServerSide quest;
+	
+	
 	private File dummymessages;
 
 	private File TravelBoatnearmis;
@@ -41,6 +49,14 @@ public class Filewriters {
 	public FileConfiguration utilitiesconfig;
 	private File desserter;
 
+	
+	private File quests;
+	
+	private File harvest;
+	private File kill;
+	private File warps;
+	private File talkto;
+	
 	private File furnaces;
 
 	public void filecheck() {
@@ -48,6 +64,29 @@ public class Filewriters {
 		if (!direct.exists()) {
 			direct.mkdir();
 		}
+		
+		quests = new File(plugin.getDataFolder(), "quests");
+			if(!quests.exists()){
+				quests.mkdir();
+		}
+		
+		harvest = new File(quests, "harvest");
+		if(!harvest.exists()){
+			harvest.mkdir();
+		}
+		kill = new File(quests, "kill");
+		if(!kill.exists()){
+			kill.mkdir();
+		}
+		warps = new File(quests, "warp");
+		if(!warps.exists()){
+			warps.mkdir();
+		}
+		talkto = new File(quests, "talkto");
+		if(!talkto.exists()){
+			talkto.mkdir();
+		}
+		
 		desserter = new File(plugin.getDataFolder(), "desserters");
 		if (!desserter.exists()) {
 			desserter.mkdir();
@@ -267,6 +306,7 @@ public class Filewriters {
 	}
 
 	public void saveall() {
+		savequests();
 		try {
 			for (Block in : FurnaceStorage.GetAll()) {
 				savefurnace(FurnaceStorage.GetStorage(in));
@@ -274,6 +314,7 @@ public class Filewriters {
 		} catch (NoClassDefFoundError ex) {
 			return;
 		}
+		
 	}
 
 	public void loadall() {
@@ -724,7 +765,186 @@ public class Filewriters {
 
 	public Filewriters(MoY instance) {
 		this.plugin = instance;
+		this.quest = instance.questers;
 		filecheck();
 		loadall();
+		loadquests();
 	}
+	
+	public void loadquests(){
+		for(File f : harvest.listFiles()){
+			LoadHarvest(f);
+		}
+		for(File f : kill.listFiles()){
+			LoadKill(f);
+		}
+		for(File f : talkto.listFiles()){
+			LoadTalk(f);
+		}
+	}
+	
+	public void savequests(){
+		for(Integer i : quest.AllHarvestId()){
+			SaveHarvest(quest.returnharvest(i));
+		}
+		for(Integer i : quest.AllKillId()){
+			SaveKill(quest.returnkill(i));
+		}
+		for(Integer i :quest.AllTalkToId()){
+			SaveTalk(quest.returntalkto(i));
+		}
+	}
+	
+	public void SaveHarvest(QuestHarvest h){
+		File f = new File(harvest, h.getQuestnumber() + ".yml");
+		if(!f.exists()){
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		config.set("ID", h.getQuestnumber());
+		config.set("Name", h.getName());
+		config.set("Item", h.getItemId());
+		config.set("MinLvl", h.getMinlvl());
+		config.set("Reward", h.getReward());
+		config.set("Count", h.getCount());
+		config.set("Message", h.getMessage());
+		config.set("Prereq", h.getPrereq());
+		config.set("Delay", h.getDelay());
+		
+		try {
+			config.save(f);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void LoadHarvest(File f){
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		int id = config.getInt("ID");
+		List<String> reward = config.getStringList("Reward");
+		String name = config.getString("Name");
+		String delay = config.getString("Delay");
+		String prereq = config.getString("Prereq");
+		int minlvl = config.getInt("MinLvl");
+		int count = config.getInt("Count");
+		String itemid = config.getString("Item");
+		String message = config.getString("Message");
+		quest.loadharvest(id, name, reward, delay, minlvl, message, prereq, count, itemid);
+	}
+	
+	public void SaveKill(QuestKill h){
+		File f = new File(kill, h.getQuestnumber() + ".yml");
+		if(!f.exists()){
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		config.set("ID", h.getQuestnumber());
+		config.set("Name", h.getName());
+		config.set("Monster", h.getMonster());
+		config.set("MinLvl", h.getMinlvl());
+		config.set("Reward", h.getReward());
+		config.set("Count", h.getCount());
+		config.set("Message", h.getMessage());
+		config.set("Prereq", h.getPrereq());
+		config.set("Delay", h.getDelay());
+		
+		try {
+			config.save(f);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void LoadKill(File f){
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		int id = config.getInt("ID");
+		List<String> reward = config.getStringList("Reward");
+		String name = config.getString("Name");
+		String delay = config.getString("Delay");
+		String prereq = config.getString("Prereq");
+		int minlvl = config.getInt("MinLvl");
+		int count = config.getInt("Count");
+		String monster = config.getString("Monster");
+		String message = config.getString("Message");
+		quest.loadkill(id, name, reward, delay, minlvl, message, prereq, count, monster);
+	}
+	
+	public void deletequest(String type,int id){
+		switch(type){
+		case "kill":
+			for(File f : kill.listFiles()){
+				if(f.getName().replace(".yml", "").equals(Integer.toString(id))){
+					f.delete();
+					break;
+				}
+			}
+			break;
+		case "harvest":
+			for(File f : harvest.listFiles()){
+				if(f.getName().replace(".yml", "").equals(Integer.toString(id))){
+					f.delete();
+					break;
+				}
+			}
+			break;
+		case "talkto":
+			for(File f : talkto.listFiles()){
+				if(f.getName().replace(".yml", "").equals(Integer.toString(id))){
+					f.delete();
+					break;
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	public void SaveTalk(QuestTalkto h){
+		File f = new File(kill, h.getQuestnumber() + ".yml");
+		if(!f.exists()){
+			try {
+				f.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		config.set("ID", h.getQuestnumber());
+		config.set("Name", h.getName());
+		config.set("Person", h.getNpcid());
+		config.set("MinLvl", h.getMinlvl());
+		config.set("Reward", h.getReward());
+		config.set("Message", h.getMessage());
+		config.set("Prereq", h.getPrereq());
+		config.set("Delay", h.getDelay());
+		
+		try {
+			config.save(f);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void LoadTalk(File f){
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		int id = config.getInt("ID");
+		int person = config.getInt("Person");
+		List<String> reward = config.getStringList("Reward");
+		String name = config.getString("Name");
+		String delay = config.getString("Delay");
+		String prereq = config.getString("Prereq");
+		int minlvl = config.getInt("MinLvl");
+		String message = config.getString("Message");
+		quest.loadtalkto(id, name, person, message, delay, minlvl, prereq, reward);
+	}
+	
 }

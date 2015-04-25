@@ -13,9 +13,8 @@ import MoY.tollenaar.stephen.SkillsStuff.SkillLvls;
 public class InfoBar {
 
 	private static HashMap<UUID, Message> playermessage = new HashMap<UUID, Message>();
-	private static MoY plugin;
+	private MoY plugin;
 
-	@SuppressWarnings("static-access")
 	public InfoBar(MoY instance) {
 		this.plugin = instance;
 	}
@@ -71,6 +70,10 @@ public class InfoBar {
 		case 5:
 			lvl = Playerstats.fishing.get(player);
 			prog = Playerstats.fishingprog.get(player);
+			break;
+		case 6:
+			lvl = Playerstats.level.get(player);
+			prog = Playerstats.levelprog.get(player);
 			break;
 		default:
 			prog = 0;
@@ -141,6 +144,10 @@ public class InfoBar {
 			message = ChatColor.GRAY
 					+ "Fishing Succesful, progress increased: "
 					+ ChatColor.GREEN + prog + "/" + lvl * 10;
+			break;
+		case 6:
+			message = ChatColor.GRAY + "Level Progress: " + ChatColor.GREEN
+					+ prog + "/" + lvl * 15;
 			break;
 		default:
 			message = "";

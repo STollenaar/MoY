@@ -22,7 +22,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.inventory.ItemStack;
 
-import MoY.tollenaar.stephen.CEvents.MiningProgEvent;
+import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import ru.tehkode.permissions.PermissionUser;
@@ -67,7 +67,7 @@ public class Skillimprovement implements Listener {
 				int chance = (int) c.keySet().toArray()[0];
 				ItemStack item = c.get(chance);
 				player.getWorld().dropItem(player.getLocation(), item);
-				MiningProgEvent e = new MiningProgEvent(player.getUniqueId(),
+				ProgEvent e = new ProgEvent(player.getUniqueId(),
 						5, chance);
 				
 				Bukkit.getServer().getPluginManager().callEvent(e);
@@ -111,14 +111,14 @@ public class Skillimprovement implements Listener {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
 
-		MiningProgEvent e;
+		ProgEvent e;
 		if (SkillLvls.GetSkill(block).getLvl() <= Playerstats.woodcutting
 				.get(player.getUniqueId())) {
-			e = new MiningProgEvent(player.getUniqueId(), SkillLvls.GetSkill(
+			e = new ProgEvent(player.getUniqueId(), SkillLvls.GetSkill(
 					block).getTree(), block, 1);
 		} else {
 			event.setCancelled(true);
-			e = new MiningProgEvent(player.getUniqueId(), SkillLvls.GetSkill(
+			e = new ProgEvent(player.getUniqueId(), SkillLvls.GetSkill(
 					block).getTree(), block, -1);
 
 		}
@@ -129,14 +129,14 @@ public class Skillimprovement implements Listener {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
 
-		MiningProgEvent e;
+		ProgEvent e;
 		if (SkillLvls.GetSkill(block).getLvl() <= Playerstats.mining.get(player
 				.getUniqueId())) {
-			e = new MiningProgEvent(player.getUniqueId(), block.getType(),
+			e = new ProgEvent(player.getUniqueId(), block.getType(),
 					block, 2);
 		} else {
 			event.setCancelled(true);
-			e = new MiningProgEvent(player.getUniqueId(), block.getType(),
+			e = new ProgEvent(player.getUniqueId(), block.getType(),
 					block, -2);
 		}
 		Bukkit.getServer().getPluginManager().callEvent(e);

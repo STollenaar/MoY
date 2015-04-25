@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -593,17 +594,17 @@ public class Quest {
 
 	public void removekill(int number) {
 		killquests.remove(number);
-		plugin.database.deletekill(number);
+		plugin.fw.deletequest("kill", number);
 	}
 
 	public void removeharvest(int number) {
 		harvestquests.remove(number);
-		plugin.database.deleteharvest(number);
+		plugin.fw.deletequest("harvest", number);
 	}
 
 	public void removetalkto(int number) {
 		talktoquests.remove(number);
-		plugin.database.deletetalkto(number);
+		plugin.fw.deletequest("talkto", number);
 	}
 
 	public void removewarp(int number) {
@@ -732,7 +733,7 @@ public class Quest {
 		return harborlocation.get(number);
 	}
 
-	public void loadkill(int number, String name, String reward, String delay,
+	public void loadkill(int number, String name, List<String> reward, String delay,
 			int minlvl, String message, String prereq, int count, String monster) {
 		QuestKill kill = new QuestKill(number);
 
@@ -748,7 +749,7 @@ public class Quest {
 		killquests.put(number, kill);
 	}
 
-	public void loadharvest(int number, String name, String reward,
+	public void loadharvest(int number, String name, List<String> reward,
 			String delay, int minlvl, String message, String prereq, int count,
 			String itemid) {
 		QuestHarvest kill = new QuestHarvest(number, plugin);
@@ -766,7 +767,7 @@ public class Quest {
 	}
 
 	public void loadtalkto(int number, String name, int id, String message,
-			String delay, int minlvl, String prereq, String reward) {
+			String delay, int minlvl, String prereq, List<String> reward) {
 		QuestTalkto temp = new QuestTalkto(number);
 		temp.setName(name);
 		temp.setNpcid(id);

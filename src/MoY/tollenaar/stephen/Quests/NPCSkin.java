@@ -11,7 +11,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-
+@SuppressWarnings("unused")
 public class NPCSkin {
 	private MoY plugin;
 

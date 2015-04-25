@@ -24,8 +24,6 @@ import org.bukkit.block.Block;
 import org.fusesource.jansi.Ansi;
 
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
-import MoY.tollenaar.stephen.Quests.QuestHarvest;
-import MoY.tollenaar.stephen.Quests.QuestKill;
 import MoY.tollenaar.stephen.Quests.QuestTalkto;
 import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 import MoY.tollenaar.stephen.Quests.Warps;
@@ -131,43 +129,7 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY, "
 							+ "questnumber TEXT, " + "timereward TEXT);");
 
-			// quest kill
-			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_QuestKill ("
-							+ "id INTEGER PRIMARY KEY, "
-							+ "title TEXT NOT NULL, "
-							+ "monster TEXT NOT NULL, "
-							+ "amount INTEGER NOT NULL, "
-							+ "reward TEXT NOT NULL, "
-							+ "minlvl INTEGER NOT NULL, "
-							+ "repeattime TEXT NOT NULL, "
-							+ "message TEXT NOT NULL, "
-							+ "prereq TEXT NOT NULL);");
-
-			// quest harvest
-			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_QuestHarvest ("
-							+ "id INTEGER PRIMARY KEY, "
-							+ "title TEXT NOT NULL, "
-							+ "item TEXT NOT NULL, "
-							+ "amount INTEGER NOT NULL, "
-							+ "reward TEXT NOT NULL, "
-							+ "minlvl TEXT NOT NULL, "
-							+ "repeattime TEXT NOT NULL,"
-							+ "message TEXT NOT NULL, "
-							+ "prereq TEXT NOT NULL);");
-
-			// quest talkto
-			statement
-					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_QuestTalkto ("
-							+ "id INTEGER PRIMARY KEY, "
-							+ "title TEXT NOT NULL, "
-							+ "personid INTEGER NOT NULL, "
-							+ "reward TEXT NOT NULL, "
-							+ "minlvl INTEGER NOT NULL, "
-							+ "repeattime TEXT NOT NULL, "
-							+ "message TEXT NOT NULL, "
-							+ "prereq TEXT NOT NULL);");
+		
 			// warps
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Warp ("
 					+ "id INTEGER PRIMARY KEY, " + "title TEXT NOT NULL, "
@@ -1178,218 +1140,7 @@ public class DbStuff {
 		}
 	}
 
-	public void savekillquest() {
-
-		String insert = "INSERT INTO Mist_QuestKill (" + "`id`," + "`title`,"
-				+ "`monster`," + "`amount`," + "`reward`," + "`minlvl`,"
-				+ "`repeattime`," + "`message`," + "`prereq`) VALUES"
-				+ "(?,?,?,?,?,?,?,?,?);";
-
-		String update = "UPDATE Mist_QuestKill SET"
-				+ "`title`=?, `monster`=?, `amount`=?, `reward`=?, `minlvl`=?,"
-				+ "`repeattime`=?, `message`=?, `prereq`=? WHERE `id`=?;";
-
-		String test = "SELECT * FROM Mist_QuestKill WHERE `id`=?;";
-
-		for (int quests : questers.AllKillId()) {
-			QuestKill kill = questers.returnkill(quests);
-			PreparedStatement pst = null;
-			try {
-				pst = con.prepareStatement(test);
-				pst.setInt(1, kill.getQuestnumber());
-				ResultSet rs = pst.executeQuery();
-				if (rs.next() == false) {
-					pst.close();
-					pst = con.prepareStatement(insert);
-					pst.setInt(1, kill.getQuestnumber());
-					pst.setString(2, kill.getName());
-					pst.setString(3, kill.getMonster());
-					pst.setInt(4, kill.getCount());
-					pst.setString(5, kill.getReward());
-					pst.setInt(6, kill.getMinlvl());
-					pst.setString(7, kill.getDelay());
-					pst.setString(8, kill.getMessage());
-					pst.setString(9, kill.getPrereq());
-
-					pst.execute();
-				} else {
-					pst.close();
-					pst = con.prepareStatement(update);
-
-					pst.setString(1, kill.getName());
-					pst.setString(2, kill.getMonster());
-					pst.setInt(3, kill.getCount());
-					pst.setString(4, kill.getReward());
-					pst.setInt(5, kill.getMinlvl());
-					pst.setString(6, kill.getDelay());
-					pst.setString(7, kill.getMessage());
-					pst.setString(8, kill.getPrereq());
-					pst.setInt(9, quests);
-					pst.execute();
-				}
-			} catch (SQLException e) {
-				this.plugin.getLogger().severe(e.getMessage());
-				plugin.getLogger().info(
-						"There was a error during the savings of the data to the database: "
-								+ e.getMessage());
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			} finally {
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			}
-		}
-	}
-
-	public void saveharvestquest() {
-		String insert = "INSERT INTO Mist_QuestHarvest (" + "`id`,"
-				+ "`title`," + "`item`," + "`amount`," + "`reward`,"
-				+ "`minlvl`," + "`repeattime`," + "`message`,"
-				+ "`prereq`) VALUES" + "(?,?,?,?,?,?,?,?,?);";
-
-		String update = "UPDATE Mist_QuestHarvest SET"
-				+ "`title`=?, `item`=?, `amount`=?, `reward`=?, `minlvl`=?,"
-				+ "`repeattime`=?, `message`=?, `prereq`=? WHERE `id`=?;";
-
-		String test = "SELECT * FROM Mist_QuestHarvest WHERE `id`=?;";
-		for (int quests : questers.AllHarvestId()) {
-			QuestHarvest harvest = questers.returnharvest(quests);
-			PreparedStatement pst = null;
-			try {
-				pst = con.prepareStatement(test);
-				pst.setInt(1, harvest.getQuestnumber());
-				ResultSet rs = pst.executeQuery();
-				if (rs.next() == false) {
-					pst.close();
-					pst = con.prepareStatement(insert);
-					pst.setInt(1, harvest.getQuestnumber());
-					pst.setString(2, harvest.getName());
-					pst.setString(3, harvest.getItemId());
-					pst.setInt(4, harvest.getCount());
-					pst.setString(5, harvest.getReward());
-					pst.setInt(6, harvest.getMinlvl());
-					pst.setString(7, harvest.getDelay());
-					pst.setString(8, harvest.getMessage());
-					pst.setString(9, harvest.getPrereq());
-
-					pst.execute();
-				} else {
-					pst.close();
-					pst = con.prepareStatement(update);
-
-					pst.setString(1, harvest.getName());
-					pst.setString(2, harvest.getItemId());
-					pst.setInt(3, harvest.getCount());
-					pst.setString(4, harvest.getReward());
-					pst.setInt(5, harvest.getMinlvl());
-					pst.setString(6, harvest.getDelay());
-					pst.setString(7, harvest.getMessage());
-					pst.setString(8, harvest.getPrereq());
-					pst.setInt(9, harvest.getQuestnumber());
-					pst.execute();
-				}
-			} catch (SQLException e) {
-				this.plugin.getLogger().severe(e.getMessage());
-				plugin.getLogger().info(
-						"There was a error during the savings of the data to the database: "
-								+ e.getMessage());
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			} finally {
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			}
-		}
-	}
-
-	public void savetalktoquest() {
-		String insert = "INSERT INTO Mist_QuestTalkto (" + "`id`," + "`title`,"
-				+ "`personid`," + "`reward`," + "`minlvl`," + "`repeattime`,"
-				+ "`message`," + "`prereq`) VALUES" + "(?,?,?,?,?,?,?,?);";
-
-		String update = "UPDATE Mist_QuestTalkto SET"
-				+ "`title`=?, `personid`=?,`reward`=?, `minlvl`=?,"
-				+ "`repeattime`=?, `message`=?, `prereq`=? WHERE `id`=?;";
-
-		String test = "SELECT * FROM Mist_QuestTalkto WHERE `id`=?;";
-		for (int quests : questers.AllTalkToId()) {
-			QuestTalkto kill = questers.returntalkto(quests);
-			PreparedStatement pst = null;
-			try {
-				pst = con.prepareStatement(test);
-				pst.setInt(1, kill.getQuestnumber());
-				ResultSet rs = pst.executeQuery();
-				if (rs.next() == false) {
-					pst.close();
-					pst = con.prepareStatement(insert);
-					pst.setInt(1, kill.getQuestnumber());
-					pst.setString(2, kill.getName());
-					pst.setInt(3, kill.getNpcid());
-					pst.setString(4, kill.getReward());
-					pst.setInt(5, kill.getMinlvl());
-					pst.setString(6, kill.getDelay());
-					pst.setString(7, kill.getMessage());
-					pst.setString(8, kill.getPrereq());
-
-					pst.execute();
-				} else {
-					pst.close();
-					pst = con.prepareStatement(update);
-
-					pst.setString(1, kill.getName());
-					pst.setInt(2, kill.getNpcid());
-					pst.setString(3, kill.getReward());
-					pst.setInt(4, kill.getMinlvl());
-					pst.setString(5, kill.getDelay());
-					pst.setString(6, kill.getMessage());
-					pst.setString(7, kill.getPrereq());
-					pst.setInt(8, kill.getQuestnumber());
-					pst.execute();
-				}
-			} catch (SQLException e) {
-				this.plugin.getLogger().severe(e.getMessage());
-				plugin.getLogger().info(
-						"There was a error during the savings of the data to the database: "
-								+ e.getMessage());
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			} finally {
-				try {
-					if (pst != null) {
-						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			}
-		}
-	}
-
+	
 	public void savewarp() {
 		String insert = "INSERT INTO Mist_Warp (" + "`id`," + "`title`,"
 				+ "`startloc`," + "`type`," + "`costs`) VALUES"
@@ -1945,9 +1696,6 @@ public class DbStuff {
 		savecompletekill();
 		savecompleteharvest();
 		savecompletetalkto();
-		savekillquest();
-		saveharvestquest();
-		savetalktoquest();
 		savewarp();
 		saveeventboat();
 		saveeventcart();
@@ -2274,125 +2022,7 @@ public class DbStuff {
 		}
 	}
 
-	public void loadkill() {
-		String loading = "SELECT * FROM Mist_QuestKill;";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(loading);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String title = rs.getString("title");
-				String monster = rs.getString("monster");
-				int count = rs.getInt("amount");
-				String reward = rs.getString("reward");
-				int minlvl = rs.getInt("minlvl");
-				String delay = rs.getString("repeattime");
-				String message = rs.getString("message");
-				String prereq = rs.getString("prereq");
-				questers.loadkill(id, title, reward, delay, minlvl, message,
-						prereq, count, monster);
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
-
-	public void loadharvest() {
-		String loading = "SELECT * FROM Mist_QuestHarvest;";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(loading);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String title = rs.getString("title");
-				String itemid = rs.getString("item");
-				int count = rs.getInt("amount");
-				String reward = rs.getString("reward");
-				int minlvl = rs.getInt("minlvl");
-				String delay = rs.getString("repeattime");
-				String message = rs.getString("message");
-				String prereq = rs.getString("prereq");
-
-				questers.loadharvest(id, title, reward, delay, minlvl, message,
-						prereq, count, itemid);
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
-
-	public void loadtalkto() {
-		String loading = "SELECT * FROM Mist_QuestTalkto;";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(loading);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String title = rs.getString("title");
-				int personid = rs.getInt("personid");
-				String reward = rs.getString("reward");
-				int minlvl = rs.getInt("minlvl");
-				String delay = rs.getString("repeattime");
-				String message = rs.getString("message");
-				String prereq = rs.getString("prereq");
-				questers.loadtalkto(id, title, personid, message, delay,
-						minlvl, prereq, reward);
-
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
+	
 
 	public void loadnpc() {
 		String loading = "SELECT * FROM Mist_NPCData;";
@@ -2878,9 +2508,6 @@ public class DbStuff {
 		loadeventboat();
 		loadeventcart();
 		loadeventdragon();
-		loadkill();
-		loadharvest();
-		loadtalkto();
 		loadwarp();
 
 		loadnpc();

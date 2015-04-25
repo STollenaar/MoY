@@ -239,7 +239,8 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName().equals("Reward")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						player.sendMessage("type the command withouth the /. use player for the players who will use it");
+						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
+								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add("killquest");
 						temp.add(npcuuid.toString());
@@ -374,7 +375,8 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName().equals("Reward")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						player.sendMessage("type the command withouth the /. use player for the players who will use it");
+						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
+								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add("harvestquest");
 						temp.add(npcuuid.toString());
@@ -495,7 +497,8 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName().equals("Reward")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						player.sendMessage("type the command without the /");
+						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
+								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add("talktoquest");
 						temp.add(npcuuid.toString());
@@ -747,18 +750,18 @@ public class QuestInvClick implements Listener {
 
 				Player player = (Player) event.getWhoClicked();
 				ItemStack item = event.getCurrentItem();
-				if (item.getType() == Material.BEDROCK) {
+				if (event.getSlot() == clickedinv.getSize()-1) {
 					event.setCancelled(true);
 					return;
 				}
 				int number = Integer.parseInt(item.getItemMeta().getLore()
-						.get(item.getItemMeta().getLore().size() - 1));
+						.get(item.getItemMeta().getLore().size() - 1).replace("§", ""));
 				String message = GetMessage(item.getType(), number);
 				String quetstype = GetTypeQuest(item.getType());
 
 				UUID npcuuid = UUID.fromString(clickedinv
 						.getItem(clickedinv.getSize() - 1).getItemMeta()
-						.getLore().get(0));
+						.getLore().get(0).replaceAll("§", ""));
 				/**
 				 * this is for adding new acitve quests
 				 */
@@ -793,7 +796,7 @@ public class QuestInvClick implements Listener {
 					}
 				} else {
 					int Number2 = Integer.parseInt(item.getItemMeta().getLore()
-							.get(item.getItemMeta().getLore().size() - 2));
+							.get(item.getItemMeta().getLore().size() - 2).replace("§", ""));
 					player.closeInventory();
 					tr.boardcheck(npcuuid, number, player,
 							questers.returnwarp(Number2).getStartloc());

@@ -8,20 +8,21 @@ import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-public final class MiningProgEvent extends Event {
+public final class ProgEvent extends Event {
 
 	private static final HandlerList handlers = new HandlerList();
 
 	private UUID player;
 	private int xp;
 	private Block block;
+	private boolean q = false;
 	/**
 	 * type 1 = wood 2 = mining
 	 * 
 	 */
 	private int type;
 
-	public MiningProgEvent(UUID player, TreeSpecies wood, Block block, int type) {
+	public ProgEvent(UUID player, TreeSpecies wood, Block block, int type) {
 		this.player = player;
 		this.block = block;
 		this.type = type;
@@ -50,7 +51,7 @@ public final class MiningProgEvent extends Event {
 		}
 	}
 
-	public MiningProgEvent(UUID player, Material ore, Block block, int type) {
+	public ProgEvent(UUID player, Material ore, Block block, int type) {
 		this.player = player;
 		this.block = block;
 		this.type = type;
@@ -71,7 +72,7 @@ public final class MiningProgEvent extends Event {
 		}
 	}
 
-	public MiningProgEvent(UUID player, int type, int chance) {
+	public ProgEvent(UUID player, int type, int chance) {
 		this.player = player;
 		this.type = type;
 		switch (chance) {
@@ -91,6 +92,14 @@ public final class MiningProgEvent extends Event {
 			this.xp = 8;
 			break;
 		}
+
+	}
+
+	public ProgEvent( UUID player,int type, int xp, boolean q) {
+		this.player = player;
+		this.type = type;
+		this.xp = xp;
+		this.q = q;
 	}
 
 	public UUID getPlayer() {
@@ -115,6 +124,10 @@ public final class MiningProgEvent extends Event {
 
 	public int getType() {
 		return type;
+	}
+	
+	public boolean getQ(){
+		return q;
 	}
 
 }

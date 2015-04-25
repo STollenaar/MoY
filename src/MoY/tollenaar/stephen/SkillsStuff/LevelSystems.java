@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Monster;
@@ -19,17 +18,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
-import MoY.tollenaar.stephen.MistsOfYsir.Filewriters;
+import MoY.tollenaar.stephen.CEvents.ProgEvent;
+import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.MistsOfYsir.Party;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
-import com.gmail.filoghost.holographicdisplays.api.VisibilityManager;
-
 public class LevelSystems implements Listener {
-	private MoY plugin;
 	private Filewriters fw;
 	private Party party;
 
@@ -39,12 +34,11 @@ public class LevelSystems implements Listener {
 				|| event.getEntity() instanceof Slime
 				|| event.getEntity() instanceof Ghast
 				|| (event.getEntity() instanceof Projectile && ((Projectile) event
-						.getEntity()).getShooter() instanceof Monster)) {
+						.getEntity()).getShooter() instanceof Player)) {
 			Player player = event.getEntity().getKiller();
 			if (player != null) {
 
 				int playerlvl = Playerstats.level.get(player.getUniqueId());
-				int lvlprog = Playerstats.levelprog.get(player.getUniqueId());
 				int xp;
 				if (event.getEntity() instanceof Skeleton
 						|| event.getEntity() instanceof Zombie) {
@@ -54,45 +48,10 @@ public class LevelSystems implements Listener {
 				}
 
 				// normal xp system
-				if (lvlprog + xp < playerlvl * 15) {
-					lvlprog += xp;
-					Playerstats.levelprog.put(player.getUniqueId(), lvlprog);
-				} else if (lvlprog + xp == playerlvl + 15) {
-					if (playerlvl + 1 <= 140) {
-						lvlprog = 0;
-						playerlvl++;
-						Playerstats.levelprog.put(player.getUniqueId(), 0);
-						Playerstats.level.put(player.getUniqueId(), playerlvl);
-					}
-				} else {
-					if (playerlvl + 1 <= 140) {
-						lvlprog = lvlprog + xp - playerlvl * 15;
-						playerlvl++;
-						Playerstats.levelprog
-								.put(player.getUniqueId(), lvlprog);
-						Playerstats.level.put(player.getUniqueId(), playerlvl);
-					}
-				}
+				
 				partyrewards(player, xp);
-					Location l = event.getEntity().getLocation();
-					l.setY(l.getY()+2);
-					final Hologram holo = HologramsAPI.createHologram(plugin, l);
-					holo.appendTextLine(ChatColor.RED + "Level Progress");
-					holo.appendTextLine( ChatColor.GOLD + "Gained +" + xp
-							+ "xp");
-					holo.appendTextLine(ChatColor.GRAY + "[Progress "
-							+ Playerstats.levelprog.get(player.getUniqueId()) + "/"
-							+ Playerstats.levelprog.get(player.getUniqueId()) * 15
-							+ "]");
-					VisibilityManager vm = holo.getVisibilityManager();
-					vm.showTo(player);
-					
-			
-					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
-						public void run(){
-							holo.delete();
-						}
-					}, 2*20L);
+					ProgEvent e = new ProgEvent(player.getUniqueId(), 6, xp, false);
+					Bukkit.getServer().getPluginManager().callEvent(e);
 			}
 		}
 	}
@@ -199,7 +158,6 @@ public class LevelSystems implements Listener {
 	}
 
 	public LevelSystems(MoY instance) {
-		this.plugin = instance;
 		this.fw = instance.fw;
 		this.party = instance.party;
 	}

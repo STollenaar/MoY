@@ -61,7 +61,6 @@ public Commandexe(MoY instance){
 			//QNPC HANDLER
 		
 		 if(cmd.getName().equalsIgnoreCase("qnpc")){
-			 System.out.println(user.has("Ysir.npcadjuster"));
 		 if(user.has("Ysir.npcadjuster")){
 			if(args.length >= 1){
 				if(args[0].equalsIgnoreCase("create")){
@@ -153,9 +152,6 @@ public Commandexe(MoY instance){
 			}
 		 //PARTY HANDLER
 		else if(cmd.getName().equalsIgnoreCase("party")){
-//			System.out.println(Thread.currentThread().getStackTrace()[1] + " leaders " + party.Partyleaders);
-//			System.out.println(Thread.currentThread().getStackTrace()[1] + " with members " + party.Partyswithmembers);
-//			System.out.println(Thread.currentThread().getStackTrace()[1] + " members " + party.Partymembers);
 			
 			if(args.length >= 1 && args.length <= 2 ){
 			if((args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("kick") || args[0].equalsIgnoreCase("invite") || args[0].equalsIgnoreCase("setleader")) && args.length == 1){

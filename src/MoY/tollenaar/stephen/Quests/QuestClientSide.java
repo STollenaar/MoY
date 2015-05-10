@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import net.citizensnpcs.api.npc.NPC;
@@ -60,19 +61,20 @@ public class QuestClientSide {
 				.createInventory(null, rowcount, "Aviable Quests");
 		if (questers.killquests.get(npcuuid) != null) {
 			for (Integer i : questers.killquests.get(npcuuid)) {
-				if (i != null) {
 
 					QuestKill kill = questers.returnkill(i);
 					boolean pass = false;
 					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (!check(kill.getPrereq().split("=")[0],
+						if (check(kill.getPrereq().split("=")[0],
 								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname)&& check("kill", i, player, npcname)) {
+										.trim()), player, npcname, true)
+								&& check("kill", i, player, npcname, false)) {
 							pass = true;
 						}
-					}  else {
-						if(check("kill", i, player, npcname)){
-						pass = true;
+					} else {
+						System.out.println("first in line");
+						if (check("kill", i, player, npcname, false)) {
+							pass = true;
 						}
 					}
 					if (pass) {
@@ -90,22 +92,22 @@ public class QuestClientSide {
 						}
 					}
 				}
-			}
 		}
 		if (questers.harvestquests.get(npcuuid) != null) {
 			for (Integer i : questers.harvestquests.get(npcuuid)) {
-				if (i != null) {
 					QuestHarvest kill = questers.returnharvest(i);
 					boolean pass = false;
 					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (!check(kill.getPrereq().split("=")[0],
+						if (check(kill.getPrereq().split("=")[0],
 								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname)&& check("harvest", i, player, npcname)) {
+										.trim()), player, npcname, true)
+								&& check("harvest", i, player, npcname, false)) {
 							pass = true;
 						}
 					} else {
-						if(check("harvest", i, player, npcname)){
-						pass = true;
+						System.out.println("first in line");
+						if (check("harvest", i, player, npcname, false)) {
+							pass = true;
 						}
 					}
 					if (pass) {
@@ -122,23 +124,23 @@ public class QuestClientSide {
 							inv.addItem(harvestquest);
 						}
 					}
-				}
 			}
 		}
 		if (questers.talktoquests.get(npcuuid) != null) {
 			for (Integer i : questers.talktoquests.get(npcuuid)) {
-				if (i != null) {
 					QuestTalkto kill = questers.returntalkto(i);
 					boolean pass = false;
 					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (!check(kill.getPrereq().split("=")[0],
+						if (check(kill.getPrereq().split("=")[0],
 								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname)&& check("talkto", i, player, npcname)) {
+										.trim()), player, npcname, true)
+								&& check("talkto", i, player, npcname, false)) {
 							pass = true;
 						}
-					}  else {
-						if(check("talkto", i, player, npcname)){
-						pass = true;
+					} else {
+						System.out.println("first in line");
+						if (check("talkto", i, player, npcname, false)) {
+							pass = true;
 						}
 					}
 					if (pass) {
@@ -147,14 +149,12 @@ public class QuestClientSide {
 							ItemMeta meta = talktoquest.getItemMeta();
 							meta.setDisplayName(kill.getName());
 							ArrayList<String> lore = new ArrayList<String>();
-							lore.add(kill.getMessage());
 							lore.add("§"
 									+ Integer.toString(kill.getQuestnumber()));
 							meta.setLore(lore);
 							talktoquest.setItemMeta(meta);
 							inv.addItem(talktoquest);
 						}
-					}
 				}
 			}
 		}
@@ -238,10 +238,10 @@ public class QuestClientSide {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	public boolean check(String type, int number, Player player, String npcname) {
+	public boolean check(String type, int number, Player player,
+			String npcname, boolean ispreq) {
 		UUID playeruuid = player.getUniqueId();
-		boolean pass = true;
+		boolean pass = rewardcheck(type, number, player, npcname);
 
 		if (Playerstats.activequests.get(playeruuid) != null) {
 			if (Playerstats.activequests.get(playeruuid).get(type) != null) {
@@ -251,6 +251,32 @@ public class QuestClientSide {
 				}
 			}
 		}
+
+		if (Playerstats.rewardedlist.get(playeruuid) != null) {
+			if (Playerstats.rewardedlist.get(playeruuid).get(type) != null) {
+				if (Playerstats.rewardedlist.get(playeruuid).get(type)
+						.get(number) == null
+						&& ispreq) {
+					pass = false;
+				} else if (!ispreq
+						&& Playerstats.rewardedlist.get(playeruuid).get(type)
+								.get(number) != null) {
+					pass = false;
+				}
+			} else if (ispreq) {
+				pass = false;
+			}
+		} else if (ispreq) {
+			pass = false;
+		}
+		return pass;
+	}
+
+	@SuppressWarnings("deprecation")
+	private boolean rewardcheck(String type, int number, Player player,
+			String npcname) {
+		UUID playeruuid = player.getUniqueId();
+		boolean pass = true;
 		/**
 		 * add the rewarded thingy
 		 */
@@ -258,59 +284,17 @@ public class QuestClientSide {
 			if (Playerstats.completedquests.get(playeruuid).get(type) != null) {
 				if (Playerstats.completedquests.get(playeruuid).get(type)
 						.contains(number)) {
-					for (int i = 0; i < Playerstats.completedquests
-							.get(playeruuid).get(type).size(); i++) {
-						if (Playerstats.completedquests.get(playeruuid)
-								.get(type).get(i) == number) {
+					for (int i : Playerstats.completedquests.get(playeruuid)
+							.get(type)) {
+						
+						if (i == number) {
+							List<String> reward = null;
+							// killquest
 							if (type.equals("kill")) {
-
-								System.out.println(Ansi.ansi().fg(
-										Ansi.Color.RED)
-										+ "QUEST COMPLETE"
-										+ Ansi.ansi().fg(Ansi.Color.WHITE));
-								for (String in : questers.returnkill(number)
-										.getReward()) {
-									String reward = in.replace("player", Bukkit
-											.getPlayer(playeruuid).getName());
-									reward = reward.replaceFirst(" ", "");
-									Bukkit.dispatchCommand(
-											Bukkit.getConsoleSender(), reward);
-								}
-								Playerstats.completedquests.get(playeruuid)
-										.get(type).remove(i);
-
-								player.sendMessage(ChatColor.DARK_PURPLE + "["
-										+ ChatColor.GOLD + npcname
-										+ ChatColor.DARK_PURPLE + "] "
-										+ ChatColor.AQUA + "Enjoy your reward.");
-
-								if (Playerstats.rewardedlist.get(playeruuid) != null) {
-									if (Playerstats.rewardedlist
-											.get(playeruuid).get(type) != null) {
-										Playerstats.rewardedlist
-												.get(playeruuid)
-												.get(type)
-												.put(number,
-														System.currentTimeMillis());
-									} else {
-										HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-										temp.put(number,
-												System.currentTimeMillis());
-										Playerstats.rewardedlist
-												.get(playeruuid)
-												.put(type, temp);
-									}
-								} else {
-									HashMap<String, HashMap<Integer, Long>> total = new HashMap<String, HashMap<Integer, Long>>();
-									HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-									temp.put(number, System.currentTimeMillis());
-									total.put(type, temp);
-									Playerstats.rewardedlist.put(playeruuid,
-											total);
-								}
-
+								reward = questers.returnkill(number)
+										.getReward();
 							}
-
+							// harvestquest
 							else if (type.equals("harvest")) {
 								boolean passing = false;
 								int needed = 0;
@@ -407,55 +391,8 @@ public class QuestClientSide {
 											}
 										}
 									}
-									System.out.println(Ansi.ansi().fg(
-											Ansi.Color.RED)
-											+ "QUEST COMPLETE"
-											+ Ansi.ansi().fg(Ansi.Color.WHITE));
-									for (String in : questers.returnharvest(
-											number).getReward()) {
-										String reward = in.replace("player",
-												Bukkit.getPlayer(playeruuid)
-														.getName());
-										reward = reward.replaceFirst(" ", "");
-										Bukkit.dispatchCommand(
-												Bukkit.getConsoleSender(),
-												reward);
-									}
-
-									player.sendMessage(ChatColor.DARK_PURPLE
-											+ "[" + ChatColor.GOLD + npcname
-											+ ChatColor.DARK_PURPLE + "] "
-											+ ChatColor.AQUA
-											+ "Enjoy your reward.");
-
-									Playerstats.completedquests.get(playeruuid)
-											.get(type).remove(i);
-
-									if (Playerstats.rewardedlist
-											.get(playeruuid) != null) {
-										if (Playerstats.rewardedlist.get(
-												playeruuid).get(type) != null) {
-											Playerstats.rewardedlist
-													.get(playeruuid)
-													.get(type)
-													.put(number,
-															System.currentTimeMillis());
-										} else {
-											HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-											temp.put(number,
-													System.currentTimeMillis());
-											Playerstats.rewardedlist.get(
-													playeruuid).put(type, temp);
-										}
-									} else {
-										HashMap<String, HashMap<Integer, Long>> total = new HashMap<String, HashMap<Integer, Long>>();
-										HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-										temp.put(number,
-												System.currentTimeMillis());
-										total.put(type, temp);
-										Playerstats.rewardedlist.put(
-												playeruuid, total);
-									}
+									reward = questers.returnharvest(number)
+											.getReward();
 
 								} else {
 									player.sendMessage(ChatColor.DARK_PURPLE
@@ -472,68 +409,53 @@ public class QuestClientSide {
 											+ ". Come back with the right amount for your reward");
 									pass = false;
 								}
+								// talktoquest
 							} else {
-								System.out.println(Ansi.ansi().fg(
-										Ansi.Color.RED)
-										+ "QUEST COMPLETE"
-										+ Ansi.ansi().fg(Ansi.Color.WHITE));
-								for (String in : questers.returntalkto(number)
-										.getReward()) {
-									String reward = in.replace("player", Bukkit
-											.getPlayer(playeruuid).getName());
-									reward = reward.replaceFirst(" ", "");
+								reward = questers.returntalkto(number)
+										.getReward();
+
+							}
+
+							// giving the reward
+							System.out.println(Ansi.ansi().fg(Ansi.Color.RED)
+									+ "QUEST COMPLETE"
+									+ Ansi.ansi().fg(Ansi.Color.WHITE));
+							if (reward != null && !reward.contains("unknown")) {
+								for (String in : reward) {
+									String r = in.replace("player",
+											player.getName());
 									Bukkit.dispatchCommand(
-											Bukkit.getConsoleSender(), reward);
+											Bukkit.getConsoleSender(), r);
 								}
-								player.sendMessage(ChatColor.DARK_PURPLE + "["
-										+ ChatColor.GOLD + npcname
-										+ ChatColor.DARK_PURPLE + "] "
-										+ ChatColor.AQUA + "Enjoy your reward.");
+							}
+							Playerstats.completedquests.get(playeruuid)
+									.get(type).remove(i);
 
-								Playerstats.completedquests.get(playeruuid)
-										.get(type).remove(i);
-
-								if (Playerstats.rewardedlist.get(playeruuid) != null) {
-									if (Playerstats.rewardedlist
-											.get(playeruuid).get(type) != null) {
-										Playerstats.rewardedlist
-												.get(playeruuid)
-												.get(type)
-												.put(number,
-														System.currentTimeMillis());
-									} else {
-										HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-										temp.put(number,
-												System.currentTimeMillis());
-										Playerstats.rewardedlist
-												.get(playeruuid)
-												.put(type, temp);
-									}
+							if (Playerstats.rewardedlist.get(playeruuid) != null) {
+								if (Playerstats.rewardedlist.get(playeruuid)
+										.get(type) != null) {
+									Playerstats.rewardedlist
+											.get(playeruuid)
+											.get(type)
+											.put(number,
+													System.currentTimeMillis());
 								} else {
-									HashMap<String, HashMap<Integer, Long>> total = new HashMap<String, HashMap<Integer, Long>>();
 									HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
 									temp.put(number, System.currentTimeMillis());
-									total.put(type, temp);
-									Playerstats.rewardedlist.put(playeruuid,
-											total);
+									Playerstats.rewardedlist.get(playeruuid)
+											.put(type, temp);
 								}
+							} else {
+								HashMap<String, HashMap<Integer, Long>> total = new HashMap<String, HashMap<Integer, Long>>();
+								HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
+								temp.put(number, System.currentTimeMillis());
+								total.put(type, temp);
+								Playerstats.rewardedlist.put(playeruuid, total);
 							}
 						}
 					}
 				}
 			}
-		}
-		if (Playerstats.rewardedlist.get(playeruuid) != null) {
-			if (Playerstats.rewardedlist.get(playeruuid).get(type) != null) {
-				if (Playerstats.rewardedlist.get(playeruuid).get(type)
-						.get(number) != null) {
-					pass = false;
-				}
-			} else {
-				pass = false;
-			}
-		} else {
-			pass = false;
 		}
 		return pass;
 	}

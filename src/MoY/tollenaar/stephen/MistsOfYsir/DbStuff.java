@@ -129,7 +129,6 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY, "
 							+ "questnumber TEXT, " + "timereward TEXT);");
 
-		
 			// warps
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Warp ("
 					+ "id INTEGER PRIMARY KEY, " + "title TEXT NOT NULL, "
@@ -989,7 +988,7 @@ public class DbStuff {
 						}
 						pst.setString(1, questnumb);
 						pst.setString(2, time);
-						pst.setString(4, player.toString());
+						pst.setString(3, player.toString());
 						pst.execute();
 					}
 				} catch (SQLException e) {
@@ -1079,7 +1078,6 @@ public class DbStuff {
 
 						String questnumb = null;
 						String time = null;
-						String current = null;
 						for (Integer quest : quests) {
 							if (questnumb != null) {
 								questnumb = questnumb + quest + "_";
@@ -1088,30 +1086,18 @@ public class DbStuff {
 							}
 							if (time == null) {
 								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("talkto").get(quest))
-										+ "_";
-								current = Long
-										.toString(Playerstats.rewardedlist
-												.get(player).get("talkto")
-												.get(quest))
-										+ "_";
+										.get(player).get("talkto").get(quest));
 							} else {
 								time = time
 										+ Long.toString(Playerstats.rewardedlist
 												.get(player).get("talkto")
 												.get(quest)) + "_";
-								current = Long
-										.toString(Playerstats.rewardedlist
-												.get(player).get("talkto")
-												.get(quest))
-										+ "_";
 
 							}
 						}
 						pst.setString(1, questnumb);
 						pst.setString(2, time);
-						pst.setString(3, current);
-						pst.setString(4, player.toString());
+						pst.setString(3, player.toString());
 						pst.execute();
 					}
 				} catch (SQLException e) {
@@ -1140,7 +1126,6 @@ public class DbStuff {
 		}
 	}
 
-	
 	public void savewarp() {
 		String insert = "INSERT INTO Mist_Warp (" + "`id`," + "`title`,"
 				+ "`startloc`," + "`type`," + "`costs`) VALUES"
@@ -1416,7 +1401,6 @@ public class DbStuff {
 
 		String test = "SELECT * FROM Mist_NPCData WHERE `npcid`=?;";
 		for (Integer npcid : questers.uniquenpcid.keySet()) {
-
 			UUID npc = questers.uniquenpcid.get(npcid);
 			String killquestids = null;
 			if (questers.killquests.get(npc) != null) {
@@ -1424,7 +1408,7 @@ public class DbStuff {
 					if (killquestids == null) {
 						killquestids = killquest + "_";
 					} else {
-						killquestids = killquestids + killquest + "_";
+						killquestids += killquest + "_";
 					}
 				}
 			}
@@ -1434,8 +1418,7 @@ public class DbStuff {
 					if (harvestquestids == null) {
 						harvestquestids = harvestquest + "_";
 					} else {
-						harvestquestids = harvestquestids + harvestquestids
-								+ "_";
+						harvestquestids += harvestquest + "_";
 					}
 				}
 			}
@@ -1445,7 +1428,7 @@ public class DbStuff {
 					if (talktoquestids == null) {
 						talktoquestids = talktoquest + "_";
 					} else {
-						talktoquestids = talktoquestids + talktoquest + "_";
+						talktoquestids += talktoquest + "_";
 					}
 				}
 			}
@@ -2022,8 +2005,6 @@ public class DbStuff {
 		}
 	}
 
-	
-
 	public void loadnpc() {
 		String loading = "SELECT * FROM Mist_NPCData;";
 		PreparedStatement pst = null;
@@ -2051,7 +2032,7 @@ public class DbStuff {
 					String[] killtemp = rs.getString("killquests").split("_");
 					HashSet<Integer> quests = new HashSet<Integer>();
 					for (String t : killtemp) {
-						quests.add(Integer.parseInt(t));
+						quests.add(Integer.parseInt(t.trim()));
 					}
 					questers.killquests.put(npc, quests);
 				}
@@ -2060,7 +2041,7 @@ public class DbStuff {
 							.split("_");
 					HashSet<Integer> quests = new HashSet<Integer>();
 					for (String t : killtemp) {
-						quests.add(Integer.parseInt(t));
+						quests.add(Integer.parseInt(t.trim()));
 					}
 					questers.harvestquests.put(npc, quests);
 				}
@@ -2068,7 +2049,7 @@ public class DbStuff {
 					String[] killtemp = rs.getString("talktoquests").split("_");
 					HashSet<Integer> quests = new HashSet<Integer>();
 					for (String t : killtemp) {
-						quests.add(Integer.parseInt(t));
+						quests.add(Integer.parseInt(t.trim()));
 					}
 					questers.talktoquests.put(npc, quests);
 				}
@@ -2103,7 +2084,7 @@ public class DbStuff {
 			pst = con.prepareStatement(loading);
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
-				HashMap<String, ArrayList<Integer>> types = new HashMap<String, ArrayList<Integer>>();
+				HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
 				UUID player = UUID.fromString(rs.getString("useruuid"));
 				HashMap<String, HashMap<Integer, Integer>> progress;
 				if (questers.progress.get(player) != null) {
@@ -2119,7 +2100,7 @@ public class DbStuff {
 					} else {
 						amount = new HashMap<Integer, Integer>();
 					}
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("killquests").split("_");
 					for (String in : allkill) {
 						String[] prog = in.split("-");
@@ -2137,7 +2118,7 @@ public class DbStuff {
 					} else {
 						amount = new HashMap<Integer, Integer>();
 					}
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allharvest = rs.getString("harvestquests").split(
 							"_");
 					for (String in : allharvest) {
@@ -2150,7 +2131,7 @@ public class DbStuff {
 					types.put("harvest", quests);
 				}
 				if (rs.getString("talktoquests") != null) {
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("talktoquests").split("_");
 					for (String in : allkill) {
 						quests.add(Integer.parseInt(in));
@@ -2187,10 +2168,10 @@ public class DbStuff {
 			pst = con.prepareStatement(loading);
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
-				HashMap<String, ArrayList<Integer>> types = new HashMap<String, ArrayList<Integer>>();
+				HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
 				UUID player = UUID.fromString(rs.getString("useruuid"));
 				if (rs.getString("killquests") != null) {
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("killquests").split("_");
 					for (String in : allkill) {
 						quests.add(Integer.parseInt(in));
@@ -2198,7 +2179,7 @@ public class DbStuff {
 					types.put("kill", quests);
 				}
 				if (rs.getString("harvestquests") != null) {
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("harvestquests").split("_");
 					for (String in : allkill) {
 						quests.add(Integer.parseInt(in));
@@ -2206,7 +2187,7 @@ public class DbStuff {
 					types.put("harvest", quests);
 				}
 				if (rs.getString("talktoquests") != null) {
-					ArrayList<Integer> quests = new ArrayList<Integer>();
+					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("talktoquests").split("_");
 					for (String in : allkill) {
 						quests.add(Integer.parseInt(in));
@@ -2592,21 +2573,21 @@ public class DbStuff {
 		this.party = instance.party;
 	}
 
-	public void deletetrip(int id){
+	public void deletetrip(int id) {
 		String test = "SELECT * FROM Mist_Trips WHERE `id`=?";
 		String delete = "DELETE FROM Mist_Trips WHERE `id`=?";
 		PreparedStatement pst = null;
-		try{
+		try {
 			pst = con.prepareStatement(test);
 			pst.setInt(1, id);
 			ResultSet rs = pst.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				pst.close();
 				pst = con.prepareStatement(delete);
 				pst.setInt(1, id);
 				pst.execute();
 			}
-		}catch (SQLException e) {
+		} catch (SQLException e) {
 			this.plugin.getLogger().severe(e.getMessage());
 			plugin.getLogger().info(
 					"There was a error during the savings of the data to the database: "
@@ -2628,22 +2609,22 @@ public class DbStuff {
 			}
 		}
 	}
-	
-	public void deleteharbor(int id){
+
+	public void deleteharbor(int id) {
 		String test = "SELECT * FROM Mist_Harbors WHERE `id`=?";
 		String delete = "DELETE FROM Mist_Harbors WHERE `id`=?";
 		PreparedStatement pst = null;
-		try{
+		try {
 			pst = con.prepareStatement(test);
 			pst.setInt(1, id);
 			ResultSet rs = pst.executeQuery();
-			if(rs.next()){
+			if (rs.next()) {
 				pst.close();
 				pst = con.prepareStatement(delete);
 				pst.setInt(1, id);
 				pst.execute();
 			}
-		}catch (SQLException e) {
+		} catch (SQLException e) {
 			this.plugin.getLogger().severe(e.getMessage());
 			plugin.getLogger().info(
 					"There was a error during the savings of the data to the database: "
@@ -2665,7 +2646,7 @@ public class DbStuff {
 			}
 		}
 	}
-	
+
 	public void deletenpc(int npcid) {
 		String test = "SELECT * FROM Mist_NPCData WHERE `npcid`=?;";
 		String delete = "DELETE FROM Mist_NPCData WHERE `npcid`=?";
@@ -2702,117 +2683,6 @@ public class DbStuff {
 			}
 		}
 
-	}
-
-	public void deletekill(int id) {
-		String test = "SELECT * FROM Mist_QuestKill WHERE `id`=?;";
-		String delete = "DELETE FROM Mist_QuestKill WHERE `id`=?";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(test);
-			pst.setInt(1, id);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()) {
-				pst.close();
-				pst = con.prepareStatement(delete);
-				pst.setInt(1, id);
-				pst.execute();
-			}
-		} catch (SQLException e) {
-			this.plugin.getLogger().severe(e.getMessage());
-			plugin.getLogger().info(
-					"There was a error during the savings of the data to the database: "
-							+ e.getMessage());
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
-
-	public void deleteharvest(int id) {
-		String test = "SELECT * FROM Mist_QuestHarvest WHERE `id`=?;";
-		String delete = "DELETE FROM Mist_QuestHarvest WHERE `id`=?";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(test);
-			pst.setInt(1, id);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()) {
-				pst.close();
-				pst = con.prepareStatement(delete);
-				pst.setInt(1, id);
-				pst.execute();
-			}
-		} catch (SQLException e) {
-			this.plugin.getLogger().severe(e.getMessage());
-			plugin.getLogger().info(
-					"There was a error during the savings of the data to the database: "
-							+ e.getMessage());
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
-
-	public void deletetalkto(int id) {
-		String test = "SELECT * FROM Mist_QuestTalkto WHERE `id`=?;";
-		String delete = "DELETE FROM Mist_QuestTalkto WHERE `id`=?";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(test);
-			pst.setInt(1, id);
-			ResultSet rs = pst.executeQuery();
-			if (rs.next()) {
-				pst.close();
-				pst = con.prepareStatement(delete);
-				pst.setInt(1, id);
-				pst.execute();
-			}
-		} catch (SQLException e) {
-			this.plugin.getLogger().severe(e.getMessage());
-			plugin.getLogger().info(
-					"There was a error during the savings of the data to the database: "
-							+ e.getMessage());
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
 	}
 
 	public void deletewarp(int id) {

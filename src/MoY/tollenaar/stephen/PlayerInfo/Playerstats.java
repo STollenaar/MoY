@@ -1,7 +1,7 @@
 package MoY.tollenaar.stephen.PlayerInfo;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 
 
@@ -27,8 +27,8 @@ public class Playerstats {
 	public static HashMap<UUID, Integer> fishingprog = new HashMap<UUID, Integer>();
 
 	
-	//quests			playeruuid		type			npcuuid		questnumber			info
-	public static HashMap<UUID, HashMap<String, ArrayList<Integer>>> activequests = new HashMap<UUID, HashMap<String, ArrayList<Integer>>>();
-	public static HashMap<UUID, HashMap<String, ArrayList<Integer>>> completedquests = new HashMap<UUID, HashMap<String, ArrayList<Integer>>>();
+	//quests			playeruuid		type		questnumber			
+	public static HashMap<UUID, HashMap<String, HashSet<Integer>>> activequests = new HashMap<UUID, HashMap<String, HashSet<Integer>>>();
+	public static HashMap<UUID, HashMap<String, HashSet<Integer>>> completedquests = new HashMap<UUID, HashMap<String, HashSet<Integer>>>();
 	public static HashMap<UUID, HashMap<String, HashMap<Integer, Long>>> rewardedlist = new HashMap<UUID, HashMap<String, HashMap<Integer, Long>>>();
 }

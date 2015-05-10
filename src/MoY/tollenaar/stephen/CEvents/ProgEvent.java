@@ -16,10 +16,7 @@ public final class ProgEvent extends Event {
 	private int xp;
 	private Block block;
 	private boolean q = false;
-	/**
-	 * type 1 = wood 2 = mining
-	 * 
-	 */
+
 	private int type;
 
 	public ProgEvent(UUID player, TreeSpecies wood, Block block, int type) {

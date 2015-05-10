@@ -143,6 +143,8 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						} else if (args[0].equalsIgnoreCase("dex")) {
 							Playerstats.Dexscore.put(player.getUniqueId(),
 									newlvl);
+						}else if (args[0].equalsIgnoreCase("level")){
+							type = 6;
 						}
 						if(type != 0){
 							ProgEvent e = new ProgEvent(player.getUniqueId(), type, Integer.parseInt(args[1]), true);

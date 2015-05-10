@@ -83,7 +83,7 @@ public class Skillimprovement implements Listener {
 
 			Block block = event.getBlock();
 			if (!miningblocksplaces.contains(block)
-					|| !woodblocksplaces.contains(block)) {
+					&& !woodblocksplaces.contains(block)) {
 				if (SkillLvls.GetSkill(block) != null) {
 					if (SkillLvls.GetSkill(block).getOre() != null) {
 						mining(event);

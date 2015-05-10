@@ -78,6 +78,7 @@ public class MoY extends JavaPlugin {
 		re = new RandomEvents(this);
 
 		questers = new QuestsServerSide(this);
+		
 		fw = new Filewriters(this);
 		qqc = new QuestClientSide(this);
 		qinteract = new Questinteracts(this);

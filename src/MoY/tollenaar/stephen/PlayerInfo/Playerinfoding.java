@@ -59,7 +59,7 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> lore = new ArrayList<String>();
 			lore.add(player.getName());
 			skull.setLore(lore);
-			skull.setOwner("Notch");
+			skull.setOwner(player.getName());
 			ItemMeta temp = onlineplayer.getItemMeta();
 			temp.setDisplayName("Name");
 			ArrayList<String> t = new ArrayList<String>();
@@ -83,7 +83,8 @@ public class Playerinfoding implements Listener{
 			temp.setDisplayName("Ability points");
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.abilitiescore.get(player.getUniqueId())));
-			
+			t.add("With this you can higher your");
+			t.add("strength and dex by clicking on it");
 			temp.setLore(t);
 			ability.setItemMeta(temp);
 		}
@@ -93,6 +94,8 @@ public class Playerinfoding implements Listener{
 			temp.setDisplayName("Strength");
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.Strengthscore.get(player.getUniqueId())));
+			t.add("This allows you to hold");
+			t.add("better armor and better weapons");
 			temp.setLore(t);
 			strenght.setItemMeta(temp);
 		}
@@ -102,6 +105,7 @@ public class Playerinfoding implements Listener{
 			temp.setDisplayName("Dex");
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.Dexscore.get(player.getUniqueId())));
+			t.add("This allows you to hold better bows");
 			temp.setLore(t);
 			dex.setItemMeta(temp);
 		}
@@ -113,6 +117,7 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.mining.get(player.getUniqueId())));
 			t.add(Integer.toString(Playerstats.miningprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.mining.get(player.getUniqueId()) * 10));
+			t.add("This allows you to mine more valuable ores");
 			temp.setLore(t);
 			mining.setItemMeta(temp);
 		}
@@ -123,6 +128,7 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.woodcutting.get(player.getUniqueId())));
 			t.add(Integer.toString(Playerstats.woodcuttingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.woodcutting.get(player.getUniqueId()) * 10));
+			t.add("This allows you to cut bigger trees");
 			temp.setLore(t);
 			wood.setItemMeta(temp);
 		}
@@ -133,6 +139,7 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.fishing.get(player.getUniqueId())));
 			t.add(Integer.toString(Playerstats.fishingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.fishing.get(player.getUniqueId()) * 10));
+			t.add("This gives better fishing results");
 			temp.setLore(t);
 			fishing.setItemMeta(temp);
 		}
@@ -143,6 +150,8 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.smelting.get(player.getUniqueId())));
 			t.add(Integer.toString(Playerstats.smeltingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.smelting.get(player.getUniqueId()) * 10));
+			t.add("This increases the chance of");
+			t.add("dropped ignots instead of ores");
 			temp.setLore(t);
 			smelting.setItemMeta(temp);
 		}
@@ -153,6 +162,7 @@ public class Playerinfoding implements Listener{
 			ArrayList<String> t = new ArrayList<String>();
 			t.add(Integer.toString(Playerstats.cooking.get(player.getUniqueId())));
 			t.add(Integer.toString(Playerstats.cookingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.cooking.get(player.getUniqueId()) * 10));
+			t.add("This decreases the chance of burned food");
 			temp.setLore(t);
 			cooking.setItemMeta(temp);
 		}
@@ -188,7 +198,7 @@ public class Playerinfoding implements Listener{
 				if(item.getItemMeta() != null){
 					if(item.getItemMeta().getDisplayName() != null){
 						if(item.getItemMeta().getDisplayName().equals("Strength")){
-							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1){
+							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1 && Playerstats.Strengthscore.get(player.getUniqueId()) < 90){
 								Playerstats.abilitiescore.put(player.getUniqueId(), Playerstats.abilitiescore.get(player.getUniqueId()) - 1);
 								Playerstats.Strengthscore.put(player.getUniqueId(), Playerstats.Strengthscore.get(player.getUniqueId()) + 1);
 								player.closeInventory();
@@ -196,7 +206,7 @@ public class Playerinfoding implements Listener{
 							}
 						}
 						if(item.getItemMeta().getDisplayName().equals("Dex")){
-							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1){
+							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1 && Playerstats.Dexscore.get(player.getUniqueId()) < 50){
 								Playerstats.abilitiescore.put(player.getUniqueId(), Playerstats.abilitiescore.get(player.getUniqueId()) - 1);
 								Playerstats.Dexscore.put(player.getUniqueId(), Playerstats.Dexscore.get(player.getUniqueId()) + 1);
 								player.closeInventory();

@@ -909,7 +909,7 @@ public class Filewriters {
 	}
 	
 	public void SaveTalk(QuestTalkto h){
-		File f = new File(kill, h.getQuestnumber() + ".yml");
+		File f = new File(talkto, h.getQuestnumber() + ".yml");
 		if(!f.exists()){
 			try {
 				f.createNewFile();

@@ -1001,21 +1001,21 @@ public class Quest {
 
 	public void AddActiveQuest(Player player, int number, String quetstype) {
 		if (Playerstats.activequests.get(player.getUniqueId()) == null) {
-			HashMap<String, ArrayList<Integer>> types = new HashMap<String, ArrayList<Integer>>();
-			ArrayList<Integer> numbers = new ArrayList<Integer>();
+			HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
+			HashSet<Integer> numbers = new HashSet<Integer>();
 			numbers.add(number);
 			types.put(quetstype, numbers);
 			Playerstats.activequests.put(player.getUniqueId(), types);
 		} else {
-			HashMap<String, ArrayList<Integer>> types = Playerstats.activequests
+			HashMap<String, HashSet<Integer>> types = Playerstats.activequests
 					.get(player.getUniqueId());
 			if (types.get(quetstype) == null) {
-				ArrayList<Integer> numbers = new ArrayList<Integer>();
+				HashSet<Integer> numbers = new HashSet<Integer>();
 				numbers.add(number);
 				types.put(quetstype, numbers);
 				Playerstats.activequests.put(player.getUniqueId(), types);
 			} else {
-				ArrayList<Integer> numbers = types.get(quetstype);
+				HashSet<Integer> numbers = types.get(quetstype);
 				numbers.add(number);
 				types.put(quetstype, numbers);
 				Playerstats.activequests.put(player.getUniqueId(), types);
@@ -1025,10 +1025,10 @@ public class Quest {
 
 	public void AddCompletedQuest(Player player, int number, String questtype,
 			String npcname) {
-		ArrayList<Integer> numbers = Playerstats.activequests.get(
+		HashSet<Integer> numbers = Playerstats.activequests.get(
 				player.getUniqueId()).get(questtype);
-		for (int i = 0; i < numbers.size(); i++) {
-			if (numbers.get(i) == number) {
+		for (int i : numbers) {
+			if (i == number) {
 				numbers.remove(i);
 				break;
 			}
@@ -1043,20 +1043,21 @@ public class Quest {
 				Playerstats.completedquests.get(player.getUniqueId())
 						.get(questtype).add(number);
 			} else {
-				HashMap<String, ArrayList<Integer>> types = Playerstats.completedquests
+				HashMap<String, HashSet<Integer>> types = Playerstats.completedquests
 						.get(player.getUniqueId());
-				ArrayList<Integer> temp = new ArrayList<Integer>();
+				HashSet<Integer> temp = new HashSet<Integer>();
 				temp.add(number);
 				types.put(questtype, temp);
 				Playerstats.completedquests.put(player.getUniqueId(), types);
 			}
 		} else {
-			HashMap<String, ArrayList<Integer>> types = new HashMap<String, ArrayList<Integer>>();
-			ArrayList<Integer> temp = new ArrayList<Integer>();
+			HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
+			HashSet<Integer> temp = new HashSet<Integer>();
 			temp.add(number);
 			types.put(questtype, temp);
 			Playerstats.completedquests.put(player.getUniqueId(), types);
 		}
+		System.out.println(Playerstats.completedquests);
 		String name = returnname(questtype, number);
 		String message = plugin.fw.GetUtilityLine("QuestComplete")
 				.replace("%questname%", name).replace("%npc%", npcname);
@@ -1155,6 +1156,11 @@ public class Quest {
 					switch (type) {
 					case "kill":
 						QuestKill kill = returnkill(number);
+						if(kill == null){
+							System.out.println("removed");
+							removekill(number);
+							continue;
+						}
 						ItemStack kil = new ItemStack(Material.IRON_SWORD);
 						{
 							ItemMeta meta = kil.getItemMeta();
@@ -1165,6 +1171,11 @@ public class Quest {
 						break;
 					case "harvest":
 						QuestHarvest harvest = returnharvest(number);
+						if(harvest == null){
+							System.out.println("removed");
+							removeharvest(number);
+							continue;
+						}
 						ItemStack har = new ItemStack(Material.IRON_PICKAXE);
 						{
 							ItemMeta meta = har.getItemMeta();
@@ -1175,6 +1186,11 @@ public class Quest {
 						break;
 					case "talkto":
 						QuestTalkto talk = returntalkto(number);
+						if(talk == null){
+							System.out.println("removed");
+							removetalkto(number);
+							continue;
+						}
 						ItemStack tal = new ItemStack(Material.FEATHER);
 						{
 							ItemMeta meta = tal.getItemMeta();
@@ -1231,9 +1247,8 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomkill(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							plugin.database.deletecomkill(Integer.toString(number), player.getUniqueId().toString());
+							removekill(number);
 						}
 						break;
 					case "harvest":
@@ -1252,9 +1267,8 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomhar(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							plugin.database.deletecomhar(Integer.toString(number), player.getUniqueId().toString());
+							removeharvest(number);
 						}
 						break;
 					case "talkto":
@@ -1274,9 +1288,8 @@ public class Quest {
 						} else {
 							Playerstats.rewardedlist.get(player.getUniqueId())
 									.get(type).remove(number);
-							plugin.database.deletecomtalk(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							plugin.database.deletecomtalk(Integer.toString(number), player.getUniqueId().toString());
+							removetalkto(number);
 
 						}
 					}

@@ -78,18 +78,22 @@ public final class ProgListener implements Listener {
 				} else {
 					currentprog += xp;
 				}
-			}else if(event.getType() == 6 && currentlvl != 140){
-				if(currentprog + xp >= currentlvl * 15){
+			} else if (event.getType() == 6 && currentlvl != 140) {
+				if (currentprog + xp >= currentlvl * 15) {
 					currentlvl++;
-						while(currentprog < currentlvl*15 && xp > 0){
-							currentprog++;
-							xp--;
-						}
+					while (currentprog < currentlvl * 15 && xp > 0) {
+						currentprog++;
+						xp--;
+					}
+					Playerstats.abilitiescore
+							.put(player.getUniqueId(),
+									Playerstats.abilitiescore.get(player
+											.getUniqueId()) + 1);
 					currentprog = 0;
-					if(xp > 0){
+					if (xp > 0) {
 						currentprog = xp;
 					}
-				}else{
+				} else {
 					currentprog += xp;
 				}
 			}
@@ -130,8 +134,7 @@ public final class ProgListener implements Listener {
 				dubbledrop(currentlvl, event.getBlock());
 			}
 		}
-		
-		
+
 		if (!event.getQ()) {
 			if (currentlvl != 50 && event.getBlock() != null) {
 				info.makemessage(event.getPlayer(), event.getType(),

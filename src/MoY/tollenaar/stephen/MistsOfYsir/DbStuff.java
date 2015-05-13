@@ -1086,7 +1086,8 @@ public class DbStuff {
 							}
 							if (time == null) {
 								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("talkto").get(quest));
+										.get(player).get("talkto").get(quest))
+										+ "_";
 							} else {
 								time = time
 										+ Long.toString(Playerstats.rewardedlist
@@ -2368,8 +2369,9 @@ public class DbStuff {
 						} else {
 							HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
 							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
+								reward.put(Integer.parseInt(questnumbers[x]
+										.trim()), Long.parseLong(loggedtimes[x]
+										.trim()));
 							}
 							typereward.put("talkto", reward);
 						}

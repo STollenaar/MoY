@@ -69,7 +69,6 @@ public class QuestHarvest extends Quest {
 				item = new ItemStack(Material.getMaterial(id[0]), 1,
 						(short) id[1]);
 			}
-			System.out.println(item.toString());
 			temp.add(itemid);
 			temp.add(item.toString());
 			ItemMeta tem = monster.getItemMeta();

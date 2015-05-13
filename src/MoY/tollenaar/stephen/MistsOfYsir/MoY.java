@@ -13,6 +13,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import MoY.tollenaar.stephen.CEvents.ProgListener;
+import MoY.tollenaar.stephen.CEvents.QuestProgListener;
 import MoY.tollenaar.stephen.Commands.CommandsEvent;
 import MoY.tollenaar.stephen.Commands.CommandsNPC;
 import MoY.tollenaar.stephen.Commands.CommandsParty;
@@ -144,7 +145,8 @@ public class MoY extends JavaPlugin {
 			pm.registerEvents(qc, this);
 
 			pm.registerEvents(new ProgressKill(this), this);
-			pm.registerEvents(new ProgressHarvest(this), this);
+			pm.registerEvents(new ProgressHarvest(), this);
+			pm.registerEvents(new QuestProgListener(this), this);
 			
 			pm.registerEvents(new ProgListener(this), this);
 

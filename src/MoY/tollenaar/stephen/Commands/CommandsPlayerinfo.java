@@ -113,7 +113,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						return true;
 					}
 				}else{
-					player.sendMessage(ChatColor.RED + "Please use /quest <active/completed/rewared>.");
+					player.sendMessage(ChatColor.RED + "Please use /quest <active/completed/rewarded>.");
 					return true;
 				}
 				

@@ -653,8 +653,6 @@ public class QuestInvClick implements Listener {
 					event.setCancelled(true);
 				}
 			} else if (clickinv.getName().equals("NPCNames")) {
-				System.out.println(Thread.currentThread().getStackTrace()[1]
-						+ " " + event.getCurrentItem());
 				if (event.getCurrentItem() != null) {
 					if (event.getCurrentItem().getItemMeta() != null) {
 						if (event.getWhoClicked() != null) {

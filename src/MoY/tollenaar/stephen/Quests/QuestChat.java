@@ -172,13 +172,15 @@ public class QuestChat extends QuestInvClick implements Listener {
 						String[] tp = typed.split(" ");
 						String item = tp[0];
 						if (tp.length == 1) {
-							if(questers.ids.get(tp[0]) == null){
+							if(Material.getMaterial(Integer.parseInt(tp[0].trim())) == null){
 								throw new Exception();
 							}
 						} else if (tp.length == 2) {
-						item += ":" + tp[1];
-						if(questers.ids.get(item) == null){
+						
+						if(Material.getMaterial(Integer.parseInt(tp[0].trim())) == null){
 							throw new Exception();
+						}else{
+							Short.parseShort(tp[1].trim());
 						}
 						} else {
 							throw new Exception();
@@ -226,6 +228,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 							return;
 						}
 					}
+					break;
 				case "repeat":
 					kill.setDelay(typed);
 					questers.npcpos.remove(player.getUniqueId());

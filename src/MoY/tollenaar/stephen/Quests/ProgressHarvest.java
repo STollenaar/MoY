@@ -47,6 +47,23 @@ public class ProgressHarvest implements Listener {
 									questn, "harvest", item);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
+					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
+						ItemStack item;
+						if (event.getClickedBlock().getType() == Material.WATER
+								|| event.getClickedBlock().getType() == Material.STATIONARY_WATER) {
+							item = new ItemStack(Material.WATER_BUCKET);
+						} else if (event.getClickedBlock().getType() == Material.LAVA
+								|| event.getClickedBlock().getType() == Material.STATIONARY_LAVA) {
+							item = new ItemStack(Material.LAVA_BUCKET);
+						} else {
+							item = player.getItemInHand();
+						}
+						for (int questn : Playerstats.activequests.get(
+								player.getUniqueId()).get("eventharvest")) {
+							QuestProgEvent e = new QuestProgEvent(player,
+									questn, "eventharvest", item);
+							Bukkit.getServer().getPluginManager().callEvent(e);
+						}
 					}
 				}
 			}
@@ -69,6 +86,14 @@ public class ProgressHarvest implements Listener {
 											Material.MILK_BUCKET));
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
+					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
+						for (int quest : Playerstats.activequests.get(
+								player.getUniqueId()).get("eventharvest")) {
+							QuestProgEvent e = new QuestProgEvent(player,
+									quest, "eventharvest", new ItemStack(
+											Material.MILK_BUCKET));
+							Bukkit.getServer().getPluginManager().callEvent(e);
+						}
 					}
 				}
 			}
@@ -85,6 +110,13 @@ public class ProgressHarvest implements Listener {
 						player.getUniqueId()).get("harvest")) {
 					QuestProgEvent e = new QuestProgEvent(player, questn,
 							"harvest", event.getItem().getItemStack());
+					Bukkit.getServer().getPluginManager().callEvent(e);
+				}
+			}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
+				for (int questn : Playerstats.activequests.get(
+						player.getUniqueId()).get("eventharvest")) {
+					QuestProgEvent e = new QuestProgEvent(player, questn,
+							"eventharvest", event.getItem().getItemStack());
 					Bukkit.getServer().getPluginManager().callEvent(e);
 				}
 			}
@@ -107,6 +139,13 @@ public class ProgressHarvest implements Listener {
 								player.getUniqueId()).get("harvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									questn, "harvest", event.getCurrentItem());
+							Bukkit.getServer().getPluginManager().callEvent(e);
+						}
+					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
+						for (int questn : Playerstats.activequests.get(
+								player.getUniqueId()).get("eventharvest")) {
+							QuestProgEvent e = new QuestProgEvent(player,
+									questn, "eventharvest", event.getCurrentItem());
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
 					}

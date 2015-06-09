@@ -19,6 +19,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.Quests.QuestEvent;
 import MoY.tollenaar.stephen.Quests.QuestHarvest;
 import MoY.tollenaar.stephen.Quests.QuestKill;
 import MoY.tollenaar.stephen.Quests.QuestTalkto;
@@ -54,7 +55,7 @@ public class Filewriters {
 	
 	private File harvest;
 	private File kill;
-	private File warps;
+	private File event;
 	private File talkto;
 	
 	private File furnaces;
@@ -78,9 +79,9 @@ public class Filewriters {
 		if(!kill.exists()){
 			kill.mkdir();
 		}
-		warps = new File(quests, "warp");
-		if(!warps.exists()){
-			warps.mkdir();
+		event = new File(quests, "event");
+		if(!event.exists()){
+			event.mkdir();
 		}
 		talkto = new File(quests, "talkto");
 		if(!talkto.exists()){
@@ -781,6 +782,9 @@ public class Filewriters {
 		for(File f : talkto.listFiles()){
 			LoadTalk(f);
 		}
+		for(File f : event.listFiles()){
+			LoadEvent(f);
+		}
 	}
 	
 	public void savequests(){
@@ -792,6 +796,9 @@ public class Filewriters {
 		}
 		for(Integer i :quest.AllTalkToId()){
 			SaveTalk(quest.returntalkto(i));
+		}
+		for(Integer i : quest.AllEvents()){
+			SaveEvent(quest.returneventquest(i));
 		}
 	}
 	
@@ -903,6 +910,14 @@ public class Filewriters {
 				}
 			}
 			break;
+		case "event":
+			for(File f : event.listFiles()){
+				if(f.getName().replace(".yml", "").equals(Integer.toString(id))){
+					f.delete();
+					break;
+				}
+			}
+			break;
 		default:
 			break;
 		}
@@ -945,6 +960,49 @@ public class Filewriters {
 		int minlvl = config.getInt("MinLvl");
 		String message = config.getString("Message");
 		quest.loadtalkto(id, name, person, message, delay, minlvl, prereq, reward);
+	}
+	
+	public void SaveEvent(QuestEvent e){
+		File f = new File(event, e.getNumber() + ".yml");
+		if(!f.exists()){
+			try {
+				f.createNewFile();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		}
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		config.set("ID", e.getNumber());
+		config.set("Name", e.getTitle());
+		config.set("Thing", e.getType());
+		config.set("Minlvl", e.getMinlvl());
+		config.set("Reward", e.getReward());
+		config.set("Repeat", e.getRepeat());
+		config.set("Start", e.getStartdate());
+		config.set("End", e.getEnddate());
+		config.set("Count", e.getCount());
+		config.set("Message", e.getMessage());
+		try {
+			config.save(f);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
+	
+	public void LoadEvent(File f){
+		FileConfiguration config = YamlConfiguration.loadConfiguration(f);
+		String title = config.getString("Name");
+		int id = config.getInt("ID");
+		String thing = config.getString("Thing");
+		int minlvl = config.getInt("Minlvl");
+		List<String> reward = config.getStringList("Reward");
+		String repeat = config.getString("Repeat");
+		long start = config.getLong("Start");
+		long end = config.getLong("End");
+		int count = config.getInt("Count");
+		String message = config.getString("Message");
+		quest.loadevent(id, thing, title, start, end, reward, message, count, repeat, minlvl);
 	}
 	
 }

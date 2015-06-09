@@ -27,7 +27,7 @@ public class ProgressKill implements Listener {
 		this.plugin = instance;
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "static-access", "deprecation" })
 	@EventHandler
 	public void OnMobKill(EntityDeathEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -55,6 +55,31 @@ public class ProgressKill implements Listener {
 									if(plugin.questers.killquests.get(npcuuid).contains(quests)){
 										NPC npc = reg.getByUniqueId(npcuuid);
 										q.AddCompletedQuest(player, quests, "kill", npc.getName());
+										break;
+									}
+								}
+								
+							}
+							break;
+						}
+					}
+				}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventkill") != null){
+					for (int quests : Playerstats.activequests.get(
+							player.getUniqueId()).get("eventkill")) {
+						QuestEvent kill = q.returneventquest(quests);
+						if (EntityType.valueOf(kill.getType().toUpperCase()).getName().equals(ent.getType().getName())) {
+							HashMap<Integer, Integer> amount = q.progress.get(
+									player.getUniqueId()).get("eventkill");
+							if (amount.get(quests) + 1 != kill.getCount()) {
+								amount.put(quests, amount.get(quests) + 1);
+							} else {
+								NPCRegistry reg =	CitizensAPI.getNPCRegistry();
+								
+								for(UUID npcuuid : plugin.questers.eventquests.keySet()){
+									
+									if(plugin.questers.eventquests.get(npcuuid).contains(quests)){
+										NPC npc = reg.getByUniqueId(npcuuid);
+										q.AddCompletedQuest(player, quests, "eventkill", npc.getName());
 										break;
 									}
 								}

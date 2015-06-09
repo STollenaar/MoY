@@ -24,6 +24,7 @@ import MoY.tollenaar.stephen.Quests.ProgressHarvest;
 import MoY.tollenaar.stephen.Quests.ProgressKill;
 import MoY.tollenaar.stephen.Quests.Quest;
 import MoY.tollenaar.stephen.Quests.QuestChat;
+import MoY.tollenaar.stephen.Quests.QuestChatEvent;
 import MoY.tollenaar.stephen.Quests.QuestClientSide;
 import MoY.tollenaar.stephen.Quests.QuestInvClick;
 import MoY.tollenaar.stephen.Quests.QuestParticles;
@@ -60,7 +61,7 @@ public class MoY extends JavaPlugin {
 	public Filewriters fw;
 	public QuestChat qc;
 	public QuestInvClick qi;
-	
+	public QuestChatEvent qe;
 	
 	
 	@Override
@@ -92,7 +93,8 @@ public class MoY extends JavaPlugin {
 		qc = new QuestChat(this);
 		qi = new QuestInvClick(this);
 		qp = new QuestParticles(this);
-
+		qe = new QuestChatEvent(this);
+		
 		mob = new MobSpawns(this);
 
 		database = new DbStuff(this);
@@ -142,7 +144,7 @@ public class MoY extends JavaPlugin {
 			pm.registerEvents(dragon, this);
 			pm.registerEvents(mob, this);
 
-			pm.registerEvents(qc, this);
+			pm.registerEvents(qe, this);
 
 			pm.registerEvents(new ProgressKill(this), this);
 			pm.registerEvents(new ProgressHarvest(), this);

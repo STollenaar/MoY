@@ -27,9 +27,11 @@ import MoY.tollenaar.stephen.Travel.TripLocations;
 
 @SuppressWarnings("deprecation")
 public class QuestChat extends QuestInvClick implements Listener {
-
+	
+	private QuestChatEvent e;
 	public QuestChat(MoY instance) {
 		super(instance);
+		this.e = new QuestChatEvent(instance);
 	}
 
 	@EventHandler
@@ -38,8 +40,24 @@ public class QuestChat extends QuestInvClick implements Listener {
 		if (questers.npcpos.get(player.getUniqueId()) != null) {
 			String typed = event.getMessage();
 			ArrayList<String> info = questers.npcpos.get(player.getUniqueId());
+			String type;
+			if(info.get(0).equals("1")){
+				type = "killquest";
+			}else if(info.get(0).equals("2")){
+				type = "harvestquest";
+			}else if(info.get(0).equals("3")){
+				type = "talktoquest";
+			}else if(info.get(0).equals("4")){
+				type = "warplists";
+			}else if(info.get(0).equals("5")){
+				type = "trip";
+			}else if(info.get(0).equals("6")){
+				type = "harbor";
+			}else{
+				type = "eventquest";
+			}
 			UUID npcuuid = UUID.fromString(info.get(1));
-			if (info.get(0).equals("Main")) {
+			if (type.equals("Main")) {
 				NPCRegistry registry = CitizensAPI.getNPCRegistry();
 				NPC npc = registry.getByUniqueId(npcuuid);
 				final Location loc = npc.getStoredLocation();
@@ -48,7 +66,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				npc.spawn(loc);
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
-			} else if(info.get(0).equals("Skin")){
+			} else if(type.equals("Skin")){
 				NPCRegistry registry = CitizensAPI.getNPCRegistry();
 				NPC npc = registry.getByUniqueId(npcuuid);
 				final Location loc = npc.getStoredLocation();
@@ -57,7 +75,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				npc.spawn(loc);
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
-			}		else if (info.get(0).equals("killquest")) {
+			}		else if (type.equals("killquest")) {
 				boolean pass = false;
 				int questnumber = Integer.parseInt(info.get(2));
 				QuestKill kill = questers.returnkill(questnumber);
@@ -158,7 +176,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 					
 					kill.npcsettingskill(npcuuid, player);
 				}
-			} else if (info.get(0).equals("harvestquest")) {
+			} else if (type.equals("harvestquest")) {
 				int questnumber = Integer.parseInt(info.get(2));
 				QuestHarvest kill = questers.returnharvest(questnumber);
 				switch (info.get(info.size() - 1)) {
@@ -275,7 +293,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}
 					break;
 				}
-			} else if (info.get(0).equals("talktoquest")) {
+			} else if (type.equals("talktoquest")) {
 				int questnumber = Integer.parseInt(info.get(2));
 				QuestTalkto talk = questers.returntalkto(questnumber);
 				switch (info.get(info.size() - 1)) {
@@ -417,7 +435,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 						event.setCancelled(true);
 					}					break;
 				}
-			} else if (info.get(0).equals("warplists")) {
+			} else if (type.equals("warplists")) {
 				int number = Integer.parseInt(info.get(2));
 				Warps warp = questers.returnwarp(number);
 				boolean pass = false;
@@ -443,7 +461,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 					questers.npcpos.remove(player.getUniqueId());
 				}
 				event.setCancelled(true);
-			}else if(info.get(0).equals("trip")){
+			}else if(type.equals("trip")){
 				if(info.get(1).equals("type")){
 					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
 						int id = Integer.parseInt(info.get(info.size()-1));
@@ -459,7 +477,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 						questers.npcpos.remove(player.getUniqueId());
 					}
 				}
-			}else if(info.get(0).equals("harbor")){
+			}else if(type.equals("harbor")){
 				if(info.get(1).equals("type")){
 					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
 						int id = Integer.parseInt(info.get(info.size()-1));
@@ -474,6 +492,13 @@ public class QuestChat extends QuestInvClick implements Listener {
 						t.setLocation(player.getLocation());
 						questers.npcpos.remove(player.getUniqueId());
 					}
+				}
+			}else if(type.equals("event")){
+				if(!e.InfoSet(info, event.getMessage(), player)){
+					event.setCancelled(true);
+					player.sendMessage("something happend try again");
+				}else{
+					event.setCancelled(true);
 				}
 			}
 		}

@@ -48,6 +48,14 @@ public class QuestClientSide {
 			// rowcount += questers.warplists.get(npcuuid).size();
 			rowcount++;
 		}
+		if (questers.eventquests.get(npcuuid) != null) {
+			for (int numbers : questers.eventquests.get(npcuuid)) {
+				if (questers.EventCheck(numbers)) {
+					rowcount++;
+				}
+			}
+		}
+
 		if (rowcount % 9 == 0) {
 			rowcount++;
 		}
@@ -67,12 +75,15 @@ public class QuestClientSide {
 				if (!kill.getPrereq().split("=")[0].equals("none")) {
 					if (check(kill.getPrereq().split("=")[0],
 							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true)
-							&& check("kill", i, player, npcname, false)) {
+									.trim()), player, npcname, true,
+							kill.getMinlvl())
+							&& check("kill", i, player, npcname, false,
+									kill.getMinlvl())) {
 						pass = true;
 					}
 				} else {
-					if (check("kill", i, player, npcname, false)) {
+					if (check("kill", i, player, npcname, false,
+							kill.getMinlvl())) {
 						pass = true;
 					}
 				}
@@ -97,12 +108,15 @@ public class QuestClientSide {
 				if (!kill.getPrereq().split("=")[0].equals("none")) {
 					if (check(kill.getPrereq().split("=")[0],
 							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true)
-							&& check("harvest", i, player, npcname, false)) {
+									.trim()), player, npcname, true,
+							kill.getMinlvl())
+							&& check("harvest", i, player, npcname, false,
+									kill.getMinlvl())) {
 						pass = true;
 					}
 				} else {
-					if (check("harvest", i, player, npcname, false)) {
+					if (check("harvest", i, player, npcname, false,
+							kill.getMinlvl())) {
 						pass = true;
 					}
 				}
@@ -128,12 +142,15 @@ public class QuestClientSide {
 				if (!kill.getPrereq().split("=")[0].equals("none")) {
 					if (check(kill.getPrereq().split("=")[0],
 							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true)
-							&& check("talkto", i, player, npcname, false)) {
+									.trim()), player, npcname, true,
+							kill.getMinlvl())
+							&& check("talkto", i, player, npcname, false,
+									kill.getMinlvl())) {
 						pass = true;
 					}
 				} else {
-					if (check("talkto", i, player, npcname, false)) {
+					if (check("talkto", i, player, npcname, false,
+							kill.getMinlvl())) {
 						pass = true;
 					}
 				}
@@ -183,6 +200,25 @@ public class QuestClientSide {
 			}
 
 		}
+		if (questers.eventquests.get(npcuuid) != null) {
+			for (int i : questers.eventquests.get(npcuuid)) {
+				if (questers.EventCheck(i)) {
+					QuestEvent event = questers.returneventquest(i);
+
+					if (lvlcheck(player, event.getMinlvl())) {
+						ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
+						ItemMeta meta = item.getItemMeta();
+						ArrayList<String> lore = new ArrayList<String>();
+						meta.setDisplayName(event.getTitle());
+						lore.add("§" + event.getNumber());
+						meta.setLore(lore);
+						item.setItemMeta(meta);
+						inv.addItem(item);
+					}
+				}
+			}
+		}
+
 		if (inv.getItem(inv.getSize() - 1) != null) {
 			Inventory newinv = Bukkit.createInventory(null, rowcount + 9,
 					"Aviable Quests");
@@ -232,7 +268,7 @@ public class QuestClientSide {
 	}
 
 	public boolean check(String type, int number, Player player,
-			String npcname, boolean ispreq) {
+			String npcname, boolean ispreq, int minlvl) {
 		UUID playeruuid = player.getUniqueId();
 		boolean pass = rewardcheck(type, number, player, npcname);
 
@@ -262,7 +298,19 @@ public class QuestClientSide {
 		} else if (ispreq) {
 			pass = false;
 		}
+		if (!lvlcheck(player, minlvl)) {
+			pass = false;
+		}
+
 		return pass;
+	}
+
+	private boolean lvlcheck(Player player, int minlvl) {
+		if (Playerstats.level.get(player.getUniqueId()) < minlvl) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -334,16 +382,23 @@ public class QuestClientSide {
 
 									}
 								}
-								if(saveditem == null){
-									String[] id = questers.returnharvest(number).getItemId().split(":");
-									if(id.length == 2){
-										saveditem = new ItemStack(Material.getMaterial(Integer.parseInt(id[0].trim())), 1, Short.parseShort(id[1].trim()));
-									}else{
-										saveditem = new ItemStack(Material.getMaterial(Integer.parseInt(id[0].trim())));
+								if (saveditem == null) {
+									String[] id = questers
+											.returnharvest(number).getItemId()
+											.split(":");
+									if (id.length == 2) {
+										saveditem = new ItemStack(
+												Material.getMaterial(Integer
+														.parseInt(id[0].trim())),
+												1, Short.parseShort(id[1]
+														.trim()));
+									} else {
+										saveditem = new ItemStack(
+												Material.getMaterial(Integer
+														.parseInt(id[0].trim())));
 									}
 								}
-								
-								
+
 								if (passing) {
 									while (needed != 0) {
 										for (ItemStack item : player
@@ -400,7 +455,8 @@ public class QuestClientSide {
 											+ "] "
 											+ ChatColor.AQUA
 											+ "You didn't bring me "
-											+ questers.returnharvest(number).getCount()
+											+ questers.returnharvest(number)
+													.getCount()
 											+ " "
 											+ questers.GetItemName(saveditem)
 											+ ". Come back with the right amount for your reward");

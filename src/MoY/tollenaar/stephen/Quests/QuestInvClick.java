@@ -45,10 +45,9 @@ public class QuestInvClick implements Listener {
 							|| clickinv.getName().equals("TalktoQuest")
 							|| clickinv.getName().equals("KillQuest")
 							|| clickinv.getName().equals("HarvestQuest") || clickinv
-							.getName().equals("Main settings"))) {
-				UUID npcuuid = UUID.fromString(clickinv
-						.getItem(clickinv.getSize() - 1).getItemMeta()
-						.getLore().get(0));
+							.getName().equals("Main settings") || clickinv.getName().equals("EventQuest"))) {
+				UUID npcuuid = UUID.fromString(clickinv.getItem(2)
+						.getItemMeta().getLore().get(0));
 				ItemStack item = event.getCurrentItem();
 
 				String name = item.getItemMeta().getDisplayName();
@@ -104,6 +103,8 @@ public class QuestInvClick implements Listener {
 						t.add("Skin");
 						t.add(npcuuid.toString());
 						questers.npcpos.put(player.getUniqueId(), t);
+					}else if(event.getCurrentItem().getItemMeta().getDisplayName().equals("Event Quest")){
+						questers.AllEvents(player, questers.eventquests.get(npcuuid), npcuuid);
 					}
 				} else if (clickinv.getName().equals("AllKill")) {
 					if (name.equals("Create New")) {
@@ -187,8 +188,34 @@ public class QuestInvClick implements Listener {
 										.get(0))).npcsettingswarplists(npcuuid,
 								player);
 					}
+				} else if (clickinv.getName().equals("AllEvents")) {
+					if (name.equals("Create New")) {
+						event.setCancelled(true);
+						HashSet<Integer> all;
+						if (questers.eventquests.get(npcuuid) != null) {
+							all = questers.eventquests.get(npcuuid);
+						} else {
+							all = new HashSet<Integer>();
+						}
+
+						int n = questers.createnewevent();
+						all.add(n);
+						questers.eventquests.put(npcuuid, all);
+						questers.returneventquest(n).openinv(player, npcuuid);
+					} else {
+						event.setCancelled(true);
+						questers.returneventquest(
+								Integer.parseInt(item.getItemMeta().getLore()
+										.get(0))).openinv(player, npcuuid);
+					}
 				}
-				if (clickinv.getName().equals("KillQuest")) {
+
+				else if (!clickinv.getName().equals("WarpList")) {
+					String type = clickinv.getItem(0).getItemMeta().getLore()
+							.get(1).replace("§", "").trim();
+					String questnumber = clickinv.getItem(0).getItemMeta()
+							.getLore().get(2).replace("§", "").trim();
+
 					if (item.getItemMeta().getDisplayName().equals("To Main")) {
 						event.setCancelled(true);
 						player.closeInventory();
@@ -199,11 +226,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the new title of this killquest");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("title");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -213,11 +237,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the monster name");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("mob");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -227,11 +248,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type how many monsters you need to kill");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("count");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -242,11 +260,8 @@ public class QuestInvClick implements Listener {
 						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
 								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("reward");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -257,11 +272,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type a number for the repeat delay. If there isn't any repeat possible type -1");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("repeat");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -272,11 +284,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type a number for the minimum lvl of the player (in score board not xp lvl).");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("minimum");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -286,11 +295,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the sentence the player would read when selecting the quest.");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("message");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -301,11 +307,8 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("prere if nothing is required prior to this type none. otherwise type: <killquest/harvestquest/talktoquest> <questnumber>");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("killquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("prereq");
 						questers.npcpos.put(player.getUniqueId(), temp);
@@ -313,35 +316,36 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName()
 							.equals("Delete Quest")) {
 						event.setCancelled(true);
-						int questnumber = Integer.parseInt(clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1));
-						questers.killquests.get(npcuuid).remove(questnumber);
-						questers.removekill(questnumber);
+
+						switch (Integer.parseInt(type)) {
+						case 1:
+							questers.killquests.get(npcuuid)
+									.remove(questnumber);
+							questers.removekill(Integer.parseInt(questnumber));
+							questers.allkill(player,
+									questers.killquests.get(npcuuid), npcuuid);
+							break;
+						case 2:
+							questers.harvestquests.get(npcuuid).remove(
+									questnumber);
+							questers.removeharvest(Integer
+									.parseInt(questnumber));
+							questers.allharvest(player,
+									questers.harvestquests.get(npcuuid),
+									npcuuid);
+
+							break;
+						case 3:
+							questers.talktoquests.get(npcuuid).remove(
+									questnumber);
+							questers.removetalkto(Integer.parseInt(questnumber));
+							questers.alltalkto(player,
+									questers.talktoquests.get(npcuuid), npcuuid);
+							break;
+						}
+
 						player.closeInventory();
-						questers.allkill(player,
-								questers.killquests.get(npcuuid), npcuuid);
-					}
-				}
-				if (clickinv.getName().equals("HarvestQuest")) {
-					if (item.getItemMeta().getDisplayName().equals("To Main")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						questers.npcsettingsmain(npcuuid, player);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Title")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the new title of this harvestquest");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("title");
-						questers.npcpos.put(player.getUniqueId(), temp);
+
 					}
 					if (item.getItemMeta().getDisplayName()
 							.equals("Item to get")) {
@@ -349,135 +353,10 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the item id");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("item");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Count")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type how many items you need");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("count");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Reward")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
-								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("reward");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Repeat Delay")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type a number for the repeat delay. If there isn't any repeat possible type -1");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("repeat");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Minimum Lvl")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type a number for the minimum lvl of the player (in score board not xp lvl).");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("minimum");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Message")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the sentence the player would read when selecting the quest.");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("message");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Prerequisite")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("prere if nothing is required prior to this type none. otherwise type: <killquest/harvestquest/talktoquest> <questnumber>");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("harvestquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("prereq");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Delete Quest")) {
-						event.setCancelled(true);
-						int questnumber = Integer.parseInt(clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1));
-						questers.harvestquests.get(npcuuid).remove(questnumber);
-						questers.removeharvest(questnumber);
-						player.closeInventory();
-						questers.allharvest(player,
-								questers.harvestquests.get(npcuuid), npcuuid);
-					}
-				}
-
-				if (clickinv.getName().equals("TalktoQuest")) {
-					if (item.getItemMeta().getDisplayName().equals("To Main")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						questers.npcsettingsmain(npcuuid, player);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Title")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the new title of this talktoquest");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("title");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 					if (item.getItemMeta().getDisplayName().equals("Person")) {
@@ -485,103 +364,13 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the name of the npc.");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
+						temp.add(type);
 						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
 						temp.add(questnumber);
 						temp.add("person");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
-					if (item.getItemMeta().getDisplayName().equals("Reward")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
-								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("reward");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Minimum Lvl")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type a number that is the minimum lvl of this quest");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("minimum");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Repeat Delay")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type a number for how many seconds this quest to accept again. type -1 for no repeat possible");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("repeat");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName().equals("Message")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("type the message the npc would say when accepting the quest.");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("message");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Prerequisite")) {
-						event.setCancelled(true);
-						player.closeInventory();
-						player.sendMessage("prere if nothing is required prior to this type none. otherwise type: <killquest/harvestquest/talktoquest> <questnumber>");
-						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("talktoquest");
-						temp.add(npcuuid.toString());
-						String questnumber = clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1);
-						temp.add(questnumber);
-						temp.add("prereq");
-						questers.npcpos.put(player.getUniqueId(), temp);
-					}
-					if (item.getItemMeta().getDisplayName()
-							.equals("Delete Quest")) {
-						event.setCancelled(true);
-						int questnumber = Integer.parseInt(clickinv
-								.getItem(clickinv.getSize() - 1).getItemMeta()
-								.getLore().get(1));
-						questers.talktoquests.get(npcuuid).remove(questnumber);
-						questers.removetalkto(questnumber);
-						player.closeInventory();
-						questers.alltalkto(player,
-								questers.talktoquests.get(npcuuid), npcuuid);
-					}
 				}
-
 				if (clickinv.getName().equals("WarpList")) {
 					if (item.getItemMeta().getDisplayName().equals("To Main")) {
 						event.setCancelled(true);
@@ -738,6 +527,7 @@ public class QuestInvClick implements Listener {
 		}
 	}
 
+	@SuppressWarnings("static-access")
 	@EventHandler
 	public void PlayerQuestSelector(InventoryClickEvent event) {
 		Inventory clickedinv = event.getClickedInventory();
@@ -748,12 +538,13 @@ public class QuestInvClick implements Listener {
 
 				Player player = (Player) event.getWhoClicked();
 				ItemStack item = event.getCurrentItem();
-				if (event.getSlot() == clickedinv.getSize()-1) {
+				if (event.getSlot() == clickedinv.getSize() - 1) {
 					event.setCancelled(true);
 					return;
 				}
 				int number = Integer.parseInt(item.getItemMeta().getLore()
-						.get(item.getItemMeta().getLore().size() - 1).replace("§", ""));
+						.get(item.getItemMeta().getLore().size() - 1)
+						.replace("§", ""));
 				String message = GetMessage(item.getType(), number);
 				String quetstype = GetTypeQuest(item.getType());
 
@@ -794,7 +585,8 @@ public class QuestInvClick implements Listener {
 					}
 				} else {
 					int Number2 = Integer.parseInt(item.getItemMeta().getLore()
-							.get(item.getItemMeta().getLore().size() - 2).replace("§", ""));
+							.get(item.getItemMeta().getLore().size() - 2)
+							.replace("§", ""));
 					player.closeInventory();
 					tr.boardcheck(npcuuid, number, player,
 							questers.returnwarp(Number2).getStartloc());

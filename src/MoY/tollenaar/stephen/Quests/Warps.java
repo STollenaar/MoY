@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -14,6 +15,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
+
+import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 
 public class Warps {
 	private int warpid;
@@ -32,16 +35,7 @@ public class Warps {
 
 		Inventory warpinv = Bukkit.createInventory(null, 18, "WarpList");
 		// title
-		ItemStack title = new ItemStack(Material.BOOK);
-		{
-				type.contains("thingy");
-			List<String> temp = new ArrayList<String>();
-			temp.add(name);
-			ItemMeta tem = title.getItemMeta();
-			tem.setDisplayName("Title");
-			tem.setLore(temp);
-			title.setItemMeta(tem);
-		}
+		ItemStack title = ItemGenerator.InfoQuest(name, warpid, 4, npcuuid.toString());
 
 		// transportation
 		ItemStack transport = new ItemStack(Material.BOAT);
@@ -83,8 +77,6 @@ public class Warps {
 		ItemStack main = new ItemStack(Material.NETHER_STAR);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add(npcuuid.toString());
-			temp.add(Integer.toString(warpid));
 			ItemMeta tem = main.getItemMeta();
 			tem.setDisplayName("To Main");
 			tem.setLore(temp);

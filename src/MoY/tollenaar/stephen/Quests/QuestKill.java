@@ -7,6 +7,7 @@ import java.util.UUID;
 
 
 
+
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -15,6 +16,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
+
+import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 
 public class QuestKill {
 
@@ -41,90 +44,22 @@ public class QuestKill {
 		Inventory killquest = Bukkit.createInventory(null, 18, "KillQuest");
 
 		// title
-		ItemStack title = new ItemStack(Material.BOOK);
-		{
-
-			List<String> temp = new ArrayList<String>();
-			temp.add(name);
-			ItemMeta tem = title.getItemMeta();
-			tem.setDisplayName("Title");
-			tem.setLore(temp);
-			title.setItemMeta(tem);
-		}
+		ItemStack title = ItemGenerator.InfoQuest(name, questnumber, 1, npcuuid.toString());
 
 		// monster
-		ItemStack monsteri = new ItemStack(Material.SKULL_ITEM);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(monster);
-			ItemMeta tem = monsteri.getItemMeta();
-			tem.setDisplayName("Mob");
-			tem.setLore(temp);
-			monsteri.setItemMeta(tem);
-		}
+		ItemStack monsteri = ItemGenerator.QuestReq(monster);
 		// count monsters
-		ItemStack counti = new ItemStack(Material.ARROW);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(Integer.toString(count));
-			ItemMeta tem = counti.getItemMeta();
-			tem.setDisplayName("Count");
-			tem.setLore(temp);
-			counti.setItemMeta(tem);
-		}
+		ItemStack counti =ItemGenerator.CountQuest(count);
 		// reward
-		ItemStack rewardi = new ItemStack(Material.GOLD_INGOT);
-		{
-			List<String> temp = new ArrayList<String>();
-			for(String in : reward){
-				temp.add(in);
-			}
-			ItemMeta tem = rewardi.getItemMeta();
-			tem.setDisplayName("Reward");
-			tem.setLore(temp);
-			rewardi.setItemMeta(tem);
-		}
+		ItemStack rewardi = ItemGenerator.RewardQuest(reward);
 		// min level
-		ItemStack lvl = new ItemStack(Material.EXP_BOTTLE);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(Integer.toString(minlvl));
-			ItemMeta tem = lvl.getItemMeta();
-			tem.setDisplayName("Minimum Lvl");
-			tem.setLore(temp);
-			lvl.setItemMeta(tem);
-		}
+		ItemStack lvl = ItemGenerator.MinLvlQuest(minlvl);
 		// repeat
-		ItemStack repeat = new ItemStack(Material.WATCH);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(delay);
-			ItemMeta tem = repeat.getItemMeta();
-			tem.setDisplayName("Repeat Delay");
-			tem.setLore(temp);
-			repeat.setItemMeta(tem);
-		}
+		ItemStack repeat =ItemGenerator.RepeatQuest(delay);
 		// message
-		ItemStack messagei = new ItemStack(Material.PAPER);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(message);
-			ItemMeta tem = messagei.getItemMeta();
-			tem.setDisplayName("Message");
-			tem.setLore(temp);
-			messagei.setItemMeta(tem);
-		}
+		ItemStack messagei = ItemGenerator.MessageQuest(message);
 		// prerequisite
-		ItemStack prereqi = new ItemStack(Material.ENCHANTED_BOOK);
-		{
-			List<String> temp = new ArrayList<String>();
-			temp.add(prereq);
-			ItemMeta tem = prereqi.getItemMeta();
-			tem.setDisplayName("Prerequisite");
-			tem.setLore(temp);
-			prereqi.setItemMeta(tem);
-		}
-
+		ItemStack prereqi = ItemGenerator.PrereqQuest(prereq);
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -137,8 +72,6 @@ public class QuestKill {
 		ItemStack main = new ItemStack(Material.NETHER_STAR);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add(npcuuid.toString());
-			temp.add(Integer.toString(questnumber));
 			ItemMeta tem = main.getItemMeta();
 			tem.setDisplayName("To Main");
 			tem.setLore(temp);

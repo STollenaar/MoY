@@ -40,6 +40,7 @@ public class QuestsServerSide extends Quest {
 	public HashMap<UUID, HashSet<Integer>> killquests = new HashMap<UUID, HashSet<Integer>>();
 	public HashMap<UUID, HashSet<Integer>> harvestquests = new HashMap<UUID, HashSet<Integer>>();
 	public HashMap<UUID, HashSet<Integer>> talktoquests = new HashMap<UUID, HashSet<Integer>>();
+	public HashMap<UUID, HashSet<Integer>> eventquests = new HashMap<UUID, HashSet<Integer>>();
 	public HashMap<UUID, Integer> warplists = new HashMap<UUID, Integer>();
 
 	// active npc's
@@ -406,9 +407,17 @@ public class QuestsServerSide extends Quest {
 			temp.setLore(nu);
 			delete.setItemMeta(temp);
 		}
+		// event quest
+		ItemStack event = new ItemStack(Material.ENCHANTED_BOOK);
+		{
+			ItemMeta temp = event.getItemMeta();
+			temp.setDisplayName("Event Quest");
+			event.setItemMeta(temp);
+		}
+		
 
 		String temp = "Main settings";
-		Inventory myinventory = Bukkit.createInventory(null, 9, temp);
+		Inventory myinventory = Bukkit.createInventory(null, 18, temp);
 		myinventory.addItem(npcname);
 		myinventory.addItem(npcskin);
 		myinventory.addItem(npcuid);
@@ -417,6 +426,7 @@ public class QuestsServerSide extends Quest {
 		myinventory.addItem(harvestquest);
 		myinventory.addItem(warplists);
 		myinventory.addItem(talktoquest);
+		myinventory.addItem(event);
 		myinventory.setItem(myinventory.getSize() - 1, delete);
 		player.openInventory(myinventory);
 	}

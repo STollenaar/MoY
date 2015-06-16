@@ -19,7 +19,7 @@ import MoY.tollenaar.stephen.Commands.CommandsNPC;
 import MoY.tollenaar.stephen.Commands.CommandsParty;
 import MoY.tollenaar.stephen.Commands.CommandsPlayerinfo;
 import MoY.tollenaar.stephen.Files.Filewriters;
-import MoY.tollenaar.stephen.PlayerInfo.Playerinfoding;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.Quests.ProgressHarvest;
 import MoY.tollenaar.stephen.Quests.ProgressKill;
 import MoY.tollenaar.stephen.Quests.Quest;
@@ -46,7 +46,7 @@ public class MoY extends JavaPlugin {
 	public Questinteracts qinteract;
 	public QuestParticles qp;
 	public DbStuff database;
-	public Playerinfoding playerinfo;
+	public Playerinfo playerinfo;
 	public Travel tr;
 	public RandomEvents re;
 	public TravelBoatEvent boat;
@@ -70,13 +70,16 @@ public class MoY extends JavaPlugin {
 		config.options().copyDefaults(true);
 		saveConfig();
 		plugin = this;
+		
+		playerinfo = new Playerinfo(this);
+		
 		q = new Quest(this);
 
 		
 		party = new Party(this);
 		lvl = new LevelSystems(this);
 		skill = new Skillimprovement(this);
-		playerinfo = new Playerinfoding(this);
+		
 		re = new RandomEvents(this);
 
 		questers = new QuestsServerSide(this);
@@ -147,7 +150,7 @@ public class MoY extends JavaPlugin {
 			pm.registerEvents(qe, this);
 
 			pm.registerEvents(new ProgressKill(this), this);
-			pm.registerEvents(new ProgressHarvest(), this);
+			pm.registerEvents(new ProgressHarvest(playerinfo), this);
 			pm.registerEvents(new QuestProgListener(this), this);
 			
 			pm.registerEvents(new ProgListener(this), this);

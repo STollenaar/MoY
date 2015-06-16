@@ -20,10 +20,9 @@ public class QuestParticles {
 	private static MoY plugin;
 	private static QuestsServerSide q;
 
-	@SuppressWarnings("static-access")
 	public QuestParticles(MoY instance) {
-		this.plugin = instance;
-		this.q = instance.questers;
+		QuestParticles.plugin = instance;
+		QuestParticles.q = instance.questers;
 	}
 
 	public static void collectplayers(Location loc, UUID npcuuid) {
@@ -81,11 +80,10 @@ public class QuestParticles {
 
 	private static boolean tocompletetalk(UUID npcuuid, Player player) {
 		boolean checks = false;
-		if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-			if (Playerstats.activequests.get(player.getUniqueId())
-					.get("talkto") != null) {
-				for (Integer i : Playerstats.activequests.get(
-						player.getUniqueId()).get("talkto")) {
+		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
+		if (p.getactivetype() != null) {
+			if (p.getactives("talkto") != null) {
+				for (Integer i : p.getactives("talkto")) {
 					QuestTalkto talk = q.returntalkto(i);
 					if (plugin.questers.uniquenpcid.get(talk.getNpcid()) == npcuuid) {
 						checks = true;
@@ -99,12 +97,11 @@ public class QuestParticles {
 
 	private static boolean completedq(UUID npcuuid, Player player) {
 		boolean checks = false;
-		if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-			for (String type : Playerstats.completedquests.get(
-					player.getUniqueId()).keySet()) {
+		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
+		if (p.getcompletedtype() != null) {
+			for (String type : p.getcompletedtype()) {
 				if (type.equals("kill")) {
-					for (int number : Playerstats.completedquests.get(
-							player.getUniqueId()).get(type)) {
+					for (int number : p.getcompleted(type)) {
 						try {
 							if (plugin.questers.killquests.get(npcuuid)
 									.contains(number)) {
@@ -115,8 +112,7 @@ public class QuestParticles {
 						}
 					}
 				} else if (type.equals("harvest")) {
-					for (int number : Playerstats.completedquests.get(
-							player.getUniqueId()).get(type)) {
+					for (int number : p.getcompleted(type)) {
 						try {
 							if (plugin.questers.harvestquests.get(npcuuid)
 									.contains(number)) {
@@ -127,8 +123,7 @@ public class QuestParticles {
 						}
 					}
 				} else {
-					for (int number : Playerstats.completedquests.get(
-							player.getUniqueId()).get(type)) {
+					for (int number : p.getcompleted(type)) {
 						try {
 							if (plugin.questers.talktoquests.get(npcuuid) != null
 									&& plugin.questers.talktoquests
@@ -188,18 +183,17 @@ public class QuestParticles {
 	private static boolean check(UUID npcuuid, Player player, int questnumber,
 			String type) {
 		boolean check = true;
+		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
 		switch (type) {
 		case "kill":
 			QuestKill kill = q.returnkill(questnumber);
 			if (!kill.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = kill.getPrereq().split("=");
 
-				if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-							preq[0].trim()) != null) {
-						if (!Playerstats.rewardedlist.get(player.getUniqueId())
-								.get(preq[0].trim())
-								.containsKey(Integer.parseInt(preq[1].trim()))) {
+				if (p.getrewardedtype() != null) {
+					if (p.getrewardednumber(preq[0].trim()) != null) {
+						if (!p.getrewardednumber(preq[0].trim()).contains(
+								Integer.parseInt(preq[1].trim()))) {
 							check = false;
 						}
 					} else {
@@ -210,41 +204,31 @@ public class QuestParticles {
 				}
 			}
 
-			if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-				if (Playerstats.activequests.get(player.getUniqueId()).get(
-						"kill") != null) {
-					if (Playerstats.activequests.get(player.getUniqueId())
-							.get("kill").contains(questnumber)) {
+			if (p.getactivetype() != null) {
+				if (p.getactives(type) != null) {
+					if (p.getactives(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-				if (Playerstats.completedquests.get(player.getUniqueId()).get(
-						"kill") != null) {
-					if (Playerstats.completedquests.get(player.getUniqueId())
-							.get("kill").contains(questnumber)) {
+			if (p.getcompletedtype() != null) {
+				if (p.getcompleted(type) != null) {
+					if (p.getcompleted(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-				if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-						"kill") != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId())
-							.get("kill").get(questnumber) != null) {
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber(type) != null) {
+					if (p.getrewardedtime(type, questnumber) != 0) {
 						if (!q.returnkill(questnumber).getDelay().equals("-1")) {
 							long logged = parseDateDiff(
-									q.returnkill(questnumber).getDelay(),
-									true,
-									Playerstats.rewardedlist
-											.get(player.getUniqueId())
-											.get("kill").get(questnumber));
+									q.returnkill(questnumber).getDelay(), true,
+									p.getrewardedtime(type, questnumber));
 							if (logged <= System.currentTimeMillis()) {
 
-								Playerstats.rewardedlist
-										.get(player.getUniqueId()).get("kill")
-										.keySet().remove(questnumber);
+								p.deleterewarded(type, questnumber);
+								;
 								plugin.database.deletecomkill(Integer
 										.toString(questnumber), player
 										.getUniqueId().toString());
@@ -264,12 +248,10 @@ public class QuestParticles {
 			if (!harvest.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = harvest.getPrereq().split("=");
 
-				if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-							preq[0].trim()) != null) {
-						if (!Playerstats.rewardedlist.get(player.getUniqueId())
-								.get(preq[0].trim())
-								.containsKey(Integer.parseInt(preq[1].trim()))) {
+				if (p.getrewardedtype() != null) {
+					if (p.getrewardednumber(preq[0].trim()) != null) {
+						if (!p.getrewardednumber(preq[0].trim()).contains(
+								Integer.parseInt(preq[1].trim()))) {
 							check = false;
 						}
 					} else {
@@ -279,54 +261,39 @@ public class QuestParticles {
 					check = false;
 				}
 			}
-			if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-				if (Playerstats.activequests.get(player.getUniqueId()).get(
-						"harvest") != null) {
-					if (Playerstats.activequests.get(player.getUniqueId())
-							.get("harvest").contains(questnumber)) {
+			if (p.getactivetype() != null) {
+				if (p.getactives(type) != null) {
+					if (p.getactives(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-				if (Playerstats.completedquests.get(player.getUniqueId()).get(
-						"harvest") != null) {
-					if (Playerstats.completedquests.get(player.getUniqueId())
-							.get("harvest").contains(questnumber)) {
+			if (p.getcompletedtype() != null) {
+				if (p.getcompleted(type) != null) {
+					if (p.getcompleted(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-				if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-						"harvest") != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId())
-							.get("harvest").get(questnumber) != null) {
-						if (Playerstats.rewardedlist.get(player.getUniqueId())
-								.get("harvest").get(questnumber) != null) {
-							if (!q.returnharvest(questnumber).getDelay()
-									.equals("-1")) {
-								long logged = parseDateDiff(
-										q.returnharvest(questnumber).getDelay(),
-										true,
-										Playerstats.rewardedlist
-												.get(player.getUniqueId())
-												.get("harvest")
-												.get(questnumber));
-								if (logged <= System.currentTimeMillis()) {
-									Playerstats.rewardedlist
-											.get(player.getUniqueId())
-											.get("harvest").keySet()
-											.remove(questnumber);
-									plugin.database.deletecomkill(
-											Integer.toString(questnumber),
-											player.getUniqueId().toString());
-								} else {
-									check = false;
-								}
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber(type) != null) {
+					if (p.getrewardedtime(type, questnumber) != 0) {
+						if (!q.returnharvest(questnumber).getDelay()
+								.equals("-1")) {
+							long logged = parseDateDiff(
+									q.returnharvest(questnumber).getDelay(),
+									true, p.getrewardedtime(type, questnumber));
+							if (logged <= System.currentTimeMillis()) {
+								p.deleterewarded(type, questnumber);
+								;
+								plugin.database.deletecomkill(Integer
+										.toString(questnumber), player
+										.getUniqueId().toString());
 							} else {
 								check = false;
 							}
+						} else {
+							check = false;
 						}
 					}
 				}
@@ -337,12 +304,10 @@ public class QuestParticles {
 			if (!talk.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = talk.getPrereq().split("=");
 
-				if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-							preq[0].trim()) != null) {
-						if (!Playerstats.rewardedlist.get(player.getUniqueId())
-								.get(preq[0].trim())
-								.containsKey(Integer.parseInt(preq[1].trim()))) {
+				if (p.getrewardedtype() != null) {
+					if (p.getrewardednumber(preq[0].trim()) != null) {
+						if (!p.getrewardednumber(preq[0].trim()).contains(
+								Integer.parseInt(preq[1].trim()))) {
 							check = false;
 						}
 					} else {
@@ -352,53 +317,39 @@ public class QuestParticles {
 					check = false;
 				}
 			}
-			if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-				if (Playerstats.activequests.get(player.getUniqueId()).get(
-						"talkto") != null) {
-					if (Playerstats.activequests.get(player.getUniqueId())
-							.get("talkto").contains(questnumber)) {
+			if (p.getactivetype() != null) {
+				if (p.getactives(type) != null) {
+					if (p.getactives(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-				if (Playerstats.completedquests.get(player.getUniqueId()).get(
-						"talkto") != null) {
-					if (Playerstats.completedquests.get(player.getUniqueId())
-							.get("talkto").contains(questnumber)) {
+			if (p.getcompletedtype() != null) {
+				if (p.getcompleted(type) != null) {
+					if (p.getcompleted(type).contains(questnumber)) {
 						check = false;
 					}
 				}
 			}
-			if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-				if (Playerstats.rewardedlist.get(player.getUniqueId()).get(
-						"talkto") != null) {
-					if (Playerstats.rewardedlist.get(player.getUniqueId())
-							.get("talkto").get(questnumber) != null) {
-						if (Playerstats.rewardedlist.get(player.getUniqueId())
-								.get("talkto").get(questnumber) != null) {
-							if (!q.returntalkto(questnumber).getDelay()
-									.equals("-1")) {
-								long logged = parseDateDiff(
-										q.returntalkto(questnumber).getDelay(),
-										true,
-										Playerstats.rewardedlist
-												.get(player.getUniqueId())
-												.get("talkto").get(questnumber));
-								if (logged <= System.currentTimeMillis()) {
-									Playerstats.rewardedlist
-											.get(player.getUniqueId())
-											.get("talkto").keySet()
-											.remove(questnumber);
-									plugin.database.deletecomtalk(
-											Integer.toString(questnumber),
-											player.getUniqueId().toString());
-								} else {
-									check = false;
-								}
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber(type) != null) {
+					if (p.getrewardedtime(type, questnumber) != 0) {
+						if (!q.returntalkto(questnumber).getDelay()
+								.equals("-1")) {
+							long logged = parseDateDiff(
+									q.returntalkto(questnumber).getDelay(),
+									true, p.getrewardedtime(type, questnumber));
+							if (logged <= System.currentTimeMillis()) {
+								p.deleterewarded(type, questnumber);
+								;
+								plugin.database.deletecomtalk(Integer
+										.toString(questnumber), player
+										.getUniqueId().toString());
 							} else {
 								check = false;
 							}
+						} else {
+							check = false;
 						}
 					}
 				}

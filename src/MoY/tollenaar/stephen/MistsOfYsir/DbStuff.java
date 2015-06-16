@@ -23,7 +23,9 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.fusesource.jansi.Ansi;
 
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
+import MoY.tollenaar.stephen.Quests.Quest;
 import MoY.tollenaar.stephen.Quests.QuestTalkto;
 import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 import MoY.tollenaar.stephen.Quests.Warps;
@@ -44,6 +46,7 @@ public class DbStuff {
 	private String mysqlhost;
 	private int scheduler;
 	private int dbsaver;
+	private Playerinfo playerinfo;
 
 	public void TableCreate() {
 		Statement statement;
@@ -322,8 +325,10 @@ public class DbStuff {
 
 	public void saveplayerdata() {
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.level.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
+			Playerstats p = playerinfo.getplayer(player);
+
 			String test = "SELECT `strength` FROM `Mist_PlayerData` WHERE `useruuid` LIKE ?;";
 
 			String insert = "INSERT INTO Mist_PlayerData (" + "`useruuid`, "
@@ -361,23 +366,23 @@ public class DbStuff {
 					} else {
 						pst.setString(2, null);
 					}
-					pst.setInt(3, Playerstats.woodcutting.get(player));
-					pst.setInt(4, Playerstats.mining.get(player));
-					pst.setInt(5, Playerstats.smelting.get(player));
-					pst.setInt(6, Playerstats.cooking.get(player));
-					pst.setInt(7, Playerstats.fishing.get(player));
+					pst.setInt(3, p.getWoodcutting());
+					pst.setInt(4, p.getMining());
+					pst.setInt(5, p.getSmelting());
+					pst.setInt(6, p.getCooking());
+					pst.setInt(7, p.getFishing());
 
-					pst.setInt(8, Playerstats.woodcuttingprog.get(player));
-					pst.setInt(9, Playerstats.miningprog.get(player));
-					pst.setInt(10, Playerstats.smeltingprog.get(player));
-					pst.setInt(11, Playerstats.cookingprog.get(player));
-					pst.setInt(12, Playerstats.fishingprog.get(player));
+					pst.setInt(8, p.getWoodcuttingprog());
+					pst.setInt(9, p.getMiningprog());
+					pst.setInt(10, p.getSmeltingprog());
+					pst.setInt(11, p.getCookingprog());
+					pst.setInt(12, p.getFishingprog());
 
-					pst.setInt(13, Playerstats.abilitiescore.get(player));
-					pst.setInt(14, Playerstats.Strengthscore.get(player));
-					pst.setInt(15, Playerstats.Dexscore.get(player));
-					pst.setInt(16, Playerstats.level.get(player));
-					pst.setInt(17, Playerstats.levelprog.get(player));
+					pst.setInt(13, p.getAbility());
+					pst.setInt(14, p.getStrength());
+					pst.setInt(15, p.getDex());
+					pst.setInt(16, p.getLevel());
+					pst.setInt(17, p.getLevelprog());
 					pst.setString(18, player.toString());
 
 					pst.execute();
@@ -395,23 +400,23 @@ public class DbStuff {
 					} else {
 						pst.setString(3, null);
 					}
-					pst.setInt(4, Playerstats.woodcutting.get(player));
-					pst.setInt(5, Playerstats.mining.get(player));
-					pst.setInt(6, Playerstats.smelting.get(player));
-					pst.setInt(7, Playerstats.cooking.get(player));
-					pst.setInt(8, Playerstats.fishing.get(player));
+					pst.setInt(4, p.getWoodcutting());
+					pst.setInt(5, p.getMining());
+					pst.setInt(6, p.getSmelting());
+					pst.setInt(7, p.getCooking());
+					pst.setInt(8, p.getFishing());
 
-					pst.setInt(9, Playerstats.woodcuttingprog.get(player));
-					pst.setInt(10, Playerstats.miningprog.get(player));
-					pst.setInt(11, Playerstats.smeltingprog.get(player));
-					pst.setInt(12, Playerstats.cookingprog.get(player));
-					pst.setInt(13, Playerstats.fishingprog.get(player));
+					pst.setInt(9, p.getWoodcuttingprog());
+					pst.setInt(10, p.getMiningprog());
+					pst.setInt(11, p.getSmeltingprog());
+					pst.setInt(12, p.getCookingprog());
+					pst.setInt(13, p.getFishingprog());
 
-					pst.setInt(14, Playerstats.abilitiescore.get(player));
-					pst.setInt(15, Playerstats.Strengthscore.get(player));
-					pst.setInt(16, Playerstats.Dexscore.get(player));
-					pst.setInt(17, Playerstats.level.get(player));
-					pst.setInt(18, Playerstats.levelprog.get(player));
+					pst.setInt(14, p.getAbility());
+					pst.setInt(15, p.getStrength());
+					pst.setInt(16, p.getDex());
+					pst.setInt(17, p.getLevel());
+					pst.setInt(18, p.getLevelprog());
 
 					pst.execute();
 				}
@@ -498,8 +503,9 @@ public class DbStuff {
 
 	public void saveactivequest() {
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.activequests.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
+			Playerstats p = playerinfo.getplayer(player);
 			String insert = "INSERT INTO Mist_QuestActive (" + "`useruuid`,"
 					+ "`killquests`," + "`harvestquests`,"
 					+ "`talktoquests`) VALUES" + "(?,?,?,?);";
@@ -509,147 +515,143 @@ public class DbStuff {
 
 			String test = "SELECT * FROM Mist_QuestActive WHERE `useruuid`=?;";
 			PreparedStatement pst = null;
-			try {
-				pst = con.prepareStatement(test);
-				pst.setString(1, player.toString());
-				ResultSet rs = pst.executeQuery();
-				if (rs.next() == false) {
-					pst.close();
-					pst = con.prepareStatement(insert);
+			if (p.getactivetype() != null) {
+				try {
+					pst = con.prepareStatement(test);
 					pst.setString(1, player.toString());
-					if (Playerstats.activequests.get(player).get("kill") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("kill")) {
-							String toadd = number
-									+ "-"
-									+ questers.returnProgress(player, "kill",
-											number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-
-						pst.setString(2, quests);
-					} else {
-						pst.setString(2, null);
-					}
-					if (Playerstats.activequests.get(player).get("harvest") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("harvest")) {
-							String toadd = number
-									+ "-"
-									+ questers.returnProgress(player,
-											"harvest", number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(3, quests);
-					} else {
-						pst.setString(3, null);
-					}
-					if (Playerstats.activequests.get(player).get("talkto") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("talkto")) {
-							String toadd = Integer.toString(number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(4, quests);
-					} else {
-						pst.setString(4, null);
-					}
-					pst.execute();
-
-				} else {
-					pst.close();
-					pst = con.prepareStatement(update);
-
-					if (Playerstats.activequests.get(player).get("kill") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("kill")) {
-							String toadd = number
-									+ "-"
-									+ questers.returnProgress(player, "kill",
-											number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-
-						pst.setString(1, quests);
-					} else {
-						pst.setString(1, null);
-					}
-					if (Playerstats.activequests.get(player).get("harvest") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("harvest")) {
-							String toadd = number
-									+ "-"
-									+ questers.returnProgress(player,
-											"harvest", number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(2, quests);
-					} else {
-						pst.setString(2, null);
-					}
-					if (Playerstats.activequests.get(player).get("talkto") != null) {
-						String quests = null;
-						for (int number : Playerstats.activequests.get(player)
-								.get("talkto")) {
-							String toadd = Integer.toString(number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(3, quests);
-					} else {
-						pst.setString(3, null);
-					}
-					pst.setString(4, player.toString());
-
-					pst.execute();
-				}
-			} catch (SQLException e) {
-				this.plugin.getLogger().severe(e.getMessage());
-				plugin.getLogger().info(
-						"There was a error during the savings of the data to the database: "
-								+ e.getMessage());
-				try {
-					if (pst != null) {
+					ResultSet rs = pst.executeQuery();
+					if (rs.next() == false) {
 						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			} finally {
-				try {
-					if (pst != null) {
+						pst = con.prepareStatement(insert);
+						pst.setString(1, player.toString());
+						if (p.getactives("kill") != null) {
+							String quests = null;
+							for (int number : p.getactives("kill")) {
+								String toadd = number
+										+ "-"
+										+ questers.returnProgress(player,
+												"kill", number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+
+							pst.setString(2, quests);
+						} else {
+							pst.setString(2, null);
+						}
+						if (p.getactives("harvest") != null) {
+							String quests = null;
+							for (int number : p.getactives("harvest")) {
+								String toadd = number
+										+ "-"
+										+ questers.returnProgress(player,
+												"harvest", number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(3, quests);
+						} else {
+							pst.setString(3, null);
+						}
+						if (p.getactives("talkto") != null) {
+							String quests = null;
+							for (int number : p.getactives("talkto")) {
+								String toadd = Integer.toString(number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(4, quests);
+						} else {
+							pst.setString(4, null);
+						}
+						pst.execute();
+
+					} else {
 						pst.close();
+						pst = con.prepareStatement(update);
+
+						if (p.getactives("kill") != null) {
+							String quests = null;
+							for (int number : p.getactives("kill")) {
+								String toadd = number
+										+ "-"
+										+ questers.returnProgress(player,
+												"kill", number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+
+							pst.setString(1, quests);
+						} else {
+							pst.setString(1, null);
+						}
+						if (p.getactives("harvest") != null) {
+							String quests = null;
+							for (int number : p.getactives("harvest")) {
+								String toadd = number
+										+ "-"
+										+ questers.returnProgress(player,
+												"harvest", number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(2, quests);
+						} else {
+							pst.setString(2, null);
+						}
+						if (p.getactives("talkto") != null) {
+							String quests = null;
+							for (int number : p.getactives("talkto")) {
+								String toadd = Integer.toString(number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(3, quests);
+						} else {
+							pst.setString(3, null);
+						}
+						pst.setString(4, player.toString());
+
+						pst.execute();
 					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
+				} catch (SQLException e) {
+					this.plugin.getLogger().severe(e.getMessage());
+					plugin.getLogger().info(
+							"There was a error during the savings of the data to the database: "
+									+ e.getMessage());
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
+				} finally {
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
 				}
 			}
 		}
@@ -665,137 +667,133 @@ public class DbStuff {
 
 		String test = "SELECT * FROM Mist_QuestRewardable WHERE `useruuid`=?;";
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.completedquests.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
-
-			PreparedStatement pst = null;
-			try {
-				pst = con.prepareStatement(test);
-				pst.setString(1, player.toString());
-				ResultSet rs = pst.executeQuery();
-				if (rs.next() == false) {
-					pst.close();
-					pst = con.prepareStatement(insert);
+			Playerstats p = playerinfo.getplayer(player);
+			if (p.getcompletedtype() != null) {
+				PreparedStatement pst = null;
+				try {
+					pst = con.prepareStatement(test);
 					pst.setString(1, player.toString());
-					if (Playerstats.completedquests.get(player).get("kill") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("kill")) {
-
-							if (quests == null) {
-								quests = number + "_";
-							} else {
-								quests += number + "_";
-							}
-						}
-
-						pst.setString(2, quests);
-					} else {
-						pst.setString(2, null);
-					}
-					if (Playerstats.completedquests.get(player).get("harvest") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("harvest")) {
-							if (quests == null) {
-								quests = number + "_";
-							} else {
-								quests += number + "_";
-							}
-						}
-						pst.setString(3, quests);
-					} else {
-						pst.setString(3, null);
-					}
-					if (Playerstats.completedquests.get(player).get("talkto") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("talkto")) {
-							String toadd = Integer.toString(number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(4, quests);
-					} else {
-						pst.setString(4, null);
-					}
-
-					pst.execute();
-				} else {
-					pst.close();
-					pst = con.prepareStatement(update);
-					if (Playerstats.completedquests.get(player).get("kill") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("kill")) {
-
-							if (quests == null) {
-								quests = number + "_";
-							} else {
-								quests += number + "_";
-							}
-						}
-
-						pst.setString(1, quests);
-					} else {
-						pst.setString(1, null);
-					}
-					if (Playerstats.completedquests.get(player).get("harvest") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("harvest")) {
-
-							if (quests == null) {
-								quests = number + "_";
-							} else {
-								quests += number + "_";
-							}
-						}
-						pst.setString(2, quests);
-					} else {
-						pst.setString(2, null);
-					}
-					if (Playerstats.completedquests.get(player).get("talkto") != null) {
-						String quests = null;
-						for (int number : Playerstats.completedquests.get(
-								player).get("talkto")) {
-							String toadd = Integer.toString(number);
-							if (quests == null) {
-								quests = toadd + "_";
-							} else {
-								quests += toadd + "_";
-							}
-						}
-						pst.setString(3, quests);
-					} else {
-						pst.setString(3, null);
-					}
-					pst.setString(4, player.toString());
-
-					pst.execute();
-				}
-			} catch (SQLException e) {
-				this.plugin.getLogger().severe(e.getMessage());
-				plugin.getLogger().info(
-						"There was a error during the savings of the data to the database: "
-								+ e.getMessage());
-				try {
-					if (pst != null) {
+					ResultSet rs = pst.executeQuery();
+					if (rs.next() == false) {
 						pst.close();
-					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
-				}
-			} finally {
-				try {
-					if (pst != null) {
+						pst = con.prepareStatement(insert);
+						pst.setString(1, player.toString());
+						if (p.getcompleted("kill") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("kill")) {
+
+								if (quests == null) {
+									quests = number + "_";
+								} else {
+									quests += number + "_";
+								}
+							}
+
+							pst.setString(2, quests);
+						} else {
+							pst.setString(2, null);
+						}
+						if (p.getcompleted("harvest") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("harvest")) {
+								if (quests == null) {
+									quests = number + "_";
+								} else {
+									quests += number + "_";
+								}
+							}
+							pst.setString(3, quests);
+						} else {
+							pst.setString(3, null);
+						}
+						if (p.getcompleted("talkto") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("talkto")) {
+								String toadd = Integer.toString(number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(4, quests);
+						} else {
+							pst.setString(4, null);
+						}
+
+						pst.execute();
+					} else {
 						pst.close();
+						pst = con.prepareStatement(update);
+						if (p.getcompleted("kill") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("kill")) {
+
+								if (quests == null) {
+									quests = number + "_";
+								} else {
+									quests += number + "_";
+								}
+							}
+
+							pst.setString(1, quests);
+						} else {
+							pst.setString(1, null);
+						}
+						if (p.getcompleted("harvest") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("harvest")) {
+
+								if (quests == null) {
+									quests = number + "_";
+								} else {
+									quests += number + "_";
+								}
+							}
+							pst.setString(2, quests);
+						} else {
+							pst.setString(2, null);
+						}
+						if (p.getcompleted("talkto") != null) {
+							String quests = null;
+							for (int number : p.getcompleted("talkto")) {
+								String toadd = Integer.toString(number);
+								if (quests == null) {
+									quests = toadd + "_";
+								} else {
+									quests += toadd + "_";
+								}
+							}
+							pst.setString(3, quests);
+						} else {
+							pst.setString(3, null);
+						}
+						pst.setString(4, player.toString());
+
+						pst.execute();
 					}
-				} catch (SQLException ex) {
-					System.out.println(ex.getStackTrace());
+				} catch (SQLException e) {
+					this.plugin.getLogger().severe(e.getMessage());
+					plugin.getLogger().info(
+							"There was a error during the savings of the data to the database: "
+									+ e.getMessage());
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
+				} finally {
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
 				}
 			}
 		}
@@ -812,99 +810,100 @@ public class DbStuff {
 		String test = "SELECT * FROM Mist_QuestCompleteKill WHERE `useruuid`=?;";
 
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.rewardedlist.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
-			if (Playerstats.rewardedlist.get(player).get("kill") != null) {
-				PreparedStatement pst = null;
-				try {
-					pst = con.prepareStatement(test);
-					pst.setString(1, player.toString());
-					ResultSet rs = pst.executeQuery();
-					if (rs.next() == false) {
-						pst.close();
-						pst = con.prepareStatement(insert);
+			Playerstats p = playerinfo.getplayer(player);
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber("kill") != null) {
+					PreparedStatement pst = null;
+					try {
+						pst = con.prepareStatement(test);
 						pst.setString(1, player.toString());
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("kill").keySet());
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("kill").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("kill")
-												.get(quest)) + "_";
-
-							}
-						}
-						pst.setString(2, questnumb);
-						pst.setString(3, time);
-
-						pst.execute();
-					} else {
-						pst.close();
-						pst = con.prepareStatement(update);
-
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("kill").keySet());
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("kill").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("kill")
-												.get(quest)) + "_";
-
-							}
-						}
-						pst.setString(1, questnumb);
-						pst.setString(2, time);
-						pst.setString(3, player.toString());
-						pst.execute();
-					}
-				} catch (SQLException e) {
-					this.plugin.getLogger().severe(e.getMessage());
-					plugin.getLogger().info(
-							"There was a error during the savings of the data to the database: "
-									+ e.getMessage());
-					try {
-						if (pst != null) {
+						ResultSet rs = pst.executeQuery();
+						if (rs.next() == false) {
 							pst.close();
-						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
-					}
-				} finally {
-					try {
-						if (pst != null) {
+							pst = con.prepareStatement(insert);
+							pst.setString(1, player.toString());
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("kill"));
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"kill", quest)) + "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"kill", quest)) + "_";
+
+								}
+							}
+							pst.setString(2, questnumb);
+							pst.setString(3, time);
+
+							pst.execute();
+						} else {
 							pst.close();
+							pst = con.prepareStatement(update);
+
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("kill"));
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"kill", quest))
+
+									+ "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"kill", quest)
+
+											) + "_";
+
+								}
+							}
+							pst.setString(1, questnumb);
+							pst.setString(2, time);
+							pst.setString(3, player.toString());
+							pst.execute();
 						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
+					} catch (SQLException e) {
+						this.plugin.getLogger().severe(e.getMessage());
+						plugin.getLogger().info(
+								"There was a error during the savings of the data to the database: "
+										+ e.getMessage());
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
+					} finally {
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
 					}
+
 				}
-
 			}
 		}
 	}
@@ -921,98 +920,95 @@ public class DbStuff {
 		String test = "SELECT * FROM Mist_QuestCompleteHarvest WHERE `useruuid`=?;";
 
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.rewardedlist.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
-			if (Playerstats.rewardedlist.get(player).get("harvest") != null) {
-				PreparedStatement pst = null;
-				try {
-					pst = con.prepareStatement(test);
-					pst.setString(1, player.toString());
-					ResultSet rs = pst.executeQuery();
-					if (rs.next() == false) {
-						pst.close();
-						pst = con.prepareStatement(insert);
+			Playerstats p = playerinfo.getplayer(player);
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber("harvest") != null) {
+					PreparedStatement pst = null;
+					try {
+						pst = con.prepareStatement(test);
 						pst.setString(1, player.toString());
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("harvest").keySet());
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("harvest").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("harvest")
-												.get(quest)) + "_";
-
-							}
-						}
-						pst.setString(2, questnumb);
-						pst.setString(3, time);
-
-						pst.execute();
-					} else {
-						pst.close();
-						pst = con.prepareStatement(update);
-
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("harvest").keySet());
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("harvest").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("harvest")
-												.get(quest)) + "_";
-							}
-						}
-						pst.setString(1, questnumb);
-						pst.setString(2, time);
-						pst.setString(3, player.toString());
-						pst.execute();
-					}
-				} catch (SQLException e) {
-					this.plugin.getLogger().severe(e.getMessage());
-					plugin.getLogger().info(
-							"There was a error during the savings of the data to the database: "
-									+ e.getMessage());
-					try {
-						if (pst != null) {
+						ResultSet rs = pst.executeQuery();
+						if (rs.next() == false) {
 							pst.close();
-						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
-					}
-				} finally {
-					try {
-						if (pst != null) {
+							pst = con.prepareStatement(insert);
+							pst.setString(1, player.toString());
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("harvest"));
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"harvest", quest)) + "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"harvest", quest)) + "_";
+
+								}
+							}
+							pst.setString(2, questnumb);
+							pst.setString(3, time);
+
+							pst.execute();
+						} else {
 							pst.close();
+							pst = con.prepareStatement(update);
+
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("harvest"));
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"harvest", quest)) + "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"harvest", quest)) + "_";
+								}
+							}
+							pst.setString(1, questnumb);
+							pst.setString(2, time);
+							pst.setString(3, player.toString());
+							pst.execute();
 						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
+					} catch (SQLException e) {
+						this.plugin.getLogger().severe(e.getMessage());
+						plugin.getLogger().info(
+								"There was a error during the savings of the data to the database: "
+										+ e.getMessage());
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
+					} finally {
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
 					}
+
 				}
-
 			}
 		}
 	}
@@ -1029,100 +1025,96 @@ public class DbStuff {
 		String test = "SELECT * FROM Mist_QuestCompleteTalkto WHERE `useruuid`=?;";
 
 		ArrayList<UUID> players = new ArrayList<UUID>();
-		players.addAll(Playerstats.rewardedlist.keySet());
+		players.addAll(playerinfo.getplayers());
 		for (UUID player : players) {
-			if (Playerstats.rewardedlist.get(player).get("talkto") != null) {
-				PreparedStatement pst = null;
-				try {
-					pst = con.prepareStatement(test);
-					pst.setString(1, player.toString());
-					ResultSet rs = pst.executeQuery();
-					if (rs.next() == false) {
-						pst.close();
-						pst = con.prepareStatement(insert);
+			Playerstats p = playerinfo.getplayer(player);
+			if (p.getrewardedtype() != null) {
+				if (p.getrewardednumber("talkto") != null) {
+					PreparedStatement pst = null;
+					try {
+						pst = con.prepareStatement(test);
 						pst.setString(1, player.toString());
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("talkto").keySet());
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("talkto").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("talkto")
-												.get(quest)) + "_";
-
-							}
-						}
-						pst.setString(2, questnumb);
-						pst.setString(3, time);
-
-						pst.execute();
-					} else {
-						pst.close();
-						pst = con.prepareStatement(update);
-
-						ArrayList<Integer> quests = new ArrayList<Integer>();
-						quests.addAll(Playerstats.rewardedlist.get(player)
-								.get("talkto").keySet());
-
-						String questnumb = null;
-						String time = null;
-						for (Integer quest : quests) {
-							if (questnumb != null) {
-								questnumb = questnumb + quest + "_";
-							} else {
-								questnumb = Integer.toString(quest) + "_";
-							}
-							if (time == null) {
-								time = Long.toString(Playerstats.rewardedlist
-										.get(player).get("talkto").get(quest))
-										+ "_";
-							} else {
-								time = time
-										+ Long.toString(Playerstats.rewardedlist
-												.get(player).get("talkto")
-												.get(quest)) + "_";
-
-							}
-						}
-						pst.setString(1, questnumb);
-						pst.setString(2, time);
-						pst.setString(3, player.toString());
-						pst.execute();
-					}
-				} catch (SQLException e) {
-					this.plugin.getLogger().severe(e.getMessage());
-					plugin.getLogger().info(
-							"There was a error during the savings of the data to the database: "
-									+ e.getMessage());
-					try {
-						if (pst != null) {
+						ResultSet rs = pst.executeQuery();
+						if (rs.next() == false) {
 							pst.close();
-						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
-					}
-				} finally {
-					try {
-						if (pst != null) {
+							pst = con.prepareStatement(insert);
+							pst.setString(1, player.toString());
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("talkto"));
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"talkto", quest)) + "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"talkto", quest)) + "_";
+
+								}
+							}
+							pst.setString(2, questnumb);
+							pst.setString(3, time);
+
+							pst.execute();
+						} else {
 							pst.close();
+							pst = con.prepareStatement(update);
+
+							ArrayList<Integer> quests = new ArrayList<Integer>();
+							quests.addAll(p.getrewardednumber("talkto"));
+
+							String questnumb = null;
+							String time = null;
+							for (Integer quest : quests) {
+								if (questnumb != null) {
+									questnumb = questnumb + quest + "_";
+								} else {
+									questnumb = Integer.toString(quest) + "_";
+								}
+								if (time == null) {
+									time = Long.toString(p.getrewardedtime(
+											"talkto", quest)) + "_";
+								} else {
+									time = time
+											+ Long.toString(p.getrewardedtime(
+													"talkto", quest)) + "_";
+
+								}
+							}
+							pst.setString(1, questnumb);
+							pst.setString(2, time);
+							pst.setString(3, player.toString());
+							pst.execute();
 						}
-					} catch (SQLException ex) {
-						System.out.println(ex.getStackTrace());
+					} catch (SQLException e) {
+						this.plugin.getLogger().severe(e.getMessage());
+						plugin.getLogger().info(
+								"There was a error during the savings of the data to the database: "
+										+ e.getMessage());
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
+					} finally {
+						try {
+							if (pst != null) {
+								pst.close();
+							}
+						} catch (SQLException ex) {
+							System.out.println(ex.getStackTrace());
+						}
 					}
 				}
-
 			}
 		}
 	}
@@ -1385,7 +1377,6 @@ public class DbStuff {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	public void savenpcdata() {
 		String insert = "INSERT INTO Mist_NPCData (" + "`npcid`,"
 				+ "`npcname`," + "`spawnlocationx`," + "`spawnlocationy`,"
@@ -1468,9 +1459,10 @@ public class DbStuff {
 					pst.setString(9, talktoquestids);
 					pst.setString(10, warpids);
 					pst.setString(11, world);
-					pst.setString(12,
-							(String) pc.data()
-									.get(pc.PLAYER_SKIN_UUID_METADATA));
+					pst.setString(
+							12,
+							(String) pc.data().get(
+									NPC.PLAYER_SKIN_UUID_METADATA));
 					pst.execute();
 				} else {
 					pst.close();
@@ -1490,9 +1482,10 @@ public class DbStuff {
 					pst.setString(8, talktoquestids);
 					pst.setString(9, warpids);
 					pst.setString(10, world);
-					pst.setString(11,
-							(String) pc.data()
-									.get(pc.PLAYER_SKIN_UUID_METADATA));
+					pst.setString(
+							11,
+							(String) pc.data().get(
+									NPC.PLAYER_SKIN_UUID_METADATA));
 					pst.setInt(12, npcid);
 					pst.execute();
 				}
@@ -1820,24 +1813,25 @@ public class DbStuff {
 				if (rs.getString("partyinvite") != null) {
 					party.invites.put(player, rs.getString("partyinvite"));
 				}
-				Playerstats.woodcutting.put(player, rs.getInt("woodcutting"));
-				Playerstats.mining.put(player, rs.getInt("mining"));
-				Playerstats.smelting.put(player, rs.getInt("smelting"));
-				Playerstats.cooking.put(player, rs.getInt("cooking"));
-				Playerstats.fishing.put(player, rs.getInt("fishing"));
+				Playerstats p = playerinfo.createplayer(player);
 
-				Playerstats.woodcuttingprog.put(player,
-						rs.getInt("woodcuttingprog"));
-				Playerstats.miningprog.put(player, rs.getInt("miningprog"));
-				Playerstats.smeltingprog.put(player, rs.getInt("smeltingprog"));
-				Playerstats.cookingprog.put(player, rs.getInt("cookingprog"));
-				Playerstats.fishingprog.put(player, rs.getInt("fishingprog"));
+				p.setWoodcutting(rs.getInt("woodcutting"));
+				p.setMining(rs.getInt("mining"));
+				p.setSmelting(rs.getInt("smelting"));
+				p.setCooking(rs.getInt("cooking"));
+				p.setFishing(rs.getInt("fishing"));
 
-				Playerstats.abilitiescore.put(player, rs.getInt("abilitie"));
-				Playerstats.Strengthscore.put(player, rs.getInt("strength"));
-				Playerstats.Dexscore.put(player, rs.getInt("dex"));
-				Playerstats.level.put(player, rs.getInt("lvl"));
-				Playerstats.levelprog.put(player, rs.getInt("levelprog"));
+				p.setWoodcuttingprog(rs.getInt("woodcuttingprog"));
+				p.setMiningprog(rs.getInt("miningprog"));
+				p.setSmeltingprog(rs.getInt("smeltingprog"));
+				p.setCookingprog(rs.getInt("cookingprog"));
+				p.setFishingprog(rs.getInt("fishingprog"));
+
+				p.setAbility(rs.getInt("abilitie"));
+				p.setStrength(rs.getInt("strength"));
+				p.setDex(rs.getInt("dex"));
+				p.setLevel(rs.getInt("lvl"));
+				p.setLevelprog(rs.getInt("levelprog"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2085,11 +2079,11 @@ public class DbStuff {
 			pst = con.prepareStatement(loading);
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
-				HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
 				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.createplayer(player);
 				HashMap<String, HashMap<Integer, Integer>> progress;
-				if (questers.progress.get(player) != null) {
-					progress = questers.progress.get(player);
+				if (Quest.progress.get(player) != null) {
+					progress = Quest.progress.get(player);
 				} else {
 					progress = new HashMap<String, HashMap<Integer, Integer>>();
 				}
@@ -2101,16 +2095,15 @@ public class DbStuff {
 					} else {
 						amount = new HashMap<Integer, Integer>();
 					}
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("killquests").split("_");
 					for (String in : allkill) {
 						String[] prog = in.split("-");
-						quests.add(Integer.parseInt(prog[0]));
+						p.addactive("kill",Integer.parseInt(prog[0]));
 						amount.put(Integer.parseInt(prog[0]),
 								Integer.parseInt(prog[1]));
 					}
 					progress.put("kill", amount);
-					types.put("kill", quests);
+			
 				}
 				if (rs.getString("harvestquests") != null) {
 					HashMap<Integer, Integer> amount;
@@ -2119,28 +2112,23 @@ public class DbStuff {
 					} else {
 						amount = new HashMap<Integer, Integer>();
 					}
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allharvest = rs.getString("harvestquests").split(
 							"_");
 					for (String in : allharvest) {
 						String[] prog = in.split("-");
-						quests.add(Integer.parseInt(prog[0]));
+						p.addactive("harvest", Integer.parseInt(prog[0]));
 						amount.put(Integer.parseInt(prog[0]),
 								Integer.parseInt(prog[1]));
 					}
 					progress.put("harvest", amount);
-					types.put("harvest", quests);
 				}
 				if (rs.getString("talktoquests") != null) {
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("talktoquests").split("_");
 					for (String in : allkill) {
-						quests.add(Integer.parseInt(in));
+						p.addactive("talkto", Integer.parseInt(in));
 					}
-					types.put("talkto", quests);
 				}
-				questers.progress.put(player, progress);
-				Playerstats.activequests.put(player, types);
+				Quest.progress.put(player, progress);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2169,33 +2157,26 @@ public class DbStuff {
 			pst = con.prepareStatement(loading);
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
-				HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
 				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
 				if (rs.getString("killquests") != null) {
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("killquests").split("_");
 					for (String in : allkill) {
-						quests.add(Integer.parseInt(in));
+						p.addcompleted("kill", Integer.parseInt(in));
 					}
-					types.put("kill", quests);
 				}
 				if (rs.getString("harvestquests") != null) {
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("harvestquests").split("_");
 					for (String in : allkill) {
-						quests.add(Integer.parseInt(in));
+					p.addcompleted("harvest", Integer.parseInt(in));
 					}
-					types.put("harvest", quests);
 				}
 				if (rs.getString("talktoquests") != null) {
-					HashSet<Integer> quests = new HashSet<Integer>();
 					String[] allkill = rs.getString("talktoquests").split("_");
 					for (String in : allkill) {
-						quests.add(Integer.parseInt(in));
+						p.addcompleted("talkto", Integer.parseInt(in));
 					}
-					types.put("talkto", quests);
 				}
-				Playerstats.completedquests.put(player, types);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2226,37 +2207,14 @@ public class DbStuff {
 			while (rs.next()) {
 				if (rs.getString("questnumber") != null) {
 					UUID player = UUID.fromString(rs.getString("useruuid"));
+					Playerstats p = playerinfo.getplayer(player);
+					
 					String[] questnumbers = rs.getString("questnumber").split(
 							"_");
 					String[] loggedtimes = rs.getString("timereward")
 							.split("_");
-					if (Playerstats.rewardedlist.get(player) != null) {
-						HashMap<String, HashMap<Integer, Long>> typereward = Playerstats.rewardedlist
-								.get(player);
-						if (typereward.get("kill") != null) {
-							HashMap<Integer, Long> reward = typereward
-									.get("kill");
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
-							}
-						} else {
-							HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
-							}
-							typereward.put("kill", reward);
-						}
-					} else {
-						HashMap<String, HashMap<Integer, Long>> typereward = new HashMap<String, HashMap<Integer, Long>>();
-						HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-						for (int x = 0; x < questnumbers.length; x++) {
-							reward.put(Integer.parseInt(questnumbers[x]),
-									Long.parseLong(loggedtimes[x]));
-						}
-						typereward.put("kill", reward);
-						Playerstats.rewardedlist.put(player, typereward);
+					for(int x = 0; x < questnumbers.length; x++){
+						p.addrewarded("kill", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
 				}
 			}
@@ -2288,38 +2246,14 @@ public class DbStuff {
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
 				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
 				if (rs.getString("questnumber") != null) {
 					String[] questnumbers = rs.getString("questnumber").split(
 							"_");
 					String[] loggedtimes = rs.getString("timereward")
 							.split("_");
-					if (Playerstats.rewardedlist.get(player) != null) {
-						HashMap<String, HashMap<Integer, Long>> typereward = Playerstats.rewardedlist
-								.get(player);
-						if (typereward.get("harvest") != null) {
-							HashMap<Integer, Long> reward = typereward
-									.get("harvest");
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
-							}
-						} else {
-							HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
-							}
-							typereward.put("harvest", reward);
-						}
-					} else {
-						HashMap<String, HashMap<Integer, Long>> typereward = new HashMap<String, HashMap<Integer, Long>>();
-						HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-						for (int x = 0; x < questnumbers.length; x++) {
-							reward.put(Integer.parseInt(questnumbers[x]),
-									Long.parseLong(loggedtimes[x]));
-						}
-						typereward.put("harvest", reward);
-						Playerstats.rewardedlist.put(player, typereward);
+					for(int x = 0; x < questnumbers.length; x++){
+						p.addrewarded("harvest", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
 				}
 			}
@@ -2351,39 +2285,14 @@ public class DbStuff {
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
 				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
 				if (rs.getString("questnumber") != null) {
 					String[] questnumbers = rs.getString("questnumber").split(
 							"_");
 					String[] loggedtimes = rs.getString("timereward")
 							.split("_");
-					if (Playerstats.rewardedlist.get(player) != null) {
-						HashMap<String, HashMap<Integer, Long>> typereward = Playerstats.rewardedlist
-								.get(player);
-						if (typereward.get("talkto") != null) {
-							HashMap<Integer, Long> reward = typereward
-									.get("talkto");
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]),
-										Long.parseLong(loggedtimes[x]));
-							}
-						} else {
-							HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-							for (int x = 0; x < questnumbers.length; x++) {
-								reward.put(Integer.parseInt(questnumbers[x]
-										.trim()), Long.parseLong(loggedtimes[x]
-										.trim()));
-							}
-							typereward.put("talkto", reward);
-						}
-					} else {
-						HashMap<String, HashMap<Integer, Long>> typereward = new HashMap<String, HashMap<Integer, Long>>();
-						HashMap<Integer, Long> reward = new HashMap<Integer, Long>();
-						for (int x = 0; x < questnumbers.length; x++) {
-							reward.put(Integer.parseInt(questnumbers[x]),
-									Long.parseLong(loggedtimes[x]));
-						}
-						typereward.put("talkto", reward);
-						Playerstats.rewardedlist.put(player, typereward);
+					for(int x = 0; x < questnumbers.length; x++){
+						p.addrewarded("talkto", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
 				}
 			}
@@ -2517,6 +2426,7 @@ public class DbStuff {
 
 		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,
 				new Runnable() {
+					@Override
 					public void run() {
 						PreparedStatement pst;
 						try {
@@ -2543,6 +2453,7 @@ public class DbStuff {
 		}
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 				new Runnable() {
+					@Override
 					public void run() {
 						saveall();
 						plugin.getLogger().info(

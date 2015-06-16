@@ -10,7 +10,9 @@ import java.util.HashMap;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -37,8 +39,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 
 
-public class Playerinfoding implements Listener{
-	MoY plugin;
+public class Playerinfo implements Listener{
+	private MoY plugin;
+	
 	
 	private static HashMap<String, String> pinventory = new HashMap<String, String>(); 
 	private static HashMap<String, Integer> temperus = new HashMap<String, Integer>();  
@@ -47,8 +50,13 @@ public class Playerinfoding implements Listener{
 	private HashSet<Material> axes = new HashSet<Material>();
 	private HashSet<Material> pickaxes = new HashSet<Material>();
 	
+	
+	private static HashMap<UUID, Playerstats> players = new HashMap<UUID, Playerstats>();
+	
 	public void playerstatsinv(Player player){
 		Inventory stats = Bukkit.createInventory(null, 18, player.getName() + " stats");
+		
+		Playerstats p = getplayer(player.getUniqueId());
 		
 		//general stats
 		ItemStack onlineplayer = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
@@ -72,8 +80,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = lvl.getItemMeta();
 			temp.setDisplayName("Level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.level.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.levelprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.level.get(player.getUniqueId()) * 15));
+			t.add(Integer.toString(p.getLevel()));
+			t.add(Integer.toString(p.getLevelprog()) + "/" + Integer.toString(p.getLevel() * 15));
 			temp.setLore(t);
 			lvl.setItemMeta(temp);
 		}
@@ -82,7 +90,7 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = ability.getItemMeta();
 			temp.setDisplayName("Ability points");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.abilitiescore.get(player.getUniqueId())));
+			t.add(Integer.toString(p.getAbility()));
 			t.add("With this you can higher your");
 			t.add("strength and dex by clicking on it");
 			temp.setLore(t);
@@ -93,7 +101,7 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = strenght.getItemMeta();
 			temp.setDisplayName("Strength");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.Strengthscore.get(player.getUniqueId())));
+			t.add(Integer.toString(p.getStrength()));
 			t.add("This allows you to hold");
 			t.add("better armor and better weapons");
 			temp.setLore(t);
@@ -104,7 +112,7 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = dex.getItemMeta();
 			temp.setDisplayName("Dex");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.Dexscore.get(player.getUniqueId())));
+			t.add(Integer.toString(p.getDex()));
 			t.add("This allows you to hold better bows");
 			temp.setLore(t);
 			dex.setItemMeta(temp);
@@ -115,8 +123,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = mining.getItemMeta();
 			temp.setDisplayName("Mining level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.mining.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.miningprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.mining.get(player.getUniqueId()) * 10));
+			t.add(Integer.toString(p.getMining()));
+			t.add(Integer.toString(p.getMiningprog()) + "/" + Integer.toString(p.getMining() * 10));
 			t.add("This allows you to mine more valuable ores");
 			temp.setLore(t);
 			mining.setItemMeta(temp);
@@ -126,8 +134,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = wood.getItemMeta();
 			temp.setDisplayName("Woodcutting level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.woodcutting.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.woodcuttingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.woodcutting.get(player.getUniqueId()) * 10));
+			t.add(Integer.toString(p.getWoodcutting()));
+			t.add(Integer.toString(p.getWoodcuttingprog()) + "/" + Integer.toString(p.getWoodcutting() * 10));
 			t.add("This allows you to cut bigger trees");
 			temp.setLore(t);
 			wood.setItemMeta(temp);
@@ -137,8 +145,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = fishing.getItemMeta();
 			temp.setDisplayName("Fishing level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.fishing.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.fishingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.fishing.get(player.getUniqueId()) * 10));
+			t.add(Integer.toString(p.getFishing()));
+			t.add(Integer.toString(p.getFishingprog()) + "/" + Integer.toString(p.getFishing() * 10));
 			t.add("This gives better fishing results");
 			temp.setLore(t);
 			fishing.setItemMeta(temp);
@@ -148,8 +156,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp = smelting.getItemMeta();
 			temp.setDisplayName("Smelting level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.smelting.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.smeltingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.smelting.get(player.getUniqueId()) * 10));
+			t.add(Integer.toString(p.getSmelting()));
+			t.add(Integer.toString(p.getSmeltingprog()) + "/" + Integer.toString(p.getSmelting() * 10));
 			t.add("This increases the chance of");
 			t.add("dropped ignots instead of ores");
 			temp.setLore(t);
@@ -160,8 +168,8 @@ public class Playerinfoding implements Listener{
 			ItemMeta temp  = cooking.getItemMeta();
 			temp.setDisplayName("Cooking level");
 			ArrayList<String> t = new ArrayList<String>();
-			t.add(Integer.toString(Playerstats.cooking.get(player.getUniqueId())));
-			t.add(Integer.toString(Playerstats.cookingprog.get(player.getUniqueId())) + "/" + Integer.toString(Playerstats.cooking.get(player.getUniqueId()) * 10));
+			t.add(Integer.toString(p.getCooking()));
+			t.add(Integer.toString(p.getCookingprog()) + "/" + Integer.toString(p.getCooking() * 10));
 			t.add("This decreases the chance of burned food");
 			temp.setLore(t);
 			cooking.setItemMeta(temp);
@@ -190,6 +198,7 @@ public class Playerinfoding implements Listener{
 	@EventHandler(ignoreCancelled = true)
 	public void onInventoryclickstatsup(InventoryClickEvent event){
 		Player player = (Player) event.getWhoClicked();
+		Playerstats p = getplayer(player.getUniqueId());
 		if(pinventory.get(player.getName()) != null){
 			if(pinventory.get(player.getName()).equals(event.getInventory().getName())){
 		
@@ -198,17 +207,17 @@ public class Playerinfoding implements Listener{
 				if(item.getItemMeta() != null){
 					if(item.getItemMeta().getDisplayName() != null){
 						if(item.getItemMeta().getDisplayName().equals("Strength")){
-							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1 && Playerstats.Strengthscore.get(player.getUniqueId()) < 90){
-								Playerstats.abilitiescore.put(player.getUniqueId(), Playerstats.abilitiescore.get(player.getUniqueId()) - 1);
-								Playerstats.Strengthscore.put(player.getUniqueId(), Playerstats.Strengthscore.get(player.getUniqueId()) + 1);
+							if(p.getAbility() >= 1 && p.getStrength() < 90){
+								p.setAbility(p.getAbility()-1);;
+								p.setStrength(p.getStrength()+1);;
 								player.closeInventory();
 								playerstatsinv(player);
 							}
 						}
 						if(item.getItemMeta().getDisplayName().equals("Dex")){
-							if(Playerstats.abilitiescore.get(player.getUniqueId()) >= 1 && Playerstats.Dexscore.get(player.getUniqueId()) < 50){
-								Playerstats.abilitiescore.put(player.getUniqueId(), Playerstats.abilitiescore.get(player.getUniqueId()) - 1);
-								Playerstats.Dexscore.put(player.getUniqueId(), Playerstats.Dexscore.get(player.getUniqueId()) + 1);
+							if(p.getAbility() >= 1 && p.getDex()< 50){
+								p.setAbility(p.getAbility()-1);;
+								p.setDex(p.getDex()+1);
 								player.closeInventory();
 								playerstatsinv(player);
 							}
@@ -225,40 +234,27 @@ public class Playerinfoding implements Listener{
 		
 	
 	
-	
+	public Playerstats createplayer(UUID player){
+		Playerstats p  = new Playerstats(player);
+		players.put(player, p);
+		return p;
+	}
 	
 	@EventHandler
 	public void onplayerjoin(PlayerJoinEvent event){
 		Player player = event.getPlayer();
-		if(Playerstats.Strengthscore.get(player.getUniqueId()) == null){
-			Playerstats.abilitiescore.put(player.getUniqueId(), 0);
-			Playerstats.Strengthscore.put(player.getUniqueId(), 1);
-			Playerstats.Dexscore.put(player.getUniqueId(), 1);
-			Playerstats.level.put(player.getUniqueId(), 1);
-			Playerstats.levelprog.put(player.getUniqueId(), 0);
-			
-			Playerstats.woodcutting.put(player.getUniqueId(), 1);
-			Playerstats.mining.put(player.getUniqueId(), 1);
-			Playerstats.smelting.put(player.getUniqueId(), 1);
-			Playerstats.cooking.put(player.getUniqueId(), 1);
-			Playerstats.fishing.put(player.getUniqueId(), 1);
-			
-			Playerstats.woodcuttingprog.put(player.getUniqueId(), 0);
-			Playerstats.levelprog.put(player.getUniqueId(), 0);
-			Playerstats.miningprog.put(player.getUniqueId(), 0);
-			Playerstats.smeltingprog.put(player.getUniqueId(), 0);
-			Playerstats.cookingprog.put(player.getUniqueId(), 0);
-			Playerstats.fishingprog.put(player.getUniqueId(), 0);
-			
+		if(getplayer(player.getUniqueId()) == null){
+			createplayer(player.getUniqueId());
 		}
 	}
 	
 	@EventHandler
 	public void onplayeritemhold(PlayerItemHeldEvent event){
 		Player player = event.getPlayer();
+		Playerstats p = getplayer(player.getUniqueId());
 		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
-		ArrayList<ItemStack>pweapons = helditems("weapon", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-		ArrayList<ItemStack>pbows = helditems("bow", Playerstats.Dexscore.get(player.getUniqueId()), "dex");
+		ArrayList<ItemStack>pweapons = helditems("weapon", p.getStrength(), "strength");
+		ArrayList<ItemStack>pbows = helditems("bow", p.getDex(), "dex");
 		
 		ArrayList<ItemStack>weapons = helditems("weapon", 90, "strength");
 		ArrayList<ItemStack>bows = helditems("bow", 90, "dex");
@@ -288,10 +284,10 @@ public class Playerinfoding implements Listener{
 				pbowtype.add(pbow.getType());
 			}
 
-			ArrayList<Material> axesskill = heldtools("axes", Playerstats.woodcutting.get(player.getUniqueId()), "skill");
-			ArrayList<Material> axesstrength = heldtools("axes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-			ArrayList<Material> pickaxesskill = heldtools("pickaxes", Playerstats.mining.get(player.getUniqueId()), "skill");
-			ArrayList<Material> pickaxesstrength = heldtools("pickaxes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
+			ArrayList<Material> axesskill = heldtools("axes", p.getWoodcutting(), "skill");
+			ArrayList<Material> axesstrength = heldtools("axes", p.getStrength(), "strength");
+			ArrayList<Material> pickaxesskill = heldtools("pickaxes", p.getMining(), "skill");
+			ArrayList<Material> pickaxesstrength = heldtools("pickaxes", p.getStrength(), "strength");
 			
 			ArrayList<Material> allaxesstrength = heldtools("axes", 50, "strength");
 			if(weapontype.contains(item.getType()) || bowtype.contains(item.getType())){
@@ -307,7 +303,7 @@ public class Playerinfoding implements Listener{
 
 	else
 		if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-			int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+			int playerlvl = p.getStrength();
 			HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 			HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 			Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -329,7 +325,7 @@ public class Playerinfoding implements Listener{
 
 	if(pass == false){
 	event.setCancelled(true);
-		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 	
 	}
 	}else if(bowtype.contains(item.getType())){
@@ -339,7 +335,7 @@ public class Playerinfoding implements Listener{
 	}
 		else
 			if(item.containsEnchantment(Enchantment.ARROW_DAMAGE)){
-				int playerlvl = Playerstats.Dexscore.get(player.getUniqueId());
+				int playerlvl = p.getDex();
 				HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 				HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 				Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -361,7 +357,7 @@ public class Playerinfoding implements Listener{
 	
 		if(pass == false){
 		event.setCancelled(true);
-		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Dexscore.get(player.getUniqueId())) +". Use more ability points on dex to use this weapon.");
+		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getDex()) +". Use more ability points on dex to use this weapon.");
 	}
 	}
 		}else if(tools.contains(item.getType())){
@@ -369,7 +365,7 @@ public class Playerinfoding implements Listener{
 			if(allaxesstrength.contains(item.getType())){
 				if(axesskill.contains(item.getType()) || axesstrength.contains(item.getType())){
 				if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -386,11 +382,11 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 			if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 			}
 				}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-					int playerlvl = Playerstats.woodcutting.get(player.getUniqueId());
+					int playerlvl = p.getWoodcutting();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -407,19 +403,19 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 			if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) +".");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) +".");
 
 			}
 				}
 				}else{
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
 
 				}
 			}else{
 				if(pickaxesskill.contains(item.getType()) || pickaxesstrength.contains(item.getType())){
 				if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -436,11 +432,11 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 			if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 			}
 				}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-					int playerlvl = Playerstats.mining.get(player.getUniqueId());
+					int playerlvl = p.getMining();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -457,13 +453,13 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 			if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) +".");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getMining()) +".");
 
 			}
 				}
 				}else{
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or mine some more ore.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), p.getMining()) + ". Use more ability points on strength to use this weapon or mine some more ore.");
 
 				}
 			}
@@ -479,13 +475,14 @@ public class Playerinfoding implements Listener{
 	@EventHandler(ignoreCancelled = true)
 	public void onplayeritemfrominv(InventoryClickEvent event){
 		Player player = (Player) event.getWhoClicked();
+		Playerstats p = getplayer(player.getUniqueId());
 		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
 		if(event.getAction() != InventoryAction.DROP_ALL_SLOT){
 		 
 		 
-		 ArrayList<ItemStack>pweapons = helditems("weapon", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-		ArrayList<ItemStack>parmors = helditems("armor", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-		ArrayList<ItemStack>pbows = helditems("bow", Playerstats.Dexscore.get(player.getUniqueId()), "dex");
+		 ArrayList<ItemStack>pweapons = helditems("weapon", p.getStrength(), "strength");
+		ArrayList<ItemStack>parmors = helditems("armor", p.getStrength(), "strength");
+		ArrayList<ItemStack>pbows = helditems("bow", p.getDex(), "dex");
 		
 		ArrayList<ItemStack>weapons = helditems("weapon", 90, "strength");
 		ArrayList<ItemStack>armors = helditems("armor", 90, "strength");
@@ -496,10 +493,10 @@ public class Playerinfoding implements Listener{
 		ArrayList<Material> bowtype = new ArrayList<Material>();
 		ArrayList<Material> armortype = new ArrayList<Material>();
 		
-		ArrayList<Material> axesskill = heldtools("axes", Playerstats.woodcutting.get(player.getUniqueId()), "skill");
-		ArrayList<Material> axesstrength = heldtools("axes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-		ArrayList<Material> pickaxesskill = heldtools("pickaxes", Playerstats.mining.get(player.getUniqueId()), "skill");
-		ArrayList<Material> pickaxesstrength = heldtools("pickaxes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
+		ArrayList<Material> axesskill = heldtools("axes", p.getWoodcutting(), "skill");
+		ArrayList<Material> axesstrength = heldtools("axes", p.getStrength(), "strength");
+		ArrayList<Material> pickaxesskill = heldtools("pickaxes", p.getMining(), "skill");
+		ArrayList<Material> pickaxesstrength = heldtools("pickaxes", p.getStrength(), "strength");
 		
 		ArrayList<Material> allaxesstrength = heldtools("axes", 50, "strength");
 		for(ItemStack weapon : weapons){
@@ -560,7 +557,7 @@ public class Playerinfoding implements Listener{
 						pass = false;
 					}else
 						if(item.containsEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL)){
-							int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+							int playerlvl = p.getStrength();
 							HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 							HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 							Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -583,7 +580,7 @@ public class Playerinfoding implements Listener{
 						if(pass == false){
 						event.setCursor(new ItemStack(Material.AIR));
 						event.setCancelled(true);
-						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " For safety measures this action is disabled. This is for the fact that your level is to low for this item. It needs to be at least level " + neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())));
+						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " For safety measures this action is disabled. This is for the fact that your level is to low for this item. It needs to be at least level " + neededlvl(item, item.getEnchantments(), p.getStrength()));
 						}
 					}
 						
@@ -598,7 +595,7 @@ public class Playerinfoding implements Listener{
 
 						else
 							if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-								int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+								int playerlvl = p.getStrength();
 								HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 								HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 								Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -621,7 +618,7 @@ public class Playerinfoding implements Listener{
 					if(pass == false){
 						event.setCursor(new ItemStack(Material.AIR));
 						event.setCancelled(true);
-						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 						
 						}
 						}else if(bowtype.contains(item.getType())){
@@ -631,7 +628,7 @@ public class Playerinfoding implements Listener{
 						}
 							else
 								if(item.containsEnchantment(Enchantment.ARROW_DAMAGE)){
-									int playerlvl = Playerstats.Dexscore.get(player.getUniqueId());
+									int playerlvl = p.getDex();
 									HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 									HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 									Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -653,7 +650,7 @@ public class Playerinfoding implements Listener{
 						if(allaxesstrength.contains(item.getType())){
 							if(axesskill.contains(item.getType()) || axesstrength.contains(item.getType())){
 							if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-								int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+								int playerlvl = p.getStrength();
 								HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 								HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 								Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -670,11 +667,11 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 						if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 						}
 							}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-								int playerlvl = Playerstats.woodcutting.get(player.getUniqueId());
+								int playerlvl = p.getWoodcutting();
 								HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 								HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 								Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -691,19 +688,19 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 						if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) +".");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) +".");
 
 						}
 							}
 							}else{
 								pass = false;
-								player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
+								player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
 
 							}
 						}else{
 							if(pickaxesskill.contains(item.getType()) || pickaxesstrength.contains(item.getType())){
 							if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-								int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+								int playerlvl = p.getStrength();
 								HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 								HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 								Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -720,11 +717,11 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 						if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 						}
 							}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-								int playerlvl = Playerstats.mining.get(player.getUniqueId());
+								int playerlvl = p.getMining();
 								HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 								HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 								Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -741,13 +738,13 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 						if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) +".");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getMining()) +".");
 
 						}
 							}
 							}else{
 								pass = false;
-								player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or mine some more ore.");
+								player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), p.getMining()) + ". Use more ability points on strength to use this weapon or mine some more ore.");
 
 							}
 						}
@@ -756,7 +753,7 @@ public class Playerinfoding implements Listener{
 						if(pass == false){
 							event.setCursor(new ItemStack(Material.AIR));
 							event.setCancelled(true);
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Dexscore.get(player.getUniqueId())) +". Use more ability points on dex to use this weapon.");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getDex()) +". Use more ability points on dex to use this weapon.");
 						}
 						}
 							
@@ -777,7 +774,7 @@ public class Playerinfoding implements Listener{
 		
 			else
 				if(item.containsEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -806,7 +803,7 @@ public class Playerinfoding implements Listener{
 						player.getInventory().addItem(item);
 					}
 					player.updateInventory();
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 				}
 			}
 			
@@ -824,7 +821,7 @@ public class Playerinfoding implements Listener{
 
 			else
 				if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -853,7 +850,7 @@ public class Playerinfoding implements Listener{
 				player.getInventory().addItem(item);
 			}
 			player.updateInventory();
-			player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+			player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 			
 			}
 			}else if(bowtype.contains(item.getType())){
@@ -863,7 +860,7 @@ public class Playerinfoding implements Listener{
 			}
 				else
 					if(item.containsEnchantment(Enchantment.ARROW_DAMAGE)){	
-						int playerlvl = Playerstats.Dexscore.get(player.getUniqueId());
+						int playerlvl = p.getDex();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -892,7 +889,7 @@ public class Playerinfoding implements Listener{
 					player.getInventory().addItem(item);
 				}
 				player.updateInventory();
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Dexscore.get(player.getUniqueId())) +". Use more ability points on dex to use this weapon.");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getDex()) +". Use more ability points on dex to use this weapon.");
 			}
 			}
 				
@@ -903,7 +900,7 @@ public class Playerinfoding implements Listener{
 			if(allaxesstrength.contains(item.getType())){
 				if(axesskill.contains(item.getType()) || axesstrength.contains(item.getType())){
 				if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -920,11 +917,11 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 			if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 			}
 				}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-					int playerlvl = Playerstats.woodcutting.get(player.getUniqueId());
+					int playerlvl = p.getWoodcutting();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -941,19 +938,19 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 			if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) +".");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) +".");
 
 			}
 				}
 				}else{
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
 
 				}
 			}else{
 				if(pickaxesskill.contains(item.getType()) || pickaxesstrength.contains(item.getType())){
 				if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-					int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+					int playerlvl = p.getStrength();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -970,11 +967,11 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 			if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 			}
 				}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-					int playerlvl = Playerstats.mining.get(player.getUniqueId());
+					int playerlvl = p.getMining();
 					HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 					HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 					Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -991,13 +988,13 @@ public class Playerinfoding implements Listener{
 			int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 			if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 				pass = false;
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) +".");
+				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getMining()) +".");
 
 			}
 				}
 				}else{
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or mine some more ore.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), p.getMining()) + ". Use more ability points on strength to use this weapon or mine some more ore.");
 
 				}
 			}
@@ -1024,8 +1021,9 @@ public class Playerinfoding implements Listener{
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onplayerrightarmor(PlayerInteractEvent event){
 		Player player = event.getPlayer();
+		Playerstats p = getplayer(player.getUniqueId());
 		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
-		ArrayList<ItemStack> parmors = helditems("armors", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
+		ArrayList<ItemStack> parmors = helditems("armors", p.getStrength(), "strength");
 		ArrayList<ItemStack> armors = helditems("armors", 90, "strength");
 		ArrayList<Material> armortype = new ArrayList<Material>();
 		for(ItemStack armor : armors){
@@ -1045,7 +1043,7 @@ public class Playerinfoding implements Listener{
 			pass = false;
 		}else
 			if(item.containsEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL)){
-				int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+				int playerlvl = p.getStrength();
 				HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 				HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 				Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1069,7 +1067,7 @@ public class Playerinfoding implements Listener{
 
 			event.setCancelled(true);
 			player.updateInventory();
-			player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+			player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 			}
 		}
 	}
@@ -1078,9 +1076,10 @@ public class Playerinfoding implements Listener{
 	@EventHandler
 	public void onplayerpickup(PlayerPickupItemEvent event){
 		 Player player = event.getPlayer();
+		 Playerstats p = getplayer(player.getUniqueId());
 			if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
-			 ArrayList<ItemStack>pweapons = helditems("weapon", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-			 ArrayList<ItemStack>pbows = helditems("bow", Playerstats.Dexscore.get(player.getUniqueId()), "dex");
+			 ArrayList<ItemStack>pweapons = helditems("weapon", p.getStrength(), "strength");
+			 ArrayList<ItemStack>pbows = helditems("bow", p.getDex(), "dex");
 			
 			ArrayList<ItemStack>weapons = helditems("weapon", 90, "strength");
 			ArrayList<ItemStack>bows = helditems("bow", 90, "dex");
@@ -1097,10 +1096,10 @@ public class Playerinfoding implements Listener{
 			ArrayList<Material> pweapontype = new ArrayList<Material>();
 			ArrayList<Material> pbowtype = new ArrayList<Material>();
 			
-			ArrayList<Material> axesskill = heldtools("axes", Playerstats.woodcutting.get(player.getUniqueId()), "skill");
-			ArrayList<Material> axesstrength = heldtools("axes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
-			ArrayList<Material> pickaxesskill = heldtools("pickaxes", Playerstats.mining.get(player.getUniqueId()), "skill");
-			ArrayList<Material> pickaxesstrength = heldtools("pickaxes", Playerstats.Strengthscore.get(player.getUniqueId()), "strength");
+			ArrayList<Material> axesskill = heldtools("axes", p.getWoodcutting(), "skill");
+			ArrayList<Material> axesstrength = heldtools("axes", p.getStrength(), "strength");
+			ArrayList<Material> pickaxesskill = heldtools("pickaxes", p.getMining(), "skill");
+			ArrayList<Material> pickaxesstrength = heldtools("pickaxes", p.getStrength(), "strength");
 			
 			ArrayList<Material> allaxesstrength = heldtools("axes", 50, "strength");
 			for(ItemStack weapon : pweapons){
@@ -1129,7 +1128,7 @@ public class Playerinfoding implements Listener{
 				}else if(item.containsEnchantment(Enchantment.ARROW_DAMAGE) || item.containsEnchantment(Enchantment.DAMAGE_ALL)){
 					boolean pass = true;
 					if(item.containsEnchantment(Enchantment.ARROW_DAMAGE)){
-						int playerlvl = Playerstats.Dexscore.get(player.getUniqueId());
+						int playerlvl = p.getDex();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1146,10 +1145,10 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.ARROW_DAMAGE);
 						if(item.getEnchantmentLevel(Enchantment.ARROW_DAMAGE) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Dexscore.get(player.getUniqueId())) +". Use more ability points on dex to use this weapon.");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your dex is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getDex()) +". Use more ability points on dex to use this weapon.");
 						}
 					}else if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-						int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+						int playerlvl = p.getStrength();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = itemenchat(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1166,7 +1165,7 @@ public class Playerinfoding implements Listener{
 						int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 						if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 							pass = false;
-							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+							player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededlvl(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 						}
 					}
@@ -1188,7 +1187,7 @@ public class Playerinfoding implements Listener{
 				if(allaxesstrength.contains(item.getType())){
 					if(axesskill.contains(item.getType()) || axesstrength.contains(item.getType())){
 					if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-						int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+						int playerlvl = p.getStrength();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1205,11 +1204,11 @@ public class Playerinfoding implements Listener{
 				int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 				if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 				}
 					}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-						int playerlvl = Playerstats.woodcutting.get(player.getUniqueId());
+						int playerlvl = p.getWoodcutting();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1226,19 +1225,19 @@ public class Playerinfoding implements Listener{
 				int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 				if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) +".");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your woodcutting is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) +".");
 
 				}
 					}
 					}else{
 						pass = false;
-						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), Playerstats.woodcutting.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
+						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or woodcutting is to low, your strength needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your woodcutting needs to be at least level " + neededskillvl(item, item.getEnchantments(), p.getWoodcutting()) + ". Use more ability points on strength to use this weapon or chop down some more trees.");
 
 					}
 				}else{
 					if(pickaxesskill.contains(item.getType()) || pickaxesstrength.contains(item.getType())){
 					if(item.containsEnchantment(Enchantment.DAMAGE_ALL)){
-						int playerlvl = Playerstats.Strengthscore.get(player.getUniqueId());
+						int playerlvl = p.getStrength();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtstrength(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1255,11 +1254,11 @@ public class Playerinfoding implements Listener{
 				int enchantlvl = enchant.get(Enchantment.DAMAGE_ALL);
 				if(item.getEnchantmentLevel(Enchantment.DAMAGE_ALL) > enchantlvl){
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +". Use more ability points on strength to use this weapon.");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength is to low, it needs to be at least level "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +". Use more ability points on strength to use this weapon.");
 
 				}
 					}else if(item.containsEnchantment(Enchantment.DIG_SPEED)){
-						int playerlvl = Playerstats.mining.get(player.getUniqueId());
+						int playerlvl = p.getMining();
 						HashMap<Material, HashMap<Integer, HashMap<Enchantment, Integer>>> itemneeds = toolsencahtskill(mat);
 						HashMap<Integer, HashMap<Enchantment, Integer>> iteminfo = itemneeds.get(mat);
 						Map<Integer, HashMap<Enchantment, Integer>> sortedtlist = new TreeMap<Integer, HashMap<Enchantment,Integer>>(iteminfo);
@@ -1276,13 +1275,13 @@ public class Playerinfoding implements Listener{
 				int enchantlvl = enchant.get(Enchantment.DIG_SPEED);
 				if(item.getEnchantmentLevel(Enchantment.DIG_SPEED) > enchantlvl){
 					pass = false;
-					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) +".");
+					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your mining is to low, it needs to be at least level "+ neededskillvl(item, item.getEnchantments(), p.getMining()) +".");
 
 				}
 					}
 					}else{
 						pass = false;
-						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), Playerstats.Strengthscore.get(player.getUniqueId())) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), Playerstats.mining.get(player.getUniqueId())) + ". Use more ability points on strength to use this weapon or mine some more ore.");
+						player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YSkill" + ChatColor.DARK_PURPLE + "]" + ChatColor.AQUA + " Sorry your strength or mining is to low, your strength needs to be at least "+ neededstrength(item, item.getEnchantments(), p.getStrength()) +" or your mining needs to be at least level" + neededskillvl(item, item.getEnchantments(), p.getMining()) + ". Use more ability points on strength to use this weapon or mine some more ore.");
 
 					}
 				}
@@ -2014,7 +2013,7 @@ public class Playerinfoding implements Listener{
 	
 	}
 	
- 	public Playerinfoding(MoY instance) {
+ 	public Playerinfo(MoY instance) {
 		this.plugin = instance;
 		tools.add(Material.WOOD_AXE);
 		tools.add(Material.WOOD_PICKAXE);
@@ -2042,50 +2041,17 @@ public class Playerinfoding implements Listener{
 	
 	}
 
+ 	public Playerstats getplayer(UUID player){
+ 		if(players.get(player) != null){
+ 			return players.get(player);
+ 		}else{
+ 			return null;
+ 		}
+ 	}
+ 	
+ 	public Set<UUID> getplayers(){
+ 		return players.keySet();
+ 	}
  	
  	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
- 	
-	
 }

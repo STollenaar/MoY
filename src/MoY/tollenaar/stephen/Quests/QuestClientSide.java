@@ -3,7 +3,6 @@ package MoY.tollenaar.stephen.Quests;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -181,7 +180,7 @@ public class QuestClientSide {
 							int time = Travel.traveltime(npcuuid,
 									kill.getWarpid(), type, w.getStartloc());
 							SimpleDateFormat df = new SimpleDateFormat("mm:ss");
-							Date date = new Date((long) (time * 1000));
+							Date date = new Date(time * 1000);
 							date.setHours(date.getHours() - 9);
 							date.setMinutes(date.getMinutes() - 30);
 							lore.add("Duration: " + df.format(date));
@@ -271,25 +270,20 @@ public class QuestClientSide {
 			String npcname, boolean ispreq, int minlvl) {
 		UUID playeruuid = player.getUniqueId();
 		boolean pass = rewardcheck(type, number, player, npcname);
-
-		if (Playerstats.activequests.get(playeruuid) != null) {
-			if (Playerstats.activequests.get(playeruuid).get(type) != null) {
-				if (Playerstats.activequests.get(playeruuid).get(type)
-						.contains(number)) {
+		Playerstats p = questers.playerinfo.getplayer(playeruuid);
+		if (p.getactivetype() != null) {
+			if (p.getactives(type) != null) {
+				if (p.getactives(type).contains(number)) {
 					pass = false;
 				}
 			}
 		}
 
-		if (Playerstats.rewardedlist.get(playeruuid) != null) {
-			if (Playerstats.rewardedlist.get(playeruuid).get(type) != null) {
-				if (Playerstats.rewardedlist.get(playeruuid).get(type)
-						.get(number) == null
-						&& ispreq) {
+		if (p.getrewardedtype() != null) {
+			if (p.getrewardednumber(type) != null) {
+				if (p.getrewardedtime(type, number) == 0 && ispreq) {
 					pass = false;
-				} else if (!ispreq
-						&& Playerstats.rewardedlist.get(playeruuid).get(type)
-								.get(number) != null) {
+				} else if (!ispreq && p.getrewardedtime(type, number) != 0) {
 					pass = false;
 				}
 			} else if (ispreq) {
@@ -306,7 +300,8 @@ public class QuestClientSide {
 	}
 
 	private boolean lvlcheck(Player player, int minlvl) {
-		if (Playerstats.level.get(player.getUniqueId()) < minlvl) {
+		Playerstats p = questers.playerinfo.getplayer(player.getUniqueId());
+		if (p.getLevel() < minlvl) {
 			return false;
 		} else {
 			return true;
@@ -316,17 +311,15 @@ public class QuestClientSide {
 	@SuppressWarnings("deprecation")
 	private boolean rewardcheck(String type, int number, Player player,
 			String npcname) {
-		UUID playeruuid = player.getUniqueId();
+		Playerstats p = questers.playerinfo.getplayer(player.getUniqueId());
 		boolean pass = true;
 		/**
 		 * add the rewarded thingy
 		 */
-		if (Playerstats.completedquests.get(playeruuid) != null) {
-			if (Playerstats.completedquests.get(playeruuid).get(type) != null) {
-				if (Playerstats.completedquests.get(playeruuid).get(type)
-						.contains(number)) {
-					for (int i : Playerstats.completedquests.get(playeruuid)
-							.get(type)) {
+		if (p.getcompletedtype() != null) {
+			if (p.getcompleted(type) != null) {
+				if (p.getcompleted(type).contains(number)) {
+					for (int i : p.getcompleted(type)) {
 
 						if (i == number) {
 							List<String> reward = null;
@@ -482,30 +475,10 @@ public class QuestClientSide {
 											Bukkit.getConsoleSender(), r);
 								}
 							}
-							Playerstats.completedquests.get(playeruuid)
-									.get(type).remove(i);
+							p.deletecompleted(type, i);
+							p.addrewarded(type, number, System.currentTimeMillis());
 
-							if (Playerstats.rewardedlist.get(playeruuid) != null) {
-								if (Playerstats.rewardedlist.get(playeruuid)
-										.get(type) != null) {
-									Playerstats.rewardedlist
-											.get(playeruuid)
-											.get(type)
-											.put(number,
-													System.currentTimeMillis());
-								} else {
-									HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-									temp.put(number, System.currentTimeMillis());
-									Playerstats.rewardedlist.get(playeruuid)
-											.put(type, temp);
-								}
-							} else {
-								HashMap<String, HashMap<Integer, Long>> total = new HashMap<String, HashMap<Integer, Long>>();
-								HashMap<Integer, Long> temp = new HashMap<Integer, Long>();
-								temp.put(number, System.currentTimeMillis());
-								total.put(type, temp);
-								Playerstats.rewardedlist.put(playeruuid, total);
-							}
+						
 						}
 					}
 				}

@@ -7,6 +7,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.SkillsStuff.SkillLvls;
 
@@ -14,9 +15,10 @@ public class InfoBar {
 
 	private static HashMap<UUID, Message> playermessage = new HashMap<UUID, Message>();
 	private MoY plugin;
-
+	private Playerinfo playerinfo;
 	public InfoBar(MoY instance) {
 		this.plugin = instance;
+		this.playerinfo = instance.playerinfo;
 	}
 
 	public void cancelAll() {
@@ -30,17 +32,17 @@ public class InfoBar {
 	}
 
 	public void makemessage(UUID player, int type, Block block) {
-
+		Playerstats p = playerinfo.getplayer(player);
 		int prog;
 		int lvl;
 		switch (type) {
 		case 1:
-			prog = Playerstats.woodcuttingprog.get(player);
-			lvl = Playerstats.woodcutting.get(player);
+			prog = p.getWoodcuttingprog();
+			lvl = p.getWoodcutting();
 			break;
 		case 2:
-			prog = Playerstats.miningprog.get(player);
-			lvl = Playerstats.mining.get(player);
+			prog = p.getMiningprog();
+			lvl =p.getMining();
 			break;
 		default:
 			prog = 0;
@@ -54,26 +56,27 @@ public class InfoBar {
 	public void makemessage(UUID player, int type) {
 		int prog;
 		int lvl;
+		Playerstats p = playerinfo.getplayer(player);
 		switch (type) {
 		case 3:
-			lvl = Playerstats.cooking.get(player);
-			prog = Playerstats.cookingprog.get(player);
+			lvl = p.getCooking();
+			prog = p.getCookingprog();
 			break;
 		case -3:
-			lvl = Playerstats.cooking.get(player);
-			prog = Playerstats.cookingprog.get(player);
+			lvl = p.getCooking();
+			prog = p.getCookingprog();
 			break;
 		case 4:
-			lvl = Playerstats.smelting.get(player);
-			prog = Playerstats.smeltingprog.get(player);
+			lvl =p.getSmelting();
+			prog = p.getSmeltingprog();
 			break;
 		case 5:
-			lvl = Playerstats.fishing.get(player);
-			prog = Playerstats.fishingprog.get(player);
+			lvl = p.getFishing();
+			prog = p.getFishingprog();
 			break;
 		case 6:
-			lvl = Playerstats.level.get(player);
-			prog = Playerstats.levelprog.get(player);
+			lvl = p.getLevel();
+			prog = p.getLevelprog();
 			break;
 		default:
 			prog = 0;

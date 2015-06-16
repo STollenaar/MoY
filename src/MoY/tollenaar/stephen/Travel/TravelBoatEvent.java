@@ -73,6 +73,7 @@ MoY plugin;
 		random3.getWorld().spawnEntity(random3, EntityType.BLAZE);
 		Bordercontrolmonster(coords, world, id);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				Bukkit.getScheduler().cancelTask(schedulerborder.get(id));
 				entremove(coords, world);
@@ -107,6 +108,7 @@ MoY plugin;
 		random.getWorld().spawnEntity(random, EntityType.GHAST);
 		Bordercontrolmonster(coords, world, id);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				Bukkit.getScheduler().cancelTask(schedulerborder.get(id));
 				entremove(coords, world);
@@ -175,6 +177,7 @@ MoY plugin;
 		final World world = Border1.getWorld();
 		Bordercontrolmonster(coords, world, id);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				Bukkit.getScheduler().cancelTask(schedulerborder.get(id));
 			entremove(coords, world);
@@ -221,6 +224,7 @@ MoY plugin;
 	if(temprunonce.get(start) != null){ 
 		temprunonce.remove(start);
 		Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				
 				ArrayList<Location> startlocs = new ArrayList<Location>();
@@ -774,6 +778,7 @@ MoY plugin;
 	//RESTRICTERS
 	private void Bordercontrolmonster(final ArrayList<Integer> coords, World world, final int id){
 		int ids = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				ArrayList<Location> locations = new ArrayList<Location>();
 				locations.addAll(spawners.get(id));

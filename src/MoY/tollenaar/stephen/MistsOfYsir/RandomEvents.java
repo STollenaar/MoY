@@ -35,12 +35,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
 
 public class RandomEvents implements Listener {
-	 MoY plugin;
-	int scheduler;
+	private MoY plugin;
+	private int scheduler;
+	
+	private Playerinfo playerinfo;
 	
 	public  HashMap<UUID, String> playerzombie = new HashMap<UUID, String>();	//temp made for ribesal
 	public  HashMap<Entity, Integer> schedulerid = new HashMap<Entity, Integer>();	//scheduler to despawn ribesal
@@ -59,6 +62,8 @@ public class RandomEvents implements Listener {
 			uuid.remove();
 			Bukkit.getScheduler().cancelTask(id);
 		}
+		Bukkit.getScheduler().cancelTask(scheduler);
+		
 	}
 	
 	@EventHandler
@@ -123,10 +128,12 @@ public class RandomEvents implements Listener {
 				seconds = (60 - seconds) + next*60;
 		scheduler = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
 			
+			@Override
 			public void run(){
 				ArrayList<Player> tempplayers = new ArrayList<Player>();
 				for(Player players: Bukkit.getOnlinePlayers()){
-				if(chance() == true && Playerstats.level.get(players.getUniqueId()) >= 10 && players.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
+					Playerstats p = playerinfo.getplayer(players.getUniqueId());
+				if(chance() == true && p.getLevel() >= 10 && players.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
 						tempplayers.add(players);
 						
 						}
@@ -197,6 +204,7 @@ public class RandomEvents implements Listener {
 					player.getInventory().addItem(it);
 					player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + npc.getName() + ChatColor.DARK_PURPLE + "]" + ChatColor.GREEN + " You have been a good boy. Enjoy this.");
 					Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+						@Override
 						public void run(){
 							player.getWorld().playEffect(loc2, Effect.EXPLOSION_HUGE, 10);
 							player.getWorld().playSound(loc2, Sound.EXPLODE, 10, 1);
@@ -214,6 +222,7 @@ public class RandomEvents implements Listener {
 	
 	public void zombdespawner(final Zombie ent){
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				Bukkit.getScheduler().cancelTask(zomb.get(ent));
 				ent.remove();
@@ -225,6 +234,7 @@ public class RandomEvents implements Listener {
 	}
 	public void zombietarget(final Zombie ent, final Player player){
 		int id =Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable(){
+			@Override
 			public void run(){
 				ent.getTarget();
 				ent.setTarget(player);
@@ -316,31 +326,33 @@ public class RandomEvents implements Listener {
 		
 			}
 		}else if(event.getInventory().getName().equals("Dusty Lamp")){
+			
 			if(event.getCurrentItem() != null){
 				Player player = (Player) event.getWhoClicked();
+				Playerstats p = playerinfo.getplayer(player.getUniqueId());
 				switch (event.getCurrentItem().getItemMeta().getDisplayName()){
 				case "Woodcutting Lvl":
-					Playerstats.woodcutting.put(player.getUniqueId(), Playerstats.woodcutting.get(player.getUniqueId()) + 1);
+					p.setWoodcutting(p.getWoodcutting()+1);
 					event.setCancelled(true);
 					player.closeInventory();
 					break;
 				case "Mining Lvl":
-					Playerstats.mining.put(player.getUniqueId(), Playerstats.mining.get(player.getUniqueId()) + 1);
+					p.setMining(p.getMining()+1);
 					event.setCancelled(true);
 					player.closeInventory();
 					break;
 				case "Smelting Lvl":
-					Playerstats.smelting.put(player.getUniqueId(), Playerstats.smelting.get(player.getUniqueId()) + 1);
+					p.setSmelting(p.getSmelting()+1);
 					event.setCancelled(true);
 					player.closeInventory();
 					break;
 				case "Cooking Lvl":
-					Playerstats.cooking.put(player.getUniqueId(), Playerstats.cooking.get(player.getUniqueId()) + 1);
+					p.setCooking(p.getCooking()+1);
 					event.setCancelled(true);
 					player.closeInventory();
 					break;
 				case "Fishing Lvl":
-					Playerstats.fishing.put(player.getUniqueId(), Playerstats.fishing.get(player.getUniqueId()) + 1);
+					p.setFishing(p.getFishing()+1);
 					event.setCancelled(true);
 					player.closeInventory();
 					break;
@@ -352,11 +364,11 @@ public class RandomEvents implements Listener {
 	
 	private void skillinv(Player player){
 		Inventory skill = Bukkit.createInventory(null, 9, "Dusty Lamp");
-		
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ItemStack woodcutting = new ItemStack(Material.DIAMOND_AXE);
 		{
 			ArrayList<String> temp = new ArrayList<String>();
-			temp.add("Lvl: " +Integer.toString(Playerstats.woodcutting.get(player.getUniqueId())));
+			temp.add("Lvl: " +Integer.toString(p.getWoodcutting()));
 			ItemMeta t  = woodcutting.getItemMeta();
 			t.setDisplayName("Woodcutting Lvl");
 			t.setLore(temp);
@@ -366,7 +378,7 @@ public class RandomEvents implements Listener {
 		ItemStack mining = new ItemStack(Material.DIAMOND_PICKAXE);
 		{
 			ArrayList<String> temp = new ArrayList<String>();
-			temp.add("Lvl: " +Integer.toString(Playerstats.mining.get(player.getUniqueId())));
+			temp.add("Lvl: " +Integer.toString(p.getMining()));
 			ItemMeta t = mining.getItemMeta();
 			t.setDisplayName("Mining Lvl");
 			t.setLore(temp);
@@ -376,7 +388,7 @@ public class RandomEvents implements Listener {
 		ItemStack smelting = new ItemStack(Material.IRON_INGOT);
 		{
 			ArrayList<String> temp = new ArrayList<String>();
-			temp.add("Lvl: " +Integer.toString(Playerstats.smelting.get(player.getUniqueId())));
+			temp.add("Lvl: " +Integer.toString(p.getSmelting()));
 			ItemMeta t = smelting.getItemMeta();
 			t.setDisplayName("Smelting Lvl");
 			t.setLore(temp);
@@ -386,7 +398,7 @@ public class RandomEvents implements Listener {
 		ItemStack cooking = new ItemStack(Material.COOKED_BEEF);
 		{
 			ArrayList<String> temp = new ArrayList<String>();
-			temp.add("Lvl: " +Integer.toString(Playerstats.cooking.get(player.getUniqueId())));
+			temp.add("Lvl: " +Integer.toString(p.getCooking()));
 			ItemMeta t = cooking.getItemMeta();
 			t.setDisplayName("Cooking Lvl");
 			t.setLore(temp);
@@ -396,7 +408,7 @@ public class RandomEvents implements Listener {
 		ItemStack fishing = new ItemStack(Material.FISHING_ROD);
 		{
 			ArrayList<String> temp = new ArrayList<String>();
-			temp.add("Lvl: " +Integer.toString(Playerstats.fishing.get(player.getUniqueId())));
+			temp.add("Lvl: " +Integer.toString(p.getFishing()));
 			ItemMeta t = fishing.getItemMeta();
 			t.setDisplayName("Fishing Lvl");
 			t.setLore(temp);
@@ -424,5 +436,6 @@ public class RandomEvents implements Listener {
 	
 	public RandomEvents(MoY instance){
 		this.plugin = instance;
+		this.playerinfo = instance.playerinfo;
 	}
 }

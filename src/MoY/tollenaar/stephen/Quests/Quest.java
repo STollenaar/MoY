@@ -31,6 +31,7 @@ import org.bukkit.material.Wool;
 
 import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.Travel.HarborWaitLocations;
 import MoY.tollenaar.stephen.Travel.TripLocations;
@@ -38,10 +39,11 @@ import MoY.tollenaar.stephen.Travel.TripLocations;
 public class Quest {
 
 	protected MoY plugin;
+	protected Playerinfo playerinfo;
 
 	public Quest(MoY instance) {
 		this.plugin = instance;
-
+		this.playerinfo = instance.playerinfo;
 	}
 
 	private static HashMap<Integer, QuestKill> killquests = new HashMap<Integer, QuestKill>();
@@ -519,64 +521,20 @@ public class Quest {
 	}
 
 	public void AddActiveQuest(Player player, int number, String quetstype) {
-		if (Playerstats.activequests.get(player.getUniqueId()) == null) {
-			HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
-			HashSet<Integer> numbers = new HashSet<Integer>();
-			numbers.add(number);
-			types.put(quetstype, numbers);
-			Playerstats.activequests.put(player.getUniqueId(), types);
-		} else {
-			HashMap<String, HashSet<Integer>> types = Playerstats.activequests
-					.get(player.getUniqueId());
-			if (types.get(quetstype) == null) {
-				HashSet<Integer> numbers = new HashSet<Integer>();
-				numbers.add(number);
-				types.put(quetstype, numbers);
-				Playerstats.activequests.put(player.getUniqueId(), types);
-			} else {
-				HashSet<Integer> numbers = types.get(quetstype);
-				numbers.add(number);
-				types.put(quetstype, numbers);
-				Playerstats.activequests.put(player.getUniqueId(), types);
-			}
-		}
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		p.addactive(quetstype, number);
 	}
 
 	public void AddCompletedQuest(Player player, int number, String questtype,
 			String npcname) {
-		HashSet<Integer> numbers = Playerstats.activequests.get(
-				player.getUniqueId()).get(questtype);
-		for (int i : numbers) {
-			if (i == number) {
-				numbers.remove(i);
-				break;
-			}
-		}
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		p.deleteactive(questtype, number);
 		if (questtype.equals("kill") || questtype.equals("harvest")
 				|| questtype.contains("event")) {
 			progress.get(player.getUniqueId()).get(questtype).remove(number);
 		}
 
-		if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-			if (Playerstats.completedquests.get(player.getUniqueId()).get(
-					questtype) != null) {
-				Playerstats.completedquests.get(player.getUniqueId())
-						.get(questtype).add(number);
-			} else {
-				HashMap<String, HashSet<Integer>> types = Playerstats.completedquests
-						.get(player.getUniqueId());
-				HashSet<Integer> temp = new HashSet<Integer>();
-				temp.add(number);
-				types.put(questtype, temp);
-				Playerstats.completedquests.put(player.getUniqueId(), types);
-			}
-		} else {
-			HashMap<String, HashSet<Integer>> types = new HashMap<String, HashSet<Integer>>();
-			HashSet<Integer> temp = new HashSet<Integer>();
-			temp.add(number);
-			types.put(questtype, temp);
-			Playerstats.completedquests.put(player.getUniqueId(), types);
-		}
+		p.addcompleted(questtype, number);
 		String name = returnname(questtype, number);
 		String message = plugin.fw.GetUtilityLine("QuestComplete")
 				.replace("%questname%", name).replace("%npc%", npcname);
@@ -587,12 +545,11 @@ public class Quest {
 
 	@SuppressWarnings("deprecation")
 	public void ActiveQuest(Player player) {
+		Playerstats p  = playerinfo.getplayer(player.getUniqueId());
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-			for (String type : Playerstats.activequests.get(
-					player.getUniqueId()).keySet()) {
-				for (int number : Playerstats.activequests.get(
-						player.getUniqueId()).get(type)) {
+		if (p.getactivetype() != null) {
+			for (String type : p.getactivetype()) {
+				for (int number : p.getactives(type)) {
 					switch (type) {
 					case "kill":
 						QuestKill kill = returnkill(number);
@@ -728,12 +685,11 @@ public class Quest {
 	}
 
 	public void CompletedQuest(Player player) {
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		if (Playerstats.completedquests.get(player.getUniqueId()) != null) {
-			for (String type : Playerstats.completedquests.get(
-					player.getUniqueId()).keySet()) {
-				for (int number : Playerstats.completedquests.get(
-						player.getUniqueId()).get(type)) {
+		if (p.getcompletedtype() != null) {
+			for (String type : p.getcompletedtype()) {
+				for (int number : p.getcompleted(type)) {
 					switch (type) {
 					case "kill":
 						QuestKill kill = returnkill(number);
@@ -828,14 +784,12 @@ public class Quest {
 	}
 
 	public void RewardedQuest(Player player) {
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
-		if (Playerstats.rewardedlist.get(player.getUniqueId()) != null) {
-			for (String type : Playerstats.rewardedlist.get(
-					player.getUniqueId()).keySet()) {
-				for (int number : Playerstats.rewardedlist
-						.get(player.getUniqueId()).get(type).keySet()) {
-					long dated = Playerstats.rewardedlist
-							.get(player.getUniqueId()).get(type).get(number);
+		if (p.getrewardedtype() != null) {
+			for (String type : p.getrewardedtype()) {
+				for (int number : p.getrewardednumber(type)) {
+					long dated = p.getrewardedtime(type, number);
 					switch (type) {
 					case "kill":
 						QuestKill kill = returnkill(number);
@@ -851,8 +805,7 @@ public class Quest {
 								items.add(kil);
 							}
 						} else {
-							Playerstats.rewardedlist.get(player.getUniqueId())
-									.get(type).remove(number);
+							p.deleterewarded(type, number);;
 							plugin.database.deletecomkill(Integer
 									.toString(number), player.getUniqueId()
 									.toString());
@@ -873,8 +826,7 @@ public class Quest {
 								items.add(har);
 							}
 						} else {
-							Playerstats.rewardedlist.get(player.getUniqueId())
-									.get(type).remove(number);
+							p.deleterewarded(type, number);;
 							plugin.database.deletecomhar(Integer
 									.toString(number), player.getUniqueId()
 									.toString());
@@ -895,8 +847,7 @@ public class Quest {
 								items.add(tal);
 							}
 						} else {
-							Playerstats.rewardedlist.get(player.getUniqueId())
-									.get(type).remove(number);
+							p.deleterewarded(type, number);;
 							plugin.database.deletecomtalk(Integer
 									.toString(number), player.getUniqueId()
 									.toString());
@@ -918,8 +869,7 @@ public class Quest {
 								items.add(kil);
 							}
 						} else {
-							Playerstats.rewardedlist.get(player.getUniqueId())
-									.get(type).remove(number);
+							p.deleterewarded(type, number);;
 							// plugin.database.deletecomkill(Integer
 							// .toString(number), player.getUniqueId()
 							// .toString());
@@ -940,8 +890,7 @@ public class Quest {
 								items.add(har);
 							}
 						} else {
-							Playerstats.rewardedlist.get(player.getUniqueId())
-									.get(type).remove(number);
+							p.deleterewarded(type, number);;
 							// plugin.database.deletecomhar(Integer
 							// .toString(number), player.getUniqueId()
 							// .toString());
@@ -1028,7 +977,7 @@ public class Quest {
 						}
 					} else if (current.getMonth() < end.getMonth()) {
 						return true;
-					}else{
+					} else {
 						RescheduleEvent(event);
 						return EventCheck(number);
 					}
@@ -1038,32 +987,30 @@ public class Quest {
 		return false;
 	}
 
-	
-	private void RescheduleEvent(QuestEvent event){
-		if(!event.getRepeat().equals("-1")){
-			long s  = event.getStartdate();
-			for(String in : event.getRepeat().split(" ")){
+	private void RescheduleEvent(QuestEvent event) {
+		if (!event.getRepeat().equals("-1")) {
+			long s = event.getStartdate();
+			for (String in : event.getRepeat().split(" ")) {
 				s = parseDateDiff(in, true, s);
 			}
 			event.setStartdate(s);
-			 
+
 			long e = event.getEnddate();
-			for(String in : event.getRepeat().split(" ")){
+			for (String in : event.getRepeat().split(" ")) {
 				e = parseDateDiff(in, true, e);
 			}
 			event.setEnddate(e);
-			
+
 			plugin.fw.SaveEvent(event);
 		}
-		
+
 	}
-	
+
 	public String GetItemName(ItemStack item) {
 		return CraftItemStack.asNMSCopy(item).getName();
 	}
-	
-	private long parseDateDiff(String time, boolean future,
-			long starttime) {
+
+	private long parseDateDiff(String time, boolean future, long starttime) {
 		Pattern timePattern = Pattern
 				.compile(
 						"(?:([0-9]+)\\s*y[a-z]*[,\\s]*)?(?:([0-9]+)\\s*m[a-z]*[,\\s]*)?(?:([0-9]+)\\s*w[a-z]*[,\\s]*)?(?:([0-9]+)\\s*d[a-z]*[,\\s]*)?",

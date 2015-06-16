@@ -527,7 +527,6 @@ public class QuestInvClick implements Listener {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	@EventHandler
 	public void PlayerQuestSelector(InventoryClickEvent event) {
 		Inventory clickedinv = event.getClickedInventory();
@@ -564,15 +563,15 @@ public class QuestInvClick implements Listener {
 							+ "YQuest" + ChatColor.BLUE + "] " + ChatColor.GRAY
 							+ message);
 					if (!quetstype.equals("talkto")) {
-						if (questers.progress.get(player.getUniqueId()) != null) {
-							if (questers.progress.get(player.getUniqueId())
+						if (Quest.progress.get(player.getUniqueId()) != null) {
+							if (Quest.progress.get(player.getUniqueId())
 									.get(quetstype) != null) {
-								questers.progress.get(player.getUniqueId())
+								Quest.progress.get(player.getUniqueId())
 										.get(quetstype).put(number, 0);
 							} else {
 								HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
 								numberq.put(number, 0);
-								questers.progress.get(player.getUniqueId())
+								Quest.progress.get(player.getUniqueId())
 										.put(quetstype, numberq);
 							}
 						} else {
@@ -580,7 +579,7 @@ public class QuestInvClick implements Listener {
 							HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
 							numberq.put(number, 0);
 							total.put(quetstype, numberq);
-							questers.progress.put(player.getUniqueId(), total);
+							Quest.progress.put(player.getUniqueId(), total);
 						}
 					}
 				} else {

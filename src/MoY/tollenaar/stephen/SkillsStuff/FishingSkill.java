@@ -1,7 +1,6 @@
 package MoY.tollenaar.stephen.SkillsStuff;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,21 +72,21 @@ public class FishingSkill {
 		int n = r.nextInt(100);
 		Map<Integer, ItemStack> m = new HashMap<Integer, ItemStack>();
 		if (n <= CalcNormal(lvl)) {
-			m.put(100, ((PossibleFishingResult) f.get(0)).a(r));
+			m.put(100, f.get(0).a(r));
 		} else if (n <= CalcSalm(lvl) + CalcNormal(lvl)) {
-			m.put(20, ((PossibleFishingResult) f.get(1)).a(r));
+			m.put(20, f.get(1).a(r));
 		} else if (n <= CalcJunk(lvl) + CalcSalm(lvl) + CalcNormal(lvl)) {
-			m.put(100, ((PossibleFishingResult) WeightedRandom.a(r, (Collection<PossibleFishingResult>) d))
+			m.put(100, ((PossibleFishingResult) WeightedRandom.a(r, d))
 					.a(r));
 		} else if (n <= CalcClown(lvl) + CalcJunk(lvl) + CalcSalm(lvl)
 				+ CalcNormal(lvl)) {
-			m.put(14, ((PossibleFishingResult) f.get(2)).a(r));
+			m.put(14, f.get(2).a(r));
 		} else if (n <= CalcTreasure(lvl) + CalcClown(lvl) + CalcJunk(lvl)
 				+ CalcSalm(lvl) + CalcNormal(lvl)) {
-			m.put(11, ((PossibleFishingResult) WeightedRandom.a(r, (Collection<PossibleFishingResult>) e))
+			m.put(11, ((PossibleFishingResult) WeightedRandom.a(r, e))
 					.a(r));
 		} else {
-			m.put(17, ((PossibleFishingResult) f.get(3)).a(r));
+			m.put(17, f.get(3).a(r));
 		}
 		return m;
 	}

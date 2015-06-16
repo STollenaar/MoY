@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -25,12 +26,16 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class Questinteracts implements Listener {
 	private Filewriters fw;
 	private MoY plugin;
-
+	private Playerinfo playerinfo;
+	
+	
 	@EventHandler
 	public void onEvent(PlayerInteractEntityEvent event) {
 		if (event.getRightClicked() != null) {
 			if (event.getRightClicked() instanceof Entity) {
 				Player player = event.getPlayer();
+				Playerstats p  = playerinfo.getplayer(player.getUniqueId());
+				
 				PermissionUser user = PermissionsEx.getUser(player);
 				boolean dummy = true;
 				Entity entity = event.getRightClicked();
@@ -42,11 +47,9 @@ public class Questinteracts implements Listener {
 					 * important to check if player isn't completing a
 					 * talktoquest
 					 */
-					if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-						if (Playerstats.activequests.get(player.getUniqueId())
-								.get("talkto") != null) {
-							for (int number : Playerstats.activequests.get(
-									player.getUniqueId()).get("talkto")) {
+					if (p.getactivetype() != null) {
+						if (p.getactives("talkto") != null) {
+							for (int number : p.getactives("talkto")) {
 								QuestTalkto talk = plugin.questers
 										.returntalkto(number);
 								if (plugin.questers.uniquenpcid.get(talk
@@ -181,6 +184,7 @@ public class Questinteracts implements Listener {
 	public Questinteracts(MoY instance) {
 		this.fw = instance.fw;
 		this.plugin = instance;
+		this.playerinfo = instance.playerinfo;
 	}
 
 }

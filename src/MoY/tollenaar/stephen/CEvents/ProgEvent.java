@@ -107,6 +107,7 @@ public final class ProgEvent extends Event {
 		return xp;
 	}
 
+	@Override
 	public HandlerList getHandlers() {
 		return handlers;
 	}

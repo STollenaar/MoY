@@ -22,12 +22,13 @@ import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.MistsOfYsir.Party;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
 public class LevelSystems implements Listener {
 	private Filewriters fw;
 	private Party party;
-
+	private Playerinfo playerinfo;
 	@EventHandler
 	public void onmonsterdeath(EntityDeathEvent event) {
 		if (event.getEntity() instanceof Monster
@@ -36,9 +37,10 @@ public class LevelSystems implements Listener {
 				|| (event.getEntity() instanceof Projectile && ((Projectile) event
 						.getEntity()).getShooter() instanceof Player)) {
 			Player player = event.getEntity().getKiller();
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			if (player != null) {
 
-				int playerlvl = Playerstats.level.get(player.getUniqueId());
+				int playerlvl = p.getLevel();
 				int xp;
 				if (event.getEntity() instanceof Skeleton
 						|| event.getEntity() instanceof Zombie) {
@@ -66,9 +68,9 @@ public class LevelSystems implements Listener {
 				if (member != player.getUniqueId()) {
 					Player victim = Bukkit.getPlayer(member);
 					if (victim != null) {
-
-						int memberprog = Playerstats.levelprog.get(member);
-						int memberlvl = Playerstats.level.get(member);
+						Playerstats p = playerinfo.getplayer(member);
+						int memberprog = p.getLevelprog();
+						int memberlvl = p.getLevel();
 						int memberneeds = memberlvl * 15;
 						if (memberprog + xp >= memberneeds) {
 							if (memberlvl + 1 < 140) {
@@ -82,8 +84,8 @@ public class LevelSystems implements Listener {
 
 								memberprog = rest;
 								memberlvl++;
-								Playerstats.levelprog.put(member, memberprog);
-								Playerstats.level.put(member, memberlvl);
+								p.setLevelprog(memberprog);
+								p.setLevel(memberlvl);
 								if (mp != null) {
 									String up = fw.GetUtilityLine("Partylvlup");
 									up = up.replace("%playername%",
@@ -97,7 +99,7 @@ public class LevelSystems implements Listener {
 								}
 							}
 						} else {
-							Playerstats.levelprog.put(member, memberprog + xp);
+							p.setLevelprog(memberprog+xp);
 						}
 					}
 				}

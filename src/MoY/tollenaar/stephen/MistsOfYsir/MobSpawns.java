@@ -38,17 +38,19 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.Travel.TravelBoatEvent;
 import MoY.tollenaar.stephen.Travel.TravelCartEvent;
 import MoY.tollenaar.stephen.Travel.TravelDragonEvent;
 
 public class MobSpawns implements Listener {
-	MoY plugin;
-	TravelBoatEvent boat;
-	TravelCartEvent cart;
-	TravelDragonEvent dragon;
-	RandomEvents rand;
+	private MoY plugin;
+	private Playerinfo playerinfo;
+	private TravelBoatEvent boat;
+	private TravelCartEvent cart;
+	private TravelDragonEvent dragon;
+	private RandomEvents rand;
 	public static HashMap<UUID, UUID> zombuuidtoplayeruuid = new HashMap<UUID, UUID>();
 
 	@EventHandler
@@ -65,14 +67,14 @@ public class MobSpawns implements Listener {
 					Iterator<? extends Player> players = ptemp.iterator();
 					while(players.hasNext()){
 					Player player  = players.next();
+					Playerstats p = playerinfo.getplayer(player.getUniqueId());
 					if (player.getWorld().getName()
 								.equals(location.getWorld().getName())) {
 							if (player.getLocation().distanceSquared(
 									location) <= radiusSquared) {
 								int playerlvl;
 								
-									playerlvl = Playerstats.level
-											.get(player.getUniqueId());
+									playerlvl = p.getLevel();
 									int lvl = (int) Math.ceil((playerlvl+.0)/10);
 									if (ent instanceof Zombie) {
 										zombieitems(ent, lvl);
@@ -113,8 +115,9 @@ public class MobSpawns implements Listener {
 	public void spiderdodging(EntityDamageByEntityEvent event){
 		if(event.getDamager() instanceof Player && event.getEntity() instanceof CaveSpider){
 			Player player = (Player) event.getDamager();
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			CaveSpider cave = (CaveSpider) event.getEntity();
-			int lvl = (int) Math.ceil(Playerstats.level.get(player.getUniqueId())/10.0);
+			int lvl = (int) Math.ceil(p.getLevel()/10.0);
 			if(lvl >= 9){
 				int constance = chance(lvl);
 				Random r = new Random();
@@ -544,7 +547,8 @@ public class MobSpawns implements Listener {
 	}
 
 	private void cavedamage(Player player) {
-		int lvl = (int) Math.ceil((Playerstats.level.get(player.getUniqueId())+.0)/10);
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);
 		PotionEffect pot = new PotionEffect(PotionEffectType.POISON, 0, 0);
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
 		for (PotionEffect t : ac) {
@@ -693,7 +697,8 @@ public class MobSpawns implements Listener {
 	}
 
 	private void slimspiderdamage(Player player) {
-		int lvl = (int) Math.ceil((Playerstats.level.get(player.getUniqueId())+.0)/10);	
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);	
 		PotionEffect pot = null;
 		PotionEffect pot2 = null;
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
@@ -901,7 +906,8 @@ public class MobSpawns implements Listener {
 	}
 
 	private void magmacubedamage(Player player) {
-		int lvl = (int) Math.ceil((Playerstats.level.get(player.getUniqueId())+.0)/10);	
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);	
 		PotionEffect pot = null;
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
 		for (PotionEffect t : ac) {
@@ -1029,7 +1035,8 @@ public class MobSpawns implements Listener {
 	}
 
 	private void witchdamage(Player player){
-		int lvl  = (int) Math.ceil((Playerstats.level.get(player.getUniqueId())+.0)/10);
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		int lvl  = (int) Math.ceil((p.getLevel()+.0)/10);
 		switch (lvl){
 		case 2:
 			player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 2*20, 1));
@@ -1071,7 +1078,8 @@ public class MobSpawns implements Listener {
 	}
 	
 	private void ghastdamage(Player player) {
-		int lvl = (int) Math.ceil((Playerstats.level.get(player.getUniqueId())+.0)/10);
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);
 		if(boat.playeratevent.get(player.getUniqueId()) != null){
 			lvl = 5;
 		}else if(dragon.playeratevent.get(player.getUniqueId()) != null){
@@ -1316,5 +1324,6 @@ public class MobSpawns implements Listener {
 		this.cart = instance.cart;
 		this.dragon = instance.dragon;
 		this.rand = instance.re;
+		this.playerinfo = instance.playerinfo;
 	}
 }

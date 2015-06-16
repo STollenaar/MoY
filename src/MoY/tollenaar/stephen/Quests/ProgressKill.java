@@ -15,16 +15,19 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
 public class ProgressKill implements Listener {
 
 	private QuestsServerSide q;
 	private MoY plugin;
+	private Playerinfo playerinfo;
 	
 	public ProgressKill(MoY instance) {
 		this.q = instance.questers;
 		this.plugin = instance;
+		this.playerinfo = instance.playerinfo;
 	}
 
 	@SuppressWarnings({ "static-access", "deprecation" })
@@ -35,12 +38,11 @@ public class ProgressKill implements Listener {
 		}
 		if (event.getEntity().getKiller() instanceof Player) {
 			Player player = event.getEntity().getKiller();
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			Entity ent = event.getEntity();
-			if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-				if (Playerstats.activequests.get(player.getUniqueId()).get(
-						"kill") != null) {
-					for (int quests : Playerstats.activequests.get(
-							player.getUniqueId()).get("kill")) {
+			if (p.getactivetype() != null) {
+				if (p.getactives("kill") != null) {
+					for (int quests : p.getactives("kill")) {
 						QuestKill kill = q.returnkill(quests);
 						if (EntityType.valueOf(kill.getMonster().toUpperCase()).getName().equals(ent.getType().getName())) {
 							HashMap<Integer, Integer> amount = q.progress.get(
@@ -63,9 +65,9 @@ public class ProgressKill implements Listener {
 							break;
 						}
 					}
-				}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventkill") != null){
-					for (int quests : Playerstats.activequests.get(
-							player.getUniqueId()).get("eventkill")) {
+				}
+				if(p.getactives("eventkill") != null){
+					for (int quests : p.getactives("eventkill")) {
 						QuestEvent kill = q.returneventquest(quests);
 						if (EntityType.valueOf(kill.getType().toUpperCase()).getName().equals(ent.getType().getName())) {
 							HashMap<Integer, Integer> amount = q.progress.get(

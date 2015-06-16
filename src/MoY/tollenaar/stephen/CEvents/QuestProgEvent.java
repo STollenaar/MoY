@@ -31,6 +31,7 @@ public class QuestProgEvent extends Event{
 	}
 	
 	
+	@Override
 	public HandlerList getHandlers() {
 		return handlers;
 	}

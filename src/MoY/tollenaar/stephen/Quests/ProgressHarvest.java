@@ -16,21 +16,26 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.CEvents.QuestProgEvent;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
 public class ProgressHarvest implements Listener {
 
+	private Playerinfo playerinfo;
 
+	public ProgressHarvest(Playerinfo playerinfo) {
+		this.playerinfo = playerinfo;
+	}
 
 	@EventHandler
 	public void onbucketFillBlock(PlayerInteractEvent event) {
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			Player player = event.getPlayer();
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			if (player.getItemInHand() != null
 					&& player.getItemInHand().getType() == Material.BUCKET) {
-				if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-					if (Playerstats.activequests.get(player.getUniqueId()).get(
-							"harvest") != null) {
+				if (p.getactivetype() != null) {
+					if (p.getactives("harvest") != null) {
 						ItemStack item;
 						if (event.getClickedBlock().getType() == Material.WATER
 								|| event.getClickedBlock().getType() == Material.STATIONARY_WATER) {
@@ -41,13 +46,12 @@ public class ProgressHarvest implements Listener {
 						} else {
 							item = player.getItemInHand();
 						}
-						for (int questn : Playerstats.activequests.get(
-								player.getUniqueId()).get("harvest")) {
+						for (int questn : p.getactives("harvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									questn, "harvest", item);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
-					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
+					} else if (p.getactives("eventharvest") != null) {
 						ItemStack item;
 						if (event.getClickedBlock().getType() == Material.WATER
 								|| event.getClickedBlock().getType() == Material.STATIONARY_WATER) {
@@ -58,8 +62,7 @@ public class ProgressHarvest implements Listener {
 						} else {
 							item = player.getItemInHand();
 						}
-						for (int questn : Playerstats.activequests.get(
-								player.getUniqueId()).get("eventharvest")) {
+						for (int questn : p.getactives("eventharvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									questn, "eventharvest", item);
 							Bukkit.getServer().getPluginManager().callEvent(e);
@@ -74,21 +77,19 @@ public class ProgressHarvest implements Listener {
 	public void onbucketFillEntity(PlayerInteractEntityEvent event) {
 		if (event.getRightClicked().getType() == EntityType.COW) {
 			Player player = event.getPlayer();
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			if (player.getItemInHand() != null
 					&& player.getItemInHand().getType() == Material.BUCKET) {
-				if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-					if (Playerstats.activequests.get(player.getUniqueId()).get(
-							"harvest") != null) {
-						for (int quest : Playerstats.activequests.get(
-								player.getUniqueId()).get("harvest")) {
+				if (p.getactivetype() != null) {
+					if (p.getactives("harvest") != null) {
+						for (int quest : p.getactives("harvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									quest, "harvest", new ItemStack(
 											Material.MILK_BUCKET));
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
-					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
-						for (int quest : Playerstats.activequests.get(
-								player.getUniqueId()).get("eventharvest")) {
+					} else if (p.getactives("eventharvest") != null) {
+						for (int quest : p.getactives("eventharvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									quest, "eventharvest", new ItemStack(
 											Material.MILK_BUCKET));
@@ -103,18 +104,16 @@ public class ProgressHarvest implements Listener {
 	@EventHandler
 	public void onItemPickup(PlayerPickupItemEvent event) {
 		Player player = event.getPlayer();
-		if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-			if (Playerstats.activequests.get(player.getUniqueId()).get(
-					"harvest") != null) {
-				for (int questn : Playerstats.activequests.get(
-						player.getUniqueId()).get("harvest")) {
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
+		if (p.getactivetype() != null) {
+			if (p.getactives("harvest") != null) {
+				for (int questn : p.getactives("harvest")) {
 					QuestProgEvent e = new QuestProgEvent(player, questn,
 							"harvest", event.getItem().getItemStack());
 					Bukkit.getServer().getPluginManager().callEvent(e);
 				}
-			}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
-				for (int questn : Playerstats.activequests.get(
-						player.getUniqueId()).get("eventharvest")) {
+			} else if (p.getactives("eventharvest") != null) {
+				for (int questn : p.getactives("eventharvest")) {
 					QuestProgEvent e = new QuestProgEvent(player, questn,
 							"eventharvest", event.getItem().getItemStack());
 					Bukkit.getServer().getPluginManager().callEvent(e);
@@ -132,21 +131,23 @@ public class ProgressHarvest implements Listener {
 							.getAction() == InventoryAction.PLACE_ONE)
 					|| event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
 				Player player = (Player) event.getWhoClicked();
-				if (Playerstats.activequests.get(player.getUniqueId()) != null) {
-					if (Playerstats.activequests.get(player.getUniqueId()).get(
-							"harvest") != null) {
-						for (int questn : Playerstats.activequests.get(
-								player.getUniqueId()).get("harvest")) {
+				Playerstats p = playerinfo.getplayer(player.getUniqueId());
+				if (p.getactivetype() != null) {
+					if (p.getactives("harvest") != null) {
+						for (int questn : p.getactives("harvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
 									questn, "harvest", event.getCurrentItem());
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
-					}else if(Playerstats.activequests.get(player.getUniqueId()).get("eventharvest") != null){
-						for (int questn : Playerstats.activequests.get(
-								player.getUniqueId()).get("eventharvest")) {
-							QuestProgEvent e = new QuestProgEvent(player,
-									questn, "eventharvest", event.getCurrentItem());
-							Bukkit.getServer().getPluginManager().callEvent(e);
+					} else if (p.getactivetype() != null) {
+						if (p.getactives("eventharvest") != null) {
+							for (int questn : p.getactives("eventharvest")) {
+								QuestProgEvent e = new QuestProgEvent(player,
+										questn, "eventharvest",
+										event.getCurrentItem());
+								Bukkit.getServer().getPluginManager()
+										.callEvent(e);
+							}
 						}
 					}
 				}

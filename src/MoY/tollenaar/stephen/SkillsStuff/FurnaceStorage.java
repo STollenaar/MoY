@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.messages.InfoBar;
 
@@ -22,13 +23,17 @@ public class FurnaceStorage {
 	private ItemStack failures;
 	private ItemStack toBurn;
 	private InfoBar info;
-
+	
+	private Playerinfo playerinfo;
+	
+	
 	private HashMap<UUID, Integer> players;
 
 	public FurnaceStorage(Block block, MoY instance) {
 		this.furnace = block;
 		this.players = new HashMap<UUID, Integer>();
 		this.info = new InfoBar(instance);
+		this.playerinfo = instance.playerinfo;
 		save();
 
 	}
@@ -61,12 +66,13 @@ public class FurnaceStorage {
 
 		UUID first = returnfirst(players.keySet());
 		players.put(first, players.get(first) - 1);
-
+		Playerstats p = playerinfo.getplayer(first);
+		
 		ProgEvent e;
 
 		if (item.getType().isEdible()) {
 			e = new ProgEvent(first, 3, Edibles.GetEdible(item)
-					.SuccesCalc(Playerstats.cooking.get(first)));
+					.SuccesCalc(p.getCooking()));
 		} else {
 			e = new ProgEvent(first, item.getType(), null, 4);
 		}

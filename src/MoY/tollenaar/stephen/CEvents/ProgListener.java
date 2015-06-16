@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.messages.InfoBar;
 import ru.tehkode.permissions.PermissionUser;
@@ -19,15 +20,18 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public final class ProgListener implements Listener {
 
 	private InfoBar info;
+	private Playerinfo playerinfo;
 
 	public ProgListener(MoY instance) {
 		this.info = new InfoBar(instance);
+		this.playerinfo = instance.playerinfo;
 	}
 
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void MiningListener(ProgEvent event) {
 		Player player = Bukkit.getPlayer(event.getPlayer());
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		PermissionUser user = PermissionsEx.getUser(player);
 		int currentlvl = 0;
 		if (event.getType() > 0) {
@@ -37,29 +41,28 @@ public final class ProgListener implements Listener {
 
 			switch (event.getType()) {
 			case 1:
-				currentlvl = Playerstats.woodcutting.get(event.getPlayer());
-				currentprog = Playerstats.woodcuttingprog
-						.get(event.getPlayer());
+				currentlvl = p.getWoodcutting();
+				currentprog = p.getWoodcuttingprog();
 				break;
 			case 2:
-				currentlvl = Playerstats.mining.get(event.getPlayer());
-				currentprog = Playerstats.miningprog.get(event.getPlayer());
+				currentlvl = p.getMining();
+				currentprog = p.getMiningprog();
 				break;
 			case 3:
-				currentlvl = Playerstats.cooking.get(event.getPlayer());
-				currentprog = Playerstats.cookingprog.get(event.getPlayer());
+				currentlvl = p.getCooking();
+				currentprog = p.getCookingprog();
 				break;
 			case 4:
-				currentlvl = Playerstats.smelting.get(event.getPlayer());
-				currentprog = Playerstats.smeltingprog.get(event.getPlayer());
+				currentlvl = p.getSmelting();
+				currentprog = p.getSmeltingprog();
 				break;
 			case 5:
-				currentlvl = Playerstats.fishing.get(event.getPlayer());
-				currentprog = Playerstats.fishingprog.get(event.getPlayer());
+				currentlvl = p.getFishing();
+				currentprog = p.getFishingprog();
 				break;
 			case 6:
-				currentlvl = Playerstats.level.get(event.getPlayer());
-				currentprog = Playerstats.levelprog.get(event.getPlayer());
+				currentlvl = p.getLevel();
+				currentprog = p.getLevelprog();
 				break;
 			default:
 				return;
@@ -85,10 +88,7 @@ public final class ProgListener implements Listener {
 						currentprog++;
 						xp--;
 					}
-					Playerstats.abilitiescore
-							.put(player.getUniqueId(),
-									Playerstats.abilitiescore.get(player
-											.getUniqueId()) + 1);
+					p.setAbility(p.getAbility() + 1);
 					currentprog = 0;
 					if (xp > 0) {
 						currentprog = xp;
@@ -100,28 +100,28 @@ public final class ProgListener implements Listener {
 
 			switch (event.getType()) {
 			case 1:
-				Playerstats.woodcutting.put(event.getPlayer(), currentlvl);
-				Playerstats.woodcuttingprog.put(event.getPlayer(), currentprog);
+				p.setWoodcutting(currentlvl);
+				p.setWoodcuttingprog(currentprog);
 				break;
 			case 2:
-				Playerstats.mining.put(event.getPlayer(), currentlvl);
-				Playerstats.miningprog.put(event.getPlayer(), currentprog);
+				p.setMining(currentlvl);
+				p.setMiningprog(currentprog);
 				break;
 			case 3:
-				Playerstats.cooking.put(event.getPlayer(), currentlvl);
-				Playerstats.cookingprog.put(event.getPlayer(), currentprog);
+				p.setCooking(currentlvl);
+				p.setCookingprog(currentprog);
 				break;
 			case 4:
-				Playerstats.smelting.put(event.getPlayer(), currentlvl);
-				Playerstats.smeltingprog.put(event.getPlayer(), currentprog);
+				p.setSmelting(currentlvl);
+				p.setSmeltingprog(currentprog);
 				break;
 			case 5:
-				Playerstats.fishing.put(event.getPlayer(), currentlvl);
-				Playerstats.fishingprog.put(event.getPlayer(), currentprog);
+				p.setFishing(currentlvl);
+				p.setFishingprog(currentprog);
 				break;
 			case 6:
-				Playerstats.level.put(event.getPlayer(), currentlvl);
-				Playerstats.levelprog.put(event.getPlayer(), currentprog);
+				p.setLevel(currentlvl);
+				p.setLevelprog(currentprog);
 				break;
 			default:
 				return;

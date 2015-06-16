@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -32,7 +33,9 @@ public class Skillimprovement implements Listener {
 	private MoY plugin;
 
 	private FishingSkill fish;
-
+	private Playerinfo playerinfo;
+	
+	
 	public HashSet<Block> miningblocksplaces = new HashSet<Block>();
 	public HashSet<Block> woodblocksplaces = new HashSet<Block>();
 
@@ -58,11 +61,13 @@ public class Skillimprovement implements Listener {
 	public void onPlayerfish(PlayerFishEvent event) {
 
 		Player player = event.getPlayer();
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		PermissionUser user = PermissionsEx.getUser(player);
 		if (user.has("MMOTEST")) {
 			if (event.getState() == State.CAUGHT_FISH) {
 				event.setCancelled(true);
-				int lvl = Playerstats.fishing.get(player.getUniqueId());
+				
+				int lvl = p.getFishing();
 				Map<Integer, ItemStack> c = fish.GetItem(lvl);
 				int chance = (int) c.keySet().toArray()[0];
 				ItemStack item = c.get(chance);
@@ -110,10 +115,9 @@ public class Skillimprovement implements Listener {
 	private void woodcutting(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
-
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ProgEvent e;
-		if (SkillLvls.GetSkill(block).getLvl() <= Playerstats.woodcutting
-				.get(player.getUniqueId())) {
+		if (SkillLvls.GetSkill(block).getLvl() <= p.getWoodcutting()) {
 			e = new ProgEvent(player.getUniqueId(), SkillLvls.GetSkill(
 					block).getTree(), block, 1);
 		} else {
@@ -128,10 +132,9 @@ public class Skillimprovement implements Listener {
 	private void mining(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
-
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ProgEvent e;
-		if (SkillLvls.GetSkill(block).getLvl() <= Playerstats.mining.get(player
-				.getUniqueId())) {
+		if (SkillLvls.GetSkill(block).getLvl() <= p.getMining()) {
 			e = new ProgEvent(player.getUniqueId(), block.getType(),
 					block, 2);
 		} else {
@@ -229,9 +232,8 @@ public class Skillimprovement implements Listener {
 
 		Random r = new Random();
 		FurnaceStorage storage = FurnaceStorage.GetStorage(event.getBlock());
-
-		int current = Playerstats.cooking.get(storage.returnfirst(storage
-				.getPlayers().keySet()));
+		Playerstats p = playerinfo.getplayer(storage.returnfirst(storage.getPlayers().keySet()));
+		int current = p.getCooking();
 		if (r.nextInt(100) <= item.SuccesCalc(current)) {
 			storage.addsucces(res);
 		} else {
@@ -251,6 +253,7 @@ public class Skillimprovement implements Listener {
 	public Skillimprovement(MoY instance) {
 		this.plugin = instance;
 		this.fish = new FishingSkill();
+		this.playerinfo = instance.playerinfo;
 	}
 
 }

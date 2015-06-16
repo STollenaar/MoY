@@ -11,13 +11,13 @@ import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 import MoY.tollenaar.stephen.CEvents.ProgEvent;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
-import MoY.tollenaar.stephen.PlayerInfo.Playerinfoding;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 
 public class CommandsPlayerinfo implements CommandExecutor {
 
-	private Playerinfoding playerinfo;
+	private Playerinfo playerinfo;
 	private QuestsServerSide questers;
 
 	public CommandsPlayerinfo(MoY instance) {
@@ -31,6 +31,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
+			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			PermissionUser user = PermissionsEx.getUser(player);
 			if (cmd.getName().equalsIgnoreCase("skill")) {
 				if (args.length == 0) {
@@ -41,26 +42,19 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						try {
 							int newlvl = Integer.parseInt(args[1]);
 							if (args[0].equalsIgnoreCase("wood")) {
-								Playerstats.woodcutting.put(
-										player.getUniqueId(), newlvl);
+								p.setWoodcutting(newlvl);
 							} else if (args[0].equalsIgnoreCase("mining")) {
-								Playerstats.mining.put(player.getUniqueId(),
-										newlvl);
+								p.setMining(newlvl);
 							} else if (args[0].equalsIgnoreCase("fishing")) {
-								Playerstats.fishing.put(player.getUniqueId(),
-										newlvl);
+								p.setFishing(newlvl);
 							} else if (args[0].equalsIgnoreCase("cooking")) {
-								Playerstats.cooking.put(player.getUniqueId(),
-										newlvl);
+								p.setCooking(newlvl);
 							} else if (args[0].equalsIgnoreCase("smelting")) {
-								Playerstats.smelting.put(player.getUniqueId(),
-										newlvl);
+								p.setSmelting(newlvl);
 							} else if (args[0].equalsIgnoreCase("strength")) {
-								Playerstats.Strengthscore.put(
-										player.getUniqueId(), newlvl);
+								p.setStrength(newlvl);
 							} else if (args[0].equalsIgnoreCase("dex")) {
-								Playerstats.Dexscore.put(player.getUniqueId(),
-										newlvl);
+								p.setDex(newlvl);
 							}
 						} catch (NumberFormatException ex) {
 							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
@@ -75,20 +69,13 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				if (user.has("Ysir.stafflvl")) {
 					if (args.length != 0) {
 						if (args[0].equalsIgnoreCase("up")) {
-							Playerstats.level
-									.put(player.getUniqueId(),
-											Playerstats.level.get(player
-													.getUniqueId()) + 1);
+							p.setLevel(p.getLevel() + 1);
 						} else if (args[0].equals("down")) {
-							Playerstats.level
-									.put(player.getUniqueId(),
-											Playerstats.level.get(player
-													.getUniqueId()) - 1);
+							p.setLevel(p.getLevel() - 1);
 						} else {
 							try {
 								int lvl = Integer.parseInt(args[0]);
-								Playerstats.level
-										.put(player.getUniqueId(), lvl);
+								p.setLevel(lvl);
 							} catch (NumberFormatException ex) {
 								ex.printStackTrace();
 							}
@@ -100,54 +87,56 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						return true;
 					}
 				}
-			}else if(cmd.getName().equalsIgnoreCase("quest")){
-				if(args.length >= 1){
-					if(args[0].equalsIgnoreCase("active")){
+			} else if (cmd.getName().equalsIgnoreCase("quest")) {
+				if (args.length >= 1) {
+					if (args[0].equalsIgnoreCase("active")) {
 						questers.ActiveQuest(player);
 						return true;
-					}else if(args[0].equalsIgnoreCase("completed")){
+					} else if (args[0].equalsIgnoreCase("completed")) {
 						questers.CompletedQuest(player);
 						return true;
-					}else if(args[0].equalsIgnoreCase("rewarded")){
+					} else if (args[0].equalsIgnoreCase("rewarded")) {
 						questers.RewardedQuest(player);
 						return true;
 					}
-				}else{
-					player.sendMessage(ChatColor.RED + "Please use /quest <active/completed/rewarded>.");
+				} else {
+					player.sendMessage(ChatColor.RED
+							+ "Please use /quest <active/completed/rewarded>.");
 					return true;
 				}
-				
+
 				return true;
 			}
-			
-		}else{
-			if(cmd.getName().equalsIgnoreCase("skill")){
-				if(args.length == 3){
+
+		} else {
+			if (cmd.getName().equalsIgnoreCase("skill")) {
+				
+				if (args.length == 3) {
 					try {
 						Player player = Bukkit.getPlayer(args[2]);
+						Playerstats p = playerinfo.getplayer(player.getUniqueId());
 						int newlvl = Integer.parseInt(args[1]);
 						int type = 0;
 						if (args[0].equalsIgnoreCase("wood")) {
-						type =1;
+							type = 1;
 						} else if (args[0].equalsIgnoreCase("mining")) {
-						type = 2;
+							type = 2;
 						} else if (args[0].equalsIgnoreCase("fishing")) {
-						type = 5;
+							type = 5;
 						} else if (args[0].equalsIgnoreCase("cooking")) {
-						type = 3;
+							type = 3;
 						} else if (args[0].equalsIgnoreCase("smelting")) {
-						type = 4;
+							type = 4;
 						} else if (args[0].equalsIgnoreCase("strength")) {
-							Playerstats.Strengthscore.put(
-									player.getUniqueId(), newlvl);
+							p.setStrength(newlvl);
 						} else if (args[0].equalsIgnoreCase("dex")) {
-							Playerstats.Dexscore.put(player.getUniqueId(),
-									newlvl);
-						}else if (args[0].equalsIgnoreCase("level")){
+							p.setDex(newlvl);
+						} else if (args[0].equalsIgnoreCase("level")) {
 							type = 6;
 						}
-						if(type != 0){
-							ProgEvent e = new ProgEvent(player.getUniqueId(), type, Integer.parseInt(args[1]), true);
+						if (type != 0) {
+							ProgEvent e = new ProgEvent(player.getUniqueId(),
+									type, Integer.parseInt(args[1]), true);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
 					} catch (NumberFormatException ex) {
@@ -157,6 +146,6 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				}
 			}
 		}
-			return false;
+		return false;
 	}
 }

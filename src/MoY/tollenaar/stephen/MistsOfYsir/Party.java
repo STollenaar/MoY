@@ -20,12 +20,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import MoY.tollenaar.stephen.Files.Filewriters;
+import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
 
 public class Party implements Listener{
 	private MoY plugin;
 	private Filewriters fw;
+	private Playerinfo playerinfo;
+	
+	
 	public  HashMap<String, Set<UUID>> Partyswithmembers = new HashMap<String, Set<UUID>>(); //party with all the members
 	public  HashMap<String, UUID> Partyleaders = new HashMap<String, UUID>(); //all the party leaders and their party name partname --> partyleader db
 	public  HashMap<UUID, String> invites = new HashMap<UUID , String>(); //all the open invites, playername --> partyname db
@@ -112,7 +116,8 @@ public class Party implements Listener{
 					SkullMeta skull = (SkullMeta) onlineplayer.getItemMeta();
 					skull.setDisplayName(ChatColor.GREEN + player.getName());
 					ArrayList<String> lore = new ArrayList<String>();
-					lore.add(plugin.mob.mobdifficulty(Playerstats.level.get(member))  + "Level: " +  Integer.toString(Playerstats.level.get(member)));
+					Playerstats p = playerinfo.getplayer(member);
+					lore.add(plugin.mob.mobdifficulty(p.getLevel())  + "Level: " +  Integer.toString(p.getLevel()));
 					if(Partyleaders.get(Partymembers.get(member)).compareTo(member)== 0){
 						lore.add(ChatColor.GOLD + "Party leader");
 					}
@@ -126,7 +131,8 @@ public class Party implements Listener{
 					SkullMeta skull = (SkullMeta) offlineplayer.getItemMeta();
 					skull.setDisplayName(ChatColor.RED + offplayer.getName());
 					ArrayList<String> lore = new ArrayList<String>();
-					lore.add(plugin.mob.mobdifficulty(Playerstats.level.get(member)) + "Level: " + Integer.toString(Playerstats.level.get(member)));
+					Playerstats p = playerinfo.getplayer(member);
+					lore.add(plugin.mob.mobdifficulty(p.getLevel())  + "Level: " +  Integer.toString(p.getLevel()));
 					if(Partyleaders.get(Partymembers.get(member)).compareTo(member)== 0){
 						lore.add(ChatColor.GOLD + "Party leader");
 					}
@@ -155,6 +161,7 @@ public class Party implements Listener{
 	public Party(MoY instance){
 		this.plugin = instance;
 		this.fw = instance.fw;
+		this.playerinfo = instance.playerinfo;
 	}
 
 	public  Set<UUID> partyfecther(UUID member){

@@ -84,6 +84,7 @@ public class QuestsServerSide extends Quest {
 				new Runnable() {
 					int tickdelay = 0;
 
+					@Override
 					public void run() {
 						Collection<? extends Player> ptemps = plugin.getServer().getOnlinePlayers();
 							Iterator<? extends Player> players = 	ptemps.iterator();
@@ -141,6 +142,7 @@ public class QuestsServerSide extends Quest {
 
 		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,
 				new Runnable() {
+					@Override
 					public void run() {
 
 						for (int i = 0; i < 3; i++) {
@@ -172,6 +174,7 @@ public class QuestsServerSide extends Quest {
 						npclocation.put(npc.getUniqueId(), output);
 						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 								new Runnable() {
+									@Override
 									public void run() {
 										npchear(npcuuid);
 									}
@@ -300,7 +303,6 @@ public class QuestsServerSide extends Quest {
 		}
 	}
 
-	@SuppressWarnings("static-access")
 	public void npcsettingsmain(UUID npcuuid, Player player) {
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.getByUniqueId(npcuuid);
@@ -321,7 +323,7 @@ public class QuestsServerSide extends Quest {
 			ItemMeta meta = npcskin.getItemMeta();
 			meta.setDisplayName("NPC skinName");
 			ArrayList<String> lore = new ArrayList<String>();
-			lore.add((String) npc.data().get(npc.PLAYER_SKIN_UUID_METADATA));
+			lore.add((String) npc.data().get(NPC.PLAYER_SKIN_UUID_METADATA));
 			meta.setLore(lore);
 			npcskin.setItemMeta(meta);
 		}

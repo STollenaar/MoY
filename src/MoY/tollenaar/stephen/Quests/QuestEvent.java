@@ -1,6 +1,7 @@
 package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +31,15 @@ public class QuestEvent {
 	
 	public QuestEvent(int number){
 		this.number = number;
+		this.title = "title";
+		this.startdate = 0;
+		this.enddate = 0;
+		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
+		this.count = 0;
+		this.minlvl = 0;
+		this.message = "message";
+		this.repeat = "-1";
+		this.type = "0";
 	}
 
 	public int getNumber() {

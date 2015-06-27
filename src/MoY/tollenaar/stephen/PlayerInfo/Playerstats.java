@@ -1,12 +1,17 @@
 package MoY.tollenaar.stephen.PlayerInfo;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public class Playerstats {
+public class Playerstats implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8397164948787158746L;
 	private UUID playeruuid;
 	private int ability;
 	private int strength;

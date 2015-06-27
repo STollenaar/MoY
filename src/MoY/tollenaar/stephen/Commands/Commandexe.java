@@ -123,6 +123,7 @@ public class Commandexe implements CommandExecutor {
 							} else if (args[0].equalsIgnoreCase("dex")) {
 								p.setDex(newlvl);
 							}
+							playerinfo.saveplayerdata(p);
 						} catch (NumberFormatException ex) {
 							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
 						}
@@ -148,7 +149,7 @@ public class Commandexe implements CommandExecutor {
 								ex.printStackTrace();
 							}
 						}
-
+						playerinfo.saveplayerdata(p);
 						return true;
 					} else {
 						player.sendMessage("/lvl <parameter>");

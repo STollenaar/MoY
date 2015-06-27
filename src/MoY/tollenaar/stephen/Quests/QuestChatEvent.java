@@ -11,10 +11,11 @@ import org.bukkit.entity.Player;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 
-public class QuestChatEvent extends QuestChat{
+public class QuestChatEvent{
+	private QuestsServerSide questers;
 	
 	public QuestChatEvent(MoY instance){
-		super(instance);
+		this.questers = instance.questers;
 	}
 	
 	

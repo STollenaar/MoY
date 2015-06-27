@@ -25,8 +25,8 @@ public final class ProgListener implements Listener {
 	public ProgListener(MoY instance) {
 		this.info = new InfoBar(instance);
 		this.playerinfo = instance.playerinfo;
-	}
-
+	} 
+//some test comments 
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void MiningListener(ProgEvent event) {
@@ -126,6 +126,7 @@ public final class ProgListener implements Listener {
 			default:
 				return;
 			}
+			playerinfo.saveplayerdata(p);
 			ArrayList<String> groups = new ArrayList<String>();
 			for (String in : user.getGroupNames()) {
 				groups.add(in);

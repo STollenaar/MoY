@@ -18,6 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import MoY.tollenaar.stephen.InventoryUtils.InventoryType;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.Travel.Travel;
 
@@ -37,19 +38,19 @@ public class QuestInvClick implements Listener {
 		if (event.getCurrentItem() != null
 				&& event.getCurrentItem().getType() != Material.AIR) {
 			if (clickinv != null
-					&& (clickinv.getName().equals("AllKill")
-							|| clickinv.getName().equals("AllHarvest")
-							|| clickinv.getName().equals("AllTalkTo")
-							|| clickinv.getName().equals("WarpList")
-							|| clickinv.getName().equals("AllWarps")
-							|| clickinv.getName().equals("TalktoQuest")
-							|| clickinv.getName().equals("KillQuest")
-							|| clickinv.getName().equals("HarvestQuest") || clickinv
-							.getName().equals("Main settings") || clickinv.getName().equals("EventQuest"))) {
-				UUID npcuuid = UUID.fromString(clickinv.getItem(2)
-						.getItemMeta().getLore().get(0));
+					&& (InventoryType.contains(clickinv.getName()))) {
+				UUID npcuuid;
+				try {
+					//this is the uuid from the quest menu
+					npcuuid = UUID.fromString(clickinv.getItem(0).getItemMeta()
+							.getLore().get(3).replace("§" , "").trim());
+				} catch (NullPointerException | IllegalArgumentException | IndexOutOfBoundsException ex) {
+					//this is the uuid from the main menu 
+					npcuuid = UUID.fromString(clickinv
+							.getItem(clickinv.getSize() - 1).getItemMeta()
+							.getLore().get(0));
+				}
 				ItemStack item = event.getCurrentItem();
-
 				String name = item.getItemMeta().getDisplayName();
 				Player player = (Player) event.getWhoClicked();
 				if (clickinv.getName().equals("Main settings")) {
@@ -103,8 +104,10 @@ public class QuestInvClick implements Listener {
 						t.add("Skin");
 						t.add(npcuuid.toString());
 						questers.npcpos.put(player.getUniqueId(), t);
-					}else if(event.getCurrentItem().getItemMeta().getDisplayName().equals("Event Quest")){
-						questers.AllEvents(player, questers.eventquests.get(npcuuid), npcuuid);
+					} else if (event.getCurrentItem().getItemMeta()
+							.getDisplayName().equals("Event Quest")) {
+						questers.AllEvents(player,
+								questers.eventquests.get(npcuuid), npcuuid);
 					}
 				} else if (clickinv.getName().equals("AllKill")) {
 					if (name.equals("Create New")) {
@@ -123,8 +126,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.returnkill(
 								Integer.parseInt(item.getItemMeta().getLore()
-										.get(0))).npcsettingskill(npcuuid,
-								player);
+										.get(2).replace("§", "").trim()))
+								.npcsettingskill(npcuuid, player);
 
 					}
 				} else if (clickinv.getName().equals("AllHarvest")) {
@@ -144,7 +147,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.returnharvest(
 								Integer.parseInt(item.getItemMeta().getLore()
-										.get(0))).qinventory(player, npcuuid);
+										.get(2).replace("§", "").trim()))
+								.qinventory(player, npcuuid);
 					}
 				} else if (clickinv.getName().equals("AllTalkTo")) {
 					if (name.equals("Create New")) {
@@ -164,8 +168,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.returntalkto(
 								Integer.parseInt(item.getItemMeta().getLore()
-										.get(0))).npcsettingstalkto(npcuuid,
-								player);
+										.get(2).replace("§", "").trim()))
+								.npcsettingstalkto(npcuuid, player);
 					}
 				} else if (clickinv.getName().equals("AllWarps")) {
 					if (name.equals("Create New")) {
@@ -185,8 +189,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.returnwarp(
 								Integer.parseInt(item.getItemMeta().getLore()
-										.get(0))).npcsettingswarplists(npcuuid,
-								player);
+										.get(2).replace("§", "").trim()))
+								.npcsettingswarplists(npcuuid, player);
 					}
 				} else if (clickinv.getName().equals("AllEvents")) {
 					if (name.equals("Create New")) {
@@ -206,7 +210,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.returneventquest(
 								Integer.parseInt(item.getItemMeta().getLore()
-										.get(0))).openinv(player, npcuuid);
+										.get(2).replace("§", "").trim()))
+								.openinv(player, npcuuid);
 					}
 				}
 
@@ -240,7 +245,11 @@ public class QuestInvClick implements Listener {
 						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
+						if(!type.equals("7")){
 						temp.add("mob");
+						}else{
+						temp.add("thing");
+						}
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 					if (item.getItemMeta().getDisplayName().equals("Count")) {
@@ -356,7 +365,11 @@ public class QuestInvClick implements Listener {
 						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
+						if(!type.equals("7")){
 						temp.add("item");
+						}else{
+						temp.add("thing");
+						}
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 					if (item.getItemMeta().getDisplayName().equals("Person")) {
@@ -368,6 +381,28 @@ public class QuestInvClick implements Listener {
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
 						temp.add("person");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+					if(item.getItemMeta().getDisplayName().equals("Start Date")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("type the start date in dd/mm");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(type);
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("start");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+					if(item.getItemMeta().getDisplayName().equals("End Date")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("type the end date in dd/mm");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(type);
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("end");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 				}
@@ -564,15 +599,15 @@ public class QuestInvClick implements Listener {
 							+ message);
 					if (!quetstype.equals("talkto")) {
 						if (Quest.progress.get(player.getUniqueId()) != null) {
-							if (Quest.progress.get(player.getUniqueId())
-									.get(quetstype) != null) {
+							if (Quest.progress.get(player.getUniqueId()).get(
+									quetstype) != null) {
 								Quest.progress.get(player.getUniqueId())
 										.get(quetstype).put(number, 0);
 							} else {
 								HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
 								numberq.put(number, 0);
-								Quest.progress.get(player.getUniqueId())
-										.put(quetstype, numberq);
+								Quest.progress.get(player.getUniqueId()).put(
+										quetstype, numberq);
 							}
 						} else {
 							HashMap<String, HashMap<Integer, Integer>> total = new HashMap<String, HashMap<Integer, Integer>>();
@@ -623,6 +658,7 @@ public class QuestInvClick implements Listener {
 		}
 	}
 
+	
 	private String GetTypeQuest(Material itemtype) {
 		switch (itemtype) {
 		case DIAMOND_SWORD:

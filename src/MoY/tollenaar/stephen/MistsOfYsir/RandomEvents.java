@@ -357,6 +357,7 @@ public class RandomEvents implements Listener {
 					player.closeInventory();
 					break;
 				}
+				playerinfo.saveplayerdata(p);
 				
 			}
 		}

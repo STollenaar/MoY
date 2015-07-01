@@ -57,7 +57,6 @@ public class Playerinfo implements Listener{
 		Inventory stats = Bukkit.createInventory(null, 18, player.getName() + " stats");
 		
 		Playerstats p = getplayer(player.getUniqueId());
-		
 		//general stats
 		ItemStack onlineplayer = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 		
@@ -234,7 +233,11 @@ public class Playerinfo implements Listener{
 		
 	
 	
-	public Playerstats createplayer(UUID player){
+	public void loadplayer(Playerstats p){
+		players.put(p.getPlayeruuid(), p);
+	}
+	
+ 	public Playerstats createplayer(UUID player){
 		Playerstats p  = new Playerstats(player);
 		players.put(player, p);
 		return p;
@@ -2053,5 +2056,8 @@ public class Playerinfo implements Listener{
  		return players.keySet();
  	}
  	
+ 	public void saveplayerdata(Playerstats p){
+ 		players.put(p.getPlayeruuid(), p);
+ 	}
  	
 }

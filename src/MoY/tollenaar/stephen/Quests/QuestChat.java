@@ -493,7 +493,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 						questers.npcpos.remove(player.getUniqueId());
 					}
 				}
-			}else if(type.equals("event")){
+			}else if(type.equals("eventquest")){
 				if(!e.InfoSet(info, event.getMessage(), player)){
 					event.setCancelled(true);
 					player.sendMessage("something happend try again");

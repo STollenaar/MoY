@@ -188,6 +188,9 @@ public class Quest {
 			if (eventquests.get(i) == null)
 				break;
 		}
+		QuestEvent event = new QuestEvent(i);
+		eventquests.put(i, event);
+		
 		return i;
 	}
 
@@ -523,6 +526,7 @@ public class Quest {
 	public void AddActiveQuest(Player player, int number, String quetstype) {
 		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		p.addactive(quetstype, number);
+		playerinfo.saveplayerdata(p);
 	}
 
 	public void AddCompletedQuest(Player player, int number, String questtype,
@@ -540,7 +544,7 @@ public class Quest {
 				.replace("%questname%", name).replace("%npc%", npcname);
 		player.sendMessage(ChatColor.BLUE + "[" + ChatColor.BLUE + "YQuest"
 				+ ChatColor.BLUE + "] " + ChatColor.GRAY + message);
-
+		playerinfo.saveplayerdata(p);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1001,7 +1005,7 @@ public class Quest {
 			}
 			event.setEnddate(e);
 
-			plugin.fw.SaveEvent(event);
+			plugin.addStorage(event);
 		}
 
 	}

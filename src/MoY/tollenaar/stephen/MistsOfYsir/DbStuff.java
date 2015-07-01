@@ -96,7 +96,7 @@ public class DbStuff {
 					+ "spawnworld VARCHAR(45) NOT NULL, "
 					+ "walking VARCHAR(6) NOT NULL, " + "killquests TEXT, "
 					+ "harvestquests TEXT, " + "talktoquests TEXT, "
-					+ "warps INTEGER);");
+					+ "warps INTEGER, eventquests TEXT);");
 
 			// active quests
 			statement
@@ -1382,14 +1382,14 @@ public class DbStuff {
 				+ "`npcname`," + "`spawnlocationx`," + "`spawnlocationy`,"
 				+ "`spawnlocationz`, " + "`walking`," + "`killquests`,"
 				+ "`harvestquests`," + "`talktoquests`," + "`warps`, "
-				+ "`spawnworld`, `npcskinname`) VALUES ("
-				+ "?,?,?,?,?,?,?,?,?,?,?,?);";
+				+ "`spawnworld`, `npcskinname`, `eventquests`) VALUES ("
+				+ "?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 		String update = "UPDATE Mist_NPCData SET" + "`npcname`=?,"
 				+ "`spawnlocationx`=?," + "`spawnlocationy`=?,"
 				+ "`spawnlocationz`=?," + "`walking`=?," + "`killquests`=?,"
 				+ "`harvestquests`=?," + "`talktoquests`=?," + "`warps`=?, "
-				+ "`spawnworld`=?, `npcskinname`=? WHERE `npcid`=?;";
+				+ "`spawnworld`=?, `npcskinname`=? , `eventquests`=? WHERE `npcid`=?;";
 
 		String test = "SELECT * FROM Mist_NPCData WHERE `npcid`=?;";
 		for (Integer npcid : questers.uniquenpcid.keySet()) {
@@ -1428,6 +1428,17 @@ public class DbStuff {
 			if (questers.warplists.get(npc) != null) {
 				warpids = Integer.toString(questers.warplists.get(npc));
 			}
+			
+			String eventquestids = null;
+			if(questers.eventquests.get(npc) != null){
+				for(Integer quests : questers.eventquests.get(npc)){
+					if(eventquestids == null){
+						eventquestids = quests + "_";
+					}else{
+						eventquestids += quests + "_";
+					}
+				}
+			}
 
 			NPCRegistry registry = CitizensAPI.getNPCRegistry();
 			NPC pc = registry.getByUniqueId(npc);
@@ -1463,6 +1474,7 @@ public class DbStuff {
 							12,
 							(String) pc.data().get(
 									NPC.PLAYER_SKIN_UUID_METADATA));
+					pst.setString(13, eventquestids);
 					pst.execute();
 				} else {
 					pst.close();
@@ -1486,7 +1498,8 @@ public class DbStuff {
 							11,
 							(String) pc.data().get(
 									NPC.PLAYER_SKIN_UUID_METADATA));
-					pst.setInt(12, npcid);
+					pst.setString(12, eventquestids);
+					pst.setInt(13, npcid);
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -1832,6 +1845,7 @@ public class DbStuff {
 				p.setDex(rs.getInt("dex"));
 				p.setLevel(rs.getInt("lvl"));
 				p.setLevelprog(rs.getInt("levelprog"));
+				playerinfo.saveplayerdata(p);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2051,6 +2065,15 @@ public class DbStuff {
 				if (rs.getString("warps") != null) {
 					questers.warplists.put(npc, rs.getInt("warps"));
 				}
+				
+				if(rs.getString("eventquests") != null){
+					String[] temp = rs.getString("eventquests").split("_");
+					HashSet<Integer> quests = new HashSet<Integer>();
+					for(String in : temp){
+						quests.add(Integer.parseInt(in.trim()));
+					}
+					questers.eventquests.put(npc, quests);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2080,7 +2103,7 @@ public class DbStuff {
 			ResultSet rs = pst.executeQuery();
 			while (rs.next()) {
 				UUID player = UUID.fromString(rs.getString("useruuid"));
-				Playerstats p = playerinfo.createplayer(player);
+				Playerstats p = playerinfo.getplayer(player);
 				HashMap<String, HashMap<Integer, Integer>> progress;
 				if (Quest.progress.get(player) != null) {
 					progress = Quest.progress.get(player);
@@ -2128,6 +2151,7 @@ public class DbStuff {
 						p.addactive("talkto", Integer.parseInt(in));
 					}
 				}
+				playerinfo.saveplayerdata(p);
 				Quest.progress.put(player, progress);
 			}
 		} catch (SQLException e) {
@@ -2177,7 +2201,9 @@ public class DbStuff {
 						p.addcompleted("talkto", Integer.parseInt(in));
 					}
 				}
+				playerinfo.saveplayerdata(p);
 			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			try {
@@ -2208,7 +2234,7 @@ public class DbStuff {
 				if (rs.getString("questnumber") != null) {
 					UUID player = UUID.fromString(rs.getString("useruuid"));
 					Playerstats p = playerinfo.getplayer(player);
-					
+					playerinfo.saveplayerdata(p);
 					String[] questnumbers = rs.getString("questnumber").split(
 							"_");
 					String[] loggedtimes = rs.getString("timereward")
@@ -2216,7 +2242,9 @@ public class DbStuff {
 					for(int x = 0; x < questnumbers.length; x++){
 						p.addrewarded("kill", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
+					playerinfo.saveplayerdata(p);
 				}
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2256,6 +2284,7 @@ public class DbStuff {
 						p.addrewarded("harvest", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
 				}
+				playerinfo.saveplayerdata(p);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2295,6 +2324,7 @@ public class DbStuff {
 						p.addrewarded("talkto", Integer.parseInt(questnumbers[x]), Long.parseLong(loggedtimes[x]));
 					}
 				}
+				playerinfo.saveplayerdata(p);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -2484,6 +2514,7 @@ public class DbStuff {
 		this.plugin = instance;
 		this.questers = instance.questers;
 		this.party = instance.party;
+		this.playerinfo = instance.playerinfo;
 	}
 
 	public void deletetrip(int id) {

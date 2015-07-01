@@ -86,6 +86,7 @@ public class LevelSystems implements Listener {
 								memberlvl++;
 								p.setLevelprog(memberprog);
 								p.setLevel(memberlvl);
+								
 								if (mp != null) {
 									String up = fw.GetUtilityLine("Partylvlup");
 									up = up.replace("%playername%",
@@ -101,6 +102,7 @@ public class LevelSystems implements Listener {
 						} else {
 							p.setLevelprog(memberprog+xp);
 						}
+						playerinfo.saveplayerdata(p);
 					}
 				}
 			}

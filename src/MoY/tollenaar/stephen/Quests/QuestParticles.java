@@ -228,7 +228,7 @@ public class QuestParticles {
 							if (logged <= System.currentTimeMillis()) {
 
 								p.deleterewarded(type, questnumber);
-								;
+								q.playerinfo.saveplayerdata(p);
 								plugin.database.deletecomkill(Integer
 										.toString(questnumber), player
 										.getUniqueId().toString());
@@ -285,7 +285,7 @@ public class QuestParticles {
 									true, p.getrewardedtime(type, questnumber));
 							if (logged <= System.currentTimeMillis()) {
 								p.deleterewarded(type, questnumber);
-								;
+								q.playerinfo.saveplayerdata(p);
 								plugin.database.deletecomkill(Integer
 										.toString(questnumber), player
 										.getUniqueId().toString());
@@ -341,7 +341,7 @@ public class QuestParticles {
 									true, p.getrewardedtime(type, questnumber));
 							if (logged <= System.currentTimeMillis()) {
 								p.deleterewarded(type, questnumber);
-								;
+								q.playerinfo.saveplayerdata(p);
 								plugin.database.deletecomtalk(Integer
 										.toString(questnumber), player
 										.getUniqueId().toString());

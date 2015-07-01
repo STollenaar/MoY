@@ -139,6 +139,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 									type, Integer.parseInt(args[1]), true);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
+						playerinfo.saveplayerdata(p);
 					} catch (NumberFormatException ex) {
 						sender.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
 					}

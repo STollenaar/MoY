@@ -477,7 +477,7 @@ public class QuestClientSide {
 							}
 							p.deletecompleted(type, i);
 							p.addrewarded(type, number, System.currentTimeMillis());
-
+							questers.playerinfo.saveplayerdata(p);
 						
 						}
 					}

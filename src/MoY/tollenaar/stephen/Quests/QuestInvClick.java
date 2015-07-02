@@ -46,10 +46,9 @@ public class QuestInvClick implements Listener {
 							.getLore().get(3).replace("§" , "").trim());
 				} catch (NullPointerException | IllegalArgumentException | IndexOutOfBoundsException ex) {
 					//this is the uuid from the main menu 
-					npcuuid = UUID.fromString(clickinv
-							.getItem(clickinv.getSize() - 1).getItemMeta()
+					npcuuid = UUID.fromString(clickinv.getItem(3).getItemMeta()
 							.getLore().get(0));
-				}
+				} 
 				ItemStack item = event.getCurrentItem();
 				String name = item.getItemMeta().getDisplayName();
 				Player player = (Player) event.getWhoClicked();

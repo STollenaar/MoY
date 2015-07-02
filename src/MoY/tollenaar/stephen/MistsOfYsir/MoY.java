@@ -64,6 +64,7 @@ public class MoY extends JavaPlugin {
 	public QuestChat qc;
 	public QuestInvClick qi;
 	private List<QuestEvent> stortemp = new ArrayList<QuestEvent>();
+
 	
 	@Override
 	public void onEnable() {

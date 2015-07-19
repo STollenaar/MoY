@@ -29,11 +29,12 @@ public class LevelSystems implements Listener {
 	private Filewriters fw;
 	private Party party;
 	private Playerinfo playerinfo;
+
 	@EventHandler
 	public void onmonsterdeath(EntityDeathEvent event) {
-		if (event.getEntity() instanceof Monster
-				|| event.getEntity() instanceof Slime
-				|| event.getEntity() instanceof Ghast
+		if (((event.getEntity() instanceof Monster
+				|| event.getEntity() instanceof Slime || event.getEntity() instanceof Ghast) && event
+				.getEntity().getKiller() instanceof Player)
 				|| (event.getEntity() instanceof Projectile && ((Projectile) event
 						.getEntity()).getShooter() instanceof Player)) {
 			Player player = event.getEntity().getKiller();
@@ -50,10 +51,10 @@ public class LevelSystems implements Listener {
 				}
 
 				// normal xp system
-				
+
 				partyrewards(player, xp);
-					ProgEvent e = new ProgEvent(player.getUniqueId(), 6, xp, false);
-					Bukkit.getServer().getPluginManager().callEvent(e);
+				ProgEvent e = new ProgEvent(player.getUniqueId(), 6, xp, false);
+				Bukkit.getServer().getPluginManager().callEvent(e);
 			}
 		}
 	}
@@ -86,7 +87,7 @@ public class LevelSystems implements Listener {
 								memberlvl++;
 								p.setLevelprog(memberprog);
 								p.setLevel(memberlvl);
-								
+
 								if (mp != null) {
 									String up = fw.GetUtilityLine("Partylvlup");
 									up = up.replace("%playername%",
@@ -100,7 +101,7 @@ public class LevelSystems implements Listener {
 								}
 							}
 						} else {
-							p.setLevelprog(memberprog+xp);
+							p.setLevelprog(memberprog + xp);
 						}
 						playerinfo.saveplayerdata(p);
 					}
@@ -108,8 +109,6 @@ public class LevelSystems implements Listener {
 			}
 		}
 	}
-
-	
 
 	private int skelzomblvl(Monster ent) {
 		Material chest = ent.getEquipment().getChestplate().getType();
@@ -164,5 +163,6 @@ public class LevelSystems implements Listener {
 	public LevelSystems(MoY instance) {
 		this.fw = instance.fw;
 		this.party = instance.party;
+		this.playerinfo = instance.playerinfo;
 	}
 }

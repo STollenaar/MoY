@@ -63,23 +63,26 @@ public class MobSpawns implements Listener {
 				if(((Monster) ent).getCustomName() == null){
 					Location location = event.getLocation();
 					double radiusSquared = 70 * 70;
-					Collection<? extends Player> ptemp = plugin.getServer().getOnlinePlayers();
-					Iterator<? extends Player> players = ptemp.iterator();
-					while(players.hasNext()){
-					Player player  = players.next();
+					for(Player player : plugin.getServer().getOnlinePlayers()){
 					Playerstats p = playerinfo.getplayer(player.getUniqueId());
 					if (player.getWorld().getName()
 								.equals(location.getWorld().getName())) {
 							if (player.getLocation().distanceSquared(
 									location) <= radiusSquared) {
-								int playerlvl;
+								int playerlvl = p.getLevel();
 								
-									playerlvl = p.getLevel();
-									int lvl = (int) Math.ceil((playerlvl+.0)/10);
+									int lvl;
+									if(!ent.hasMetadata("protect")){
+										lvl = (int) Math.ceil((playerlvl+.0)/10);
+									}else{
+										lvl = ((int[])ent.getMetadata("protect").get(0).value())[0];
+									}
 									if (ent instanceof Zombie) {
 										zombieitems(ent, lvl);
+										break;
 									} else if (ent instanceof Skeleton) {
 										skeletonitems(ent, lvl);
+										break;
 									}
 
 								}
@@ -105,7 +108,6 @@ public class MobSpawns implements Listener {
 						((Monster) ent).setCustomName(null);
 						zombieitems(ent, lvl);
 					}
-				
 			}
 		}
 	}
@@ -117,7 +119,12 @@ public class MobSpawns implements Listener {
 			Player player = (Player) event.getDamager();
 			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			CaveSpider cave = (CaveSpider) event.getEntity();
-			int lvl = (int) Math.ceil(p.getLevel()/10.0);
+			int lvl;
+			if(!cave.hasMetadata("protect")){
+				lvl = (int) Math.ceil(p.getLevel()/10.0);
+			}else{
+				lvl = cave.getMetadata("protect").get(0).asInt();
+			}
 			if(lvl >= 9){
 				int constance = chance(lvl);
 				Random r = new Random();
@@ -179,7 +186,13 @@ public class MobSpawns implements Listener {
 			
 			for(Entity ent : event.getEntity().getNearbyEntities(3.65, 3.65, 3.65)){
 				if(ent instanceof Player){
-					witchdamage((Player) ent);
+					Playerstats p = playerinfo.getplayer(((Player)ent).getUniqueId());
+
+					if(!event.getEntity().hasMetadata("protect")){
+					witchdamage((Player) ent, (int) Math.ceil((p.getLevel()+.0)/10));
+					}else{
+					witchdamage((Player) ent, event.getEntity().getMetadata("protect").get(0).asInt());
+					}
 				}
 			}
 			
@@ -493,13 +506,27 @@ public class MobSpawns implements Listener {
 			}
 			
 			if (pass == true) {
+				Playerstats p = playerinfo.getplayer(((Player) event.getEntity()).getUniqueId());
 				if (monster instanceof CaveSpider) {
-					cavedamage((Player) event.getEntity());
+					if(!monster.hasMetadata("protect")){
+					cavedamage((Player) event.getEntity(), (int) Math.ceil(p.getLevel()+.0)/10);
+					}else{
+						
+					cavedamage((Player) event.getEntity(),  ((int[])monster.getMetadata("protect").get(0).value())[0]);
+					}
 				} else if (monster instanceof Spider
 						|| slime != null) {
-					slimspiderdamage((Player) event.getEntity());
+					if(!monster.hasMetadata("protect")){
+					slimspiderdamage((Player) event.getEntity(), (int) Math.ceil((p.getLevel()+.0)/10));
+					}else{
+					slimspiderdamage((Player) event.getEntity(), ((int[])monster.getMetadata("protect").get(0).value())[0]);
+					}
 				} else if (cube != null) {
-					magmacubedamage((Player) event.getEntity());
+					if(!monster.hasMetadata("protect")){
+					magmacubedamage((Player) event.getEntity(), (int) Math.ceil((p.getLevel()+.0)/10));
+					}else{
+					magmacubedamage((Player) event.getEntity(), ((int[])monster.getMetadata("protect").get(0).value())[0]);
+					}
 				} else if (ghast != null) {
 					ghastdamage((Player) event.getEntity());
 				}
@@ -546,9 +573,8 @@ public class MobSpawns implements Listener {
 	}
 	}
 
-	private void cavedamage(Player player) {
-		Playerstats p = playerinfo.getplayer(player.getUniqueId());
-		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);
+	private void cavedamage(Player player, int lvl) {
+		
 		PotionEffect pot = new PotionEffect(PotionEffectType.POISON, 0, 0);
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
 		for (PotionEffect t : ac) {
@@ -696,9 +722,7 @@ public class MobSpawns implements Listener {
 		}
 	}
 
-	private void slimspiderdamage(Player player) {
-		Playerstats p = playerinfo.getplayer(player.getUniqueId());
-		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);	
+	private void slimspiderdamage(Player player, int lvl) {
 		PotionEffect pot = null;
 		PotionEffect pot2 = null;
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
@@ -905,9 +929,7 @@ public class MobSpawns implements Listener {
 		}
 	}
 
-	private void magmacubedamage(Player player) {
-		Playerstats p = playerinfo.getplayer(player.getUniqueId());
-		int lvl = (int) Math.ceil((p.getLevel()+.0)/10);	
+	private void magmacubedamage(Player player, int lvl) {
 		PotionEffect pot = null;
 		Collection<PotionEffect> ac = player.getActivePotionEffects();
 		for (PotionEffect t : ac) {
@@ -1034,9 +1056,7 @@ public class MobSpawns implements Listener {
 		}
 	}
 
-	private void witchdamage(Player player){
-		Playerstats p = playerinfo.getplayer(player.getUniqueId());
-		int lvl  = (int) Math.ceil((p.getLevel()+.0)/10);
+	private void witchdamage(Player player, int lvl){
 		switch (lvl){
 		case 2:
 			player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 2*20, 1));

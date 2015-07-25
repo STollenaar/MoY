@@ -126,28 +126,33 @@ public class ProgressHarvest implements Listener {
 	public void onItemFromChest(InventoryClickEvent event) {
 		if (event.getClickedInventory() != null) {
 			if (event.getClickedInventory().getType() == InventoryType.PLAYER
-					&& (event.getAction() == InventoryAction.PLACE_ALL
-							|| event.getAction() == InventoryAction.PLACE_SOME || event
-							.getAction() == InventoryAction.PLACE_ONE)
-					|| event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+					&& (event.getAction().equals(InventoryAction.PLACE_ALL)
+							|| event.getAction().equals(
+									InventoryAction.PLACE_SOME) || event
+							.getAction().equals(InventoryAction.PLACE_ONE))
+					|| event.getAction().equals(
+							InventoryAction.MOVE_TO_OTHER_INVENTORY)) {
+				ItemStack item;
+				if(event.getAction().equals(InventoryAction.MOVE_TO_OTHER_INVENTORY)){
+					item = event.getCurrentItem();
+				}else{
+					item = event.getCursor();
+				}
 				Player player = (Player) event.getWhoClicked();
 				Playerstats p = playerinfo.getplayer(player.getUniqueId());
 				if (p.getactivetype() != null) {
 					if (p.getactives("harvest") != null) {
 						for (int questn : p.getactives("harvest")) {
 							QuestProgEvent e = new QuestProgEvent(player,
-									questn, "harvest", event.getCurrentItem());
+									questn, "harvest", item);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
-					} else if (p.getactivetype() != null) {
-						if (p.getactives("eventharvest") != null) {
-							for (int questn : p.getactives("eventharvest")) {
-								QuestProgEvent e = new QuestProgEvent(player,
-										questn, "eventharvest",
-										event.getCurrentItem());
-								Bukkit.getServer().getPluginManager()
-										.callEvent(e);
-							}
+					} else if (p.getactives("eventharvest") != null) {
+						for (int questn : p.getactives("eventharvest")) {
+							QuestProgEvent e = new QuestProgEvent(player,
+									questn, "eventharvest",
+									item);
+							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
 					}
 				}

@@ -39,7 +39,7 @@ public class Message extends BukkitRunnable {
 			try {
 				
 				
-				Class<?> Chats = this.getNMSClass("ChatSerializer");
+				Class<?> Chats = this.getNMSClass("IChatBaseComponent$ChatSerializer");
 				Method i = Chats.getMethod("a", String.class);
 				Object info = i.invoke(this.getNMSClass("IChatBaseComponent"), "{\"text\": \"" + message
 					+ "\"}");

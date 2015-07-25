@@ -44,6 +44,11 @@ public class ProgressKill implements Listener {
 				if (p.getactives("kill") != null) {
 					for (int quests : p.getactives("kill")) {
 						QuestKill kill = q.returnkill(quests);
+						if(kill == null){
+							p.deleteactive("kill", quests);
+							q.removekill(quests);
+							continue;
+						}
 						if (EntityType.valueOf(kill.getMonster().toUpperCase()).getName().equals(ent.getType().getName())) {
 							HashMap<Integer, Integer> amount = q.progress.get(
 									player.getUniqueId()).get("kill");
@@ -52,9 +57,9 @@ public class ProgressKill implements Listener {
 							} else {
 								NPCRegistry reg =	CitizensAPI.getNPCRegistry();
 								
-								for(UUID npcuuid : plugin.questers.killquests.keySet()){
+								for(UUID npcuuid : plugin.questers.GetKeysSets("kill")){
 									
-									if(plugin.questers.killquests.get(npcuuid).contains(quests)){
+									if(plugin.questers.GetIds("kill", npcuuid).contains(quests)){
 										NPC npc = reg.getByUniqueId(npcuuid);
 										q.AddCompletedQuest(player, quests, "kill", npc.getName());
 										break;
@@ -69,6 +74,11 @@ public class ProgressKill implements Listener {
 				if(p.getactives("eventkill") != null){
 					for (int quests : p.getactives("eventkill")) {
 						QuestEvent kill = q.returneventquest(quests);
+						if(kill == null){
+							p.deleteactive("eventkill", quests);
+							q.removeevent(quests);
+							continue;
+						}
 						if (EntityType.valueOf(kill.getType().toUpperCase()).getName().equals(ent.getType().getName())) {
 							HashMap<Integer, Integer> amount = q.progress.get(
 									player.getUniqueId()).get("eventkill");
@@ -77,9 +87,9 @@ public class ProgressKill implements Listener {
 							} else {
 								NPCRegistry reg =	CitizensAPI.getNPCRegistry();
 								
-								for(UUID npcuuid : plugin.questers.eventquests.keySet()){
+								for(UUID npcuuid : plugin.questers.GetKeysSets("event")){
 									
-									if(plugin.questers.eventquests.get(npcuuid).contains(quests)){
+									if(plugin.questers.GetIds("event", npcuuid).contains(quests)){
 										NPC npc = reg.getByUniqueId(npcuuid);
 										q.AddCompletedQuest(player, quests, "eventkill", npc.getName());
 										break;

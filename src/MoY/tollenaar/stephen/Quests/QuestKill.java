@@ -101,7 +101,7 @@ public class QuestKill {
 		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
 		this.message = "message";
 		this.prereq = "none=0";
-		this.monster = "unknown";
+		this.monster = "zombie";
 		
 	}
 

@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.Travel.Travel;
 import MoY.tollenaar.stephen.Travel.TravelBoatEvent;
 import MoY.tollenaar.stephen.Travel.TravelCartEvent;
 import MoY.tollenaar.stephen.Travel.TravelDragonEvent;
@@ -17,11 +18,12 @@ public class CommandsEvent implements CommandExecutor{
 	 private TravelBoatEvent boat;
 	 private TravelCartEvent cart;
 	 private TravelDragonEvent dragon;
-	
+	 private Travel travel;
 	 public CommandsEvent(MoY instance){
 			this.boat = instance.boat;
 			this.cart = instance.cart;
 			this.dragon = instance.dragon;
+			this.travel = instance.tr;
 		}
 	 
 	@Override
@@ -69,10 +71,38 @@ public class CommandsEvent implements CommandExecutor{
 			return true;
 		}
 		}else if(cmd.getName().equalsIgnoreCase("Harbor")){
-			
+			if(user.has("Ysir.event")){
+				if(args.length == 1){
+					if(args[0].equalsIgnoreCase("create")){
+						travel.GetHarbor(travel.createnewharbor()).information(player);
+					}else if(args[0].equalsIgnoreCase("edit")){
+						travel.EditHarbors(player);
+					}else{
+						player.sendMessage(ChatColor.RED + "Please use /harbor <create/edit>");
+					}
+				}else{
+					player.sendMessage(ChatColor.RED + "Please use /harbor <create/edit>");
+				}
+			}
+			return true;
+		}else if(cmd.getName().equalsIgnoreCase("Trip")){
+			if(user.has("Ysir.event")){
+				if(args.length == 1){
+					if(args[0].equalsIgnoreCase("create")){
+						travel.GetTrip(travel.createnewtrip()).information(player);;
+					}else if(args[0].equalsIgnoreCase("edit")){
+						travel.EditTrips(player);
+					}else{
+						player.sendMessage(ChatColor.RED + "Please use /trip <create/edit>");
+					}
+				}else{
+					player.sendMessage(ChatColor.RED + "Please use /trip <create/edit>");
+				}
+			}
 		}
 		}
-		return false;
+		sender.sendMessage("Unknown command. Type \"/help\" for help.");
+		return true;
 	}
 
 }

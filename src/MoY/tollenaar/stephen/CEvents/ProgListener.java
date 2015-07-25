@@ -64,6 +64,12 @@ public final class ProgListener implements Listener {
 				currentlvl = p.getLevel();
 				currentprog = p.getLevelprog();
 				break;
+			case -1:
+				p.setStrength(p.getStrength()+xp);
+				return;
+			case -2:
+				p.setDex(p.getDex()+xp);
+				return;
 			default:
 				return;
 			}

@@ -23,15 +23,20 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.Travel.HarborWaitLocations;
+import MoY.tollenaar.stephen.Travel.Travel;
 import MoY.tollenaar.stephen.Travel.TripLocations;
 
 @SuppressWarnings("deprecation")
 public class QuestChat extends QuestInvClick implements Listener {
-	
+
 	private QuestChatEvent e;
+	private Travel travel;
+	
+	
 	public QuestChat(MoY instance) {
 		super(instance);
 		this.e = new QuestChatEvent(instance);
+		this.travel = instance.tr;
 	}
 
 	@EventHandler
@@ -40,22 +45,23 @@ public class QuestChat extends QuestInvClick implements Listener {
 		if (questers.npcpos.get(player.getUniqueId()) != null) {
 			String typed = event.getMessage();
 			ArrayList<String> info = questers.npcpos.get(player.getUniqueId());
-			String type;
-			if(info.get(0).equals("1")){
+			String type = info.get(0);
+			if (info.get(0).equals("1")) {
 				type = "killquest";
-			}else if(info.get(0).equals("2")){
+			} else if (info.get(0).equals("2")) {
 				type = "harvestquest";
-			}else if(info.get(0).equals("3")){
+			} else if (info.get(0).equals("3")) {
 				type = "talktoquest";
-			}else if(info.get(0).equals("4")){
+			} else if (info.get(0).equals("4")) {
 				type = "warplists";
-			}else if(info.get(0).equals("5")){
+			} else if (info.get(0).equals("5")) {
 				type = "trip";
-			}else if(info.get(0).equals("6")){
+			} else if (info.get(0).equals("6")) {
 				type = "harbor";
-			}else{
+			} else if (info.get(0).equals("7")) {
 				type = "eventquest";
 			}
+			if(!type.equals("harbor") && !type.equals("trip") && !type.equals("eventquest")){
 			UUID npcuuid = UUID.fromString(info.get(1));
 			if (type.equals("Main")) {
 				NPCRegistry registry = CitizensAPI.getNPCRegistry();
@@ -66,7 +72,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				npc.spawn(loc);
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
-			} else if(type.equals("Skin")){
+			} else if (type.equals("Skin")) {
 				NPCRegistry registry = CitizensAPI.getNPCRegistry();
 				NPC npc = registry.getByUniqueId(npcuuid);
 				final Location loc = npc.getStoredLocation();
@@ -75,7 +81,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				npc.spawn(loc);
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
-			}		else if (type.equals("killquest")) {
+			} else if (type.equals("killquest")) {
 				boolean pass = false;
 				int questnumber = Integer.parseInt(info.get(2));
 				QuestKill kill = questers.returnkill(questnumber);
@@ -83,7 +89,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				case "title":
 					kill.setName(typed);
 					pass = true;
-					
+
 					break;
 				case "mob":
 					try {
@@ -103,30 +109,32 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}
 					break;
 				case "reward":
-						if(typed.contains("add")){
-							typed = typed.replace("add", "");
-							kill.setReward(typed);
-						}else {
-							try{
-								
-								int line = Integer.parseInt(Character.toString(typed.charAt(0)));
-								typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
-								if(line >= 0){
+					if (typed.contains("add")) {
+						typed = typed.replace("add", "");
+						kill.setReward(typed);
+					} else {
+						try {
+
+							int line = Integer.parseInt(Character
+									.toString(typed.charAt(0)));
+							typed = typed.replaceFirst(
+									Character.toString(typed.charAt(0)), "");
+							if (line >= 0) {
 								List<String> rew = kill.getReward();
-								if(rew.size()-1 <= line){
+								if (rew.size() - 1 <= line) {
 									rew.set(line, typed);
 									kill.setReward(rew);
 									pass = true;
-								}else{
+								} else {
 									pass = false;
 								}
-								}else{
-									pass = false;
-								}
-							}catch(NumberFormatException ex){
+							} else {
 								pass = false;
 							}
+						} catch (NumberFormatException ex) {
+							pass = false;
 						}
+					}
 					break;
 				case "repeat":
 					kill.setDelay(typed);
@@ -159,7 +167,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 							} catch (NumberFormatException ex) {
 								player.sendMessage("the second word wasn't a number");
 							}
-						}else{
+						} else {
 							player.sendMessage("Choose out killquest/harvestquest/talktoquest");
 						}
 					} else if (typeda[0].equals("none")) {
@@ -169,45 +177,46 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}
 					break;
 				}
-				
+
 				event.setCancelled(true);
-				if(pass){
+				if (pass) {
 					questers.npcpos.remove(player.getUniqueId());
-					
+
 					kill.npcsettingskill(npcuuid, player);
 				}
 			} else if (type.equals("harvestquest")) {
+				boolean pass = false;
 				int questnumber = Integer.parseInt(info.get(2));
 				QuestHarvest kill = questers.returnharvest(questnumber);
 				switch (info.get(info.size() - 1)) {
 				case "title":
 					kill.setName(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "item":
 					try {
 						String[] tp = typed.split(" ");
 						String item = tp[0];
 						if (tp.length == 1) {
-							if(Material.getMaterial(Integer.parseInt(tp[0].trim())) == null){
+							if (Material.getMaterial(Integer.parseInt(tp[0]
+									.trim())) == null) {
 								throw new Exception();
 							}
 						} else if (tp.length == 2) {
-						
-						if(Material.getMaterial(Integer.parseInt(tp[0].trim())) == null){
-							throw new Exception();
-						}else{
-							Short.parseShort(tp[1].trim());
-						}
+
+							if (Material.getMaterial(Integer.parseInt(tp[0]
+									.trim())) == null) {
+								throw new Exception();
+							} else {
+								Short.parseShort(tp[1].trim());
+							}
 						} else {
 							throw new Exception();
 						}
-						
+
 						kill.setItem(item);
-						questers.npcpos.remove(player.getUniqueId());
-						
-						event.setCancelled(true);
+
+						pass = true;
 					} catch (Exception ex) {
 						player.sendMessage("item not found, type again");
 					}
@@ -215,56 +224,56 @@ public class QuestChat extends QuestInvClick implements Listener {
 				case "count":
 					try {
 						kill.setCount(Integer.parseInt(typed));
-						questers.npcpos.remove(player.getUniqueId());
-						event.setCancelled(true);
+						pass = true;
 					} catch (NumberFormatException ex) {
 						player.sendMessage("This was not a number try again");
 					}
 					break;
 				case "reward":
-					if(typed.contains("add")){
+					if (typed.contains("add")) {
 						typed = typed.replace("add", "");
 						kill.setReward(typed);
-					}else {
-						try{
-							
-							int line = Integer.parseInt(Character.toString(typed.charAt(0)));
-							typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
-							if(line >= 0){
-							List<String> rew = kill.getReward();
-							if(rew.size()-1 <= line){
-								rew.set(line, typed);
-								kill.setReward(rew);
-								questers.npcpos.remove(player.getUniqueId());
-							}else{
-								return;
+						pass = true;
+					} else {
+						try {
+
+							int line = Integer.parseInt(Character
+									.toString(typed.charAt(0)));
+							typed = typed.replaceFirst(
+									Character.toString(typed.charAt(0)), "");
+							if (line >= 0) {
+								List<String> rew = kill.getReward();
+								if (rew.size() - 1 <= line) {
+									rew.set(line, typed);
+									kill.setReward(rew);
+									pass = true;
+								} else {
+									pass = false;
+								}
+							} else {
+								pass = false;
 							}
-							}else{
-								return;
-							}
-						}catch(NumberFormatException ex){
-							return;
+						} catch (NumberFormatException ex) {
+							pass = false;
+							;
 						}
 					}
 					break;
 				case "repeat":
 					kill.setDelay(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "minimum":
 					try {
 						kill.setMinlvl(Integer.parseInt(typed));
-						questers.npcpos.remove(player.getUniqueId());
-						event.setCancelled(true);
+						pass = true;
 					} catch (NumberFormatException ex) {
 						player.sendMessage("This was not a number try again");
 					}
 					break;
 				case "message":
 					kill.setMessage(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "prereq":
 					String[] typeda = typed.split(" ");
@@ -277,37 +286,43 @@ public class QuestChat extends QuestInvClick implements Listener {
 								Integer.parseInt(typeda[1]);
 								String pre = typeda[0] + "=" + typeda[1];
 								kill.setPrereq(pre);
-								questers.npcpos.remove(player.getUniqueId());
-								event.setCancelled(true);
+								pass = true;
 							} catch (NumberFormatException ex) {
 								player.sendMessage("the second word wasn't a number");
 							}
-						}else{
+						} else {
 							player.sendMessage("Choose out killquest/harvestquest/talktoquest");
 						}
 					} else if (typeda[0].equals("none")) {
 						String pre = typeda[0] + "=0";
 						kill.setPrereq(pre);
-						questers.npcpos.remove(player.getUniqueId());
-						event.setCancelled(true);
+						pass = true;
 					}
 					break;
 				}
+				event.setCancelled(true);
+				if (pass) {
+					questers.npcpos.remove(player.getUniqueId());
+
+					kill.qinventory(player, npcuuid);
+				}
+
 			} else if (type.equals("talktoquest")) {
 				int questnumber = Integer.parseInt(info.get(2));
+				boolean pass = false;
 				QuestTalkto talk = questers.returntalkto(questnumber);
 				switch (info.get(info.size() - 1)) {
 				case "title":
 					talk.setName(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "person":
 					NPCRegistry registry = CitizensAPI.getNPCRegistry();
 					ArrayList<NPC> allpossible = new ArrayList<NPC>();
 					HashMap<NPC, Integer> revervse = new HashMap<NPC, Integer>();
 					for (Integer id : questers.uniquenpcid.keySet()) {
-						NPC npc = registry.getByUniqueId(questers.uniquenpcid.get(id));
+						NPC npc = registry.getByUniqueId(questers.uniquenpcid
+								.get(id));
 						if (npc.getName().equalsIgnoreCase(typed)) {
 							allpossible.add(npc);
 							revervse.put(npc, id);
@@ -358,53 +373,52 @@ public class QuestChat extends QuestInvClick implements Listener {
 						meta.setLore(lore);
 						dummy.setItemMeta(meta);
 					}
-					inv.setItem(inv.getSize()-1, dummy);
-					
+					inv.setItem(inv.getSize() - 1, dummy);
+
 					player.openInventory(inv);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "reward":
-					if(typed.contains("add")){
+					if (typed.contains("add")) {
 						typed = typed.replace("add", "");
 						talk.setReward(typed);
-					}else {
-						try{
-							
-							int line = Integer.parseInt(Character.toString(typed.charAt(0)));
-							typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
-							if(line >= 0){
-							List<String> rew = talk.getReward();
-							if(rew.size()-1 <= line){
-								rew.set(line, typed);
-								talk.setReward(rew);
-								questers.npcpos.remove(player.getUniqueId());
-							}else{
-								return;
+						pass = true;
+					} else {
+						try {
+
+							int line = Integer.parseInt(Character
+									.toString(typed.charAt(0)));
+							typed = typed.replaceFirst(
+									Character.toString(typed.charAt(0)), "");
+							if (line >= 0) {
+								List<String> rew = talk.getReward();
+								if (rew.size() - 1 <= line) {
+									rew.set(line, typed);
+									talk.setReward(rew);
+									pass = true;
+								} else {
+									pass = false;;
+								}
+							} else {
+								pass = false;;
 							}
-							}else{
-								return;
-							}
-						}catch(NumberFormatException ex){
-							return;
+						} catch (NumberFormatException ex) {
+							pass = false;;
 						}
 					}
 					break;
 				case "repeat":
 					talk.setDelay(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "message":
 					talk.setMessage(typed);
-					questers.npcpos.remove(player.getUniqueId());
-					event.setCancelled(true);
+					pass = true;
 					break;
 				case "minimum":
 					try {
 						talk.setMinlvl(Integer.parseInt(typed));
-						questers.npcpos.remove(player.getUniqueId());
-						event.setCancelled(true);
+						pass = true;
 					} catch (NumberFormatException ex) {
 						player.sendMessage("this was not a nummber try again");
 					}
@@ -420,22 +434,29 @@ public class QuestChat extends QuestInvClick implements Listener {
 								Integer.parseInt(typeda[1]);
 								String pre = typeda[0] + "=" + typeda[1];
 								talk.setPrereq(pre);
-								questers.npcpos.remove(player.getUniqueId());
-								event.setCancelled(true);
+								pass = true;
 							} catch (NumberFormatException ex) {
 								player.sendMessage("the second word wasn't a number");
 							}
-						}else{
+						} else {
 							player.sendMessage("Choose out killquest/harvestquest/talktoquest");
 						}
 					} else if (typeda[0].equals("none")) {
 						String pre = typeda[0] + "=0";
 						talk.setPrereq(pre);
-						questers.npcpos.remove(player.getUniqueId());
-						event.setCancelled(true);
-					}					break;
+						pass = true;
+					}
+					break;
 				}
+				event.setCancelled(true);
+				if (pass) {
+					questers.npcpos.remove(player.getUniqueId());
+
+					talk.npcsettingstalkto(npcuuid, player);
+				}
+
 			} else if (type.equals("warplists")) {
+				System.out.println(info);
 				int number = Integer.parseInt(info.get(2));
 				Warps warp = questers.returnwarp(number);
 				boolean pass = false;
@@ -445,8 +466,27 @@ public class QuestChat extends QuestInvClick implements Listener {
 					pass = true;
 					break;
 				case "type":
-					warp.SetType(typed);
-					pass = true;
+					String[] splitted = typed.split(" ");
+					if(splitted[0].equals("add")){
+						String build = "";
+						for(int i = 1; i < splitted.length; i++){
+							build += splitted[i] + " ";
+						}
+						warp.AddLine(build.trim().toLowerCase());
+						pass =true;
+					}else{
+						try{
+							int line = Integer.parseInt(splitted[0]);
+							String build = "";
+							for(int i = 1;i < splitted.length; i++){
+								build += splitted[i] + " ";
+							}
+							warp.SetLine(line, build.trim().toLowerCase());
+							pass = true;
+						}catch(NumberFormatException e){
+							pass = false;
+						}
+					}
 					break;
 				case "cost":
 					try {
@@ -461,43 +501,54 @@ public class QuestChat extends QuestInvClick implements Listener {
 					questers.npcpos.remove(player.getUniqueId());
 				}
 				event.setCancelled(true);
-			}else if(type.equals("trip")){
-				if(info.get(1).equals("type")){
-					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
-						int id = Integer.parseInt(info.get(info.size()-1));
-						TripLocations t = questers.returntrip(id);
+			}
+			} else if (type.equals("trip")) {
+				if (info.get(1).equals("type")) {
+					if (typed.equals("boat") || typed.equals("oxcart")
+							|| typed.equals("dragon")) {
+						int id = Integer.parseInt(info.get(info.size() - 1));
+						TripLocations t = travel.GetTrip(id);
+						String old = t.getType();
 						t.setType(typed);
+						travel.TypeSwitchTrip(t, old, typed, id);
 						questers.npcpos.remove(player.getUniqueId());
+						event.setCancelled(true);
 					}
-				}else if(info.get(1).equals("location")){
-					if(typed.equals("save")){
-						int id = Integer.parseInt(info.get(info.size()-1));
-						TripLocations t = questers.returntrip(id);
+				} else if (info.get(1).equals("location")) {
+					if (typed.equals("save")) {
+						int id = Integer.parseInt(info.get(info.size() - 1));
+						TripLocations t = travel.GetTrip(id);
 						t.setLocation(player.getLocation());
 						questers.npcpos.remove(player.getUniqueId());
+						event.setCancelled(true);
 					}
 				}
-			}else if(type.equals("harbor")){
-				if(info.get(1).equals("type")){
-					if(typed.equals("boat") || typed.equals("oxcart") || typed.equals("dragon")){
-						int id = Integer.parseInt(info.get(info.size()-1));
-						HarborWaitLocations t = questers.returnharbor(id);
+			} else if (type.equals("harbor")) {
+				if (info.get(1).equals("type")) {
+					if (typed.equals("boat") || typed.equals("oxcart")
+							|| typed.equals("dragon")) {
+						int id = Integer.parseInt(info.get(info.size() - 1));
+						HarborWaitLocations t = travel.GetHarbor(id);
+						String old = t.getType();
 						t.setType(typed);
+						travel.TypeSwitchHarbor(t, old, typed, id);
 						questers.npcpos.remove(player.getUniqueId());
+						event.setCancelled(true);
 					}
-				}else if(info.get(1).equals("location")){
-					if(typed.equals("save")){
-						int id = Integer.parseInt(info.get(info.size()-1));
-						HarborWaitLocations t = questers.returnharbor(id);
+				} else if (info.get(1).equals("location")) {
+					if (typed.equals("save")) {
+						int id = Integer.parseInt(info.get(info.size() - 1));
+						HarborWaitLocations t = travel.GetHarbor(id);
 						t.setLocation(player.getLocation());
 						questers.npcpos.remove(player.getUniqueId());
+						event.setCancelled(true);
 					}
 				}
-			}else if(type.equals("eventquest")){
-				if(!e.InfoSet(info, event.getMessage(), player)){
+			} else if (type.equals("eventquest")) {
+				if (!e.InfoSet(info, event.getMessage(), player)) {
 					event.setCancelled(true);
 					player.sendMessage("something happend try again");
-				}else{
+				} else {
 					event.setCancelled(true);
 				}
 			}

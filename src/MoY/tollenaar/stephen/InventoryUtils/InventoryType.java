@@ -6,7 +6,7 @@ public enum InventoryType {
 		ALLTALKTO("AllTalkTo"),
 		WARPLIST("WarpList"),
 		ALLWARPS("AllWarps"),
-		TALKTOQUEST("TalkToQuest"),
+		TALKTOQUEST("TalktoQuest"),
 		KILLQUEST("KillQuest"),
 		HARVESTQUEST("HarvestQuest"),
 		MAINSETTING("Main settings"),

@@ -3,10 +3,13 @@ package MoY.tollenaar.stephen.Travel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.UUID;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -22,14 +25,18 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.Files.Filewriters;
+import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 
 import com.earth2me.essentials.api.Economy;
 import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
+import com.google.common.collect.Lists;
 
 public class Travel implements Listener {
 	private TravelBoatEvent boat;
@@ -54,40 +61,61 @@ public class Travel implements Listener {
 																						// prevent
 																						// null
 																						// pointers
-	public static HashMap<UUID, Location> startlocations = new HashMap<UUID, Location>(); // start
-																							// location
-																							// for
-																							// the
-																							// player
-																							// if
-																							// he
-																							// decides
-																							// to
-																							// leave
-	private HashMap<UUID, String> typeleave = new HashMap<UUID, String>(); // type
-																			// of
-																			// transport
-																			// the
-																			// player
-																			// left
-	private HashMap<UUID, Location> destinationlocations = new HashMap<UUID, Location>(); // endlocation
-																							// needed
-																							// for
-																							// events
-	private HashMap<Integer, HarborWaitLocations> tempwaiting = new HashMap<Integer, HarborWaitLocations>();
-	private HashMap<Integer, TripLocations> temptrip = new HashMap<Integer, TripLocations>();
+
+	public static HashMap<String, Set<UUID>> players = new HashMap<String, Set<UUID>>(); // player
+																							// with
+																							// their
+																							// trip
+																							// id
+
+	private HashMap<String, HarborWaitLocations> groupedwaiting = new HashMap<String, HarborWaitLocations>(); // harborlocations
+																												// in
+																												// use
+																												// with
+																												// their
+																												// trip
+																												// id.
+	private HashMap<String, TripLocations> groupedtrip = new HashMap<String, TripLocations>(); // triplocations
+																								// in
+																								// use
+																								// with
+																								// their
+																								// trip
+																								// id
+
+	private HashMap<String, Set<HarborWaitLocations>> waiting = new HashMap<String, Set<HarborWaitLocations>>(); // harborlocations
+																													// free
+																													// to
+																													// use
+																													// with
+																													// type
+	private HashMap<String, Set<TripLocations>> trip = new HashMap<String, Set<TripLocations>>(); // triploctions
+																									// free
+																									// to
+																									// use
+																									// with
+																									// type
+
+	private HashMap<String, Set<HarborWaitLocations>> waitingac = new HashMap<String, Set<HarborWaitLocations>>(); // harborlocations
+																													// in
+																													// use
+	private HashMap<String, Set<TripLocations>> tripac = new HashMap<String, Set<TripLocations>>(); // triplocations
+																									// in
+																									// use
 
 	@SuppressWarnings("deprecation")
 	public void boardcheck(UUID npcuuid, int questnumber, Player player,
-			Location end) {
+			Location end, String type, String id) {
 		double needed = questers.returnwarp(questnumber).getCosts();
 		int seconds = Calendar.getInstance().get(Calendar.SECOND);
 		int minutes = 10; // Calendar.getInstance().get(Calendar.MINUTE);
 		int nearest = ((minutes + 5) / 10) * 10 % 60;
-		String type = questers.returnwarp(questnumber).GetType();
+
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.getByUniqueId(npcuuid);
+
 		if (!type.equals("dragoncoach")) {
+			// time checking for next trip
 			int next;
 			if (nearest == 0 && minutes >= 55) {
 				next = 60 - minutes;
@@ -108,7 +136,9 @@ public class Travel implements Listener {
 					}
 				}
 				String min;
-				if (next2 > 1) {
+				if (next2 > 1 || waiting.get(type) == null
+						|| trip.get(type) == null || waiting.get(type) == null) {
+					// just left
 					min = "minutes.";
 					String message;
 					if (type.equals("boat")) {
@@ -122,6 +152,7 @@ public class Travel implements Listener {
 							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
 							+ message + next2 + " " + min);
 				} else {
+					// almost able to board
 					min = "minute.";
 					String message;
 					if (type.equals("boat")) {
@@ -136,6 +167,7 @@ public class Travel implements Listener {
 				}
 
 			} else if (next != 0) {
+				// enough time to board
 				String min;
 				if (next > 1) {
 					min = "minutes";
@@ -149,21 +181,23 @@ public class Travel implements Listener {
 						+ "YTravel" + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
 
-				tempboard(npcuuid, questnumber, player, time, type, end);
+				tempboard(npcuuid, questnumber, player, time, type, end, id);
 
 			} else {
+				// if last minute board
 				String message = fw.GetUtilityLine("AlmostLeaving");
 				message = message.replace("%type%", type).replace("%time%",
 						Integer.toString(seconds) + " seconds");
 				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
 						+ npc.getName() + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
-				tempboard(npcuuid, questnumber, player, time, type, end);
+				tempboard(npcuuid, questnumber, player, time, type, end, id);
 			}
 		} else {
+			// checking if enought money
 			try {
 				if (Economy.hasEnough(player.getName(), needed)) {
-					travel(npcuuid, questnumber, player, type, end);
+					travel(npcuuid, questnumber, player, type, end, id);
 					Economy.subtract(player.getName(), needed);
 				} else {
 					player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -181,66 +215,77 @@ public class Travel implements Listener {
 	}
 
 	public void tempboard(final UUID npcuuid, final int questnumber,
-			final Player player, int time, final String type, final Location end) {
-		Location harbor = null;
-		if (tempwaiting.get(questnumber) == null) {
-			for (HarborWaitLocations l : HarborWaitLocations.locations) {
-				if (l.getType().equals(type)) {
-					harbor = l.getLocation();
-					HarborWaitLocations.inuse.add(l);
-					tempwaiting.put(questnumber, l);
-					HarborWaitLocations.locations.remove(l);
-					
-					break;
+			final Player player, int time, final String type,
+			final Location end, final String tripid) {
+		HashSet<UUID> p = new HashSet<UUID>();
+		p.add(player.getUniqueId());
+		if (players.get(tripid) == null) {
+			for (HarborWaitLocations harbor : waiting.get(type)) {
+				players.put(tripid, p);
+				groupedwaiting.put(tripid, harbor);
+				player.teleport(harbor.getLocation());
+
+				waiting.get(type).remove(harbor);
+				if (waitingac.get(type) != null) {
+					waitingac.get(type).add(harbor);
+				} else {
+					Set<HarborWaitLocations> h = new HashSet<HarborWaitLocations>();
+					h.add(harbor);
+					waitingac.put(type, h);
 				}
+				break;
 			}
+
+		} else if (groupedtrip.get(tripid) != null) {
+
 		} else {
-			harbor = tempwaiting.get(questnumber).getLocation();
+			players.get(tripid).add(player.getUniqueId());
+			player.teleport(groupedwaiting.get(tripid).getLocation());
 		}
-		player.teleport(harbor);
 		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
 				new Runnable() {
 					@Override
 					public void run() {
-						travel(npcuuid, questnumber, player, type, end);
+						if (groupedwaiting.get(tripid) != null) {
+							HarborWaitLocations h = groupedwaiting.get(tripid);
+							waitingac.get(type).remove(h);
+							waiting.get(type).add(h);
+							groupedwaiting.remove(tripid);
+						}
+						travel(npcuuid, questnumber, player, type, end, tripid);
 					}
 				}, time * 20L);
 		schedulerstor.put(player.getUniqueId(), id);
 
 	}
 
-	public void travel(UUID npcuuid, final int questnumber, final Player player,
-			final String type, final Location end) {
-		for (HarborWaitLocations l : HarborWaitLocations.inuse) {
-			if (l.getType().equals(type)) {
-				HarborWaitLocations.locations.add(l);
-				HarborWaitLocations.inuse.remove(l);
-				tempwaiting.remove(questnumber);
-				
+	public void travel(UUID npcuuid, final int questnumber,
+			final Player player, final String type, final Location end,
+			final String tripid) {
+		if (groupedtrip.get(tripid) == null) {
+			for (TripLocations trips : trip.get(type)) {
+				groupedtrip.put(tripid, trips);
+				trip.get(type).remove(trips);
+				if (tripac.get(type) != null) {
+					tripac.get(type).add(trips);
+				} else {
+					HashSet<TripLocations> t = new HashSet<TripLocations>();
+					t.add(trips);
+					tripac.put(type, t);
+				}
 				break;
 			}
-		}
-		if(temptrip.get(questnumber) == null){
-			for(TripLocations l : TripLocations.locations){
-				if(l.getType().equals(type)){
-					TripLocations.inuse.add(l);
-					temptrip.put(questnumber, l);
-					TripLocations.locations.remove(l);
-					break;
-				}
-			}
+		} else {
+			player.teleport(groupedtrip.get(tripid).getLocation());
 		}
 
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.getByUniqueId(npcuuid);
-		final Location start = npc.getEntity().getLocation();
+		final Location start = npc.getStoredLocation();
 
 		int time = traveltime(npcuuid, questnumber, type, end);
 
-		travelevent.put(player.getUniqueId(), true); // CHANGE THIS ONE RELEASE
-		startlocations.put(player.getUniqueId(), npc.getStoredLocation());
-		typeleave.put(player.getUniqueId(), type);
-		destinationlocations.put(player.getUniqueId(), end);
+		travelevent.put(player.getUniqueId(), chance());
 
 		player.teleport(start);
 		String message;
@@ -275,10 +320,13 @@ public class Travel implements Listener {
 				new Runnable() {
 					@Override
 					public void run() {
-						TripLocations.locations.add(temptrip.get(questnumber));
-						TripLocations.inuse.remove(temptrip.get(questnumber));
-						temptrip.remove(questnumber);
-						
+						if (groupedtrip.get(tripid) != null) {
+							TripLocations trips = groupedtrip.get(tripid);
+							groupedtrip.remove(tripid);
+							tripac.get(type).remove(trips);
+							trip.get(type).add(trips);
+						}
+
 						if (!endmessage.equals("EVENT")) {
 							player.teleport(end);
 							player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -287,7 +335,7 @@ public class Travel implements Listener {
 									+ ChatColor.AQUA
 									+ fw.GetUtilityLine("TravelArrive"));
 							schedulerstor.remove(player.getUniqueId());
-							startlocations.remove(player.getUniqueId());
+							players.get(tripid).remove(player.getUniqueId());
 						} else {
 							if (type.equals("boat")) {
 								player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -295,7 +343,7 @@ public class Travel implements Listener {
 										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TravelEvent"));
-								boat.eventint(player, start, end, time2);
+								boat.eventint(player, start, end, time2, tripid);
 							}
 							if (type.equals("oxcart")) {
 								player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -303,7 +351,7 @@ public class Travel implements Listener {
 										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TavelEvent"));
-								cart.eventint(player, start, end, time2);
+								cart.eventint(player, start, end, time2, tripid);
 							}
 							if (type.equals("dragoncoach")) {
 								player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -311,7 +359,8 @@ public class Travel implements Listener {
 										+ ChatColor.DARK_PURPLE + "] "
 										+ ChatColor.AQUA
 										+ fw.GetUtilityLine("TravelEvent"));
-								dragon.eventint(player, start, end, time2);
+								dragon.eventint(player, start, end, time2,
+										tripid);
 
 							}
 						}
@@ -331,33 +380,40 @@ public class Travel implements Listener {
 			if (travelevent.containsKey(playeruuid) == true) {
 				travelevent.remove(playeruuid);
 			}
-			Location startloc = startlocations.get(playeruuid);
+			String tripid = null;
+			for (String in : players.keySet()) {
+				if (players.get(in).contains(playeruuid)) {
+					tripid = in;
+					break;
+				}
+			}
+			String[] splitted = tripid.split("-");
+			int n = Integer.parseInt(splitted[0].trim());
+			Location startloc = questers.returnwarp(n).getStartloc();
 			player.getLocation().setX(startloc.getX());
 			player.getLocation().setY(startloc.getY());
 			player.getLocation().setZ(startloc.getZ());
 			player.getLocation().setWorld(startloc.getWorld());
-			if (typeleave.containsKey(playeruuid)) {
-				String type = typeleave.get(playeruuid);
-				String message;
-				switch (type) {
-				case "boat":
-					message = boatleavemessage();
-					plugin.boat.playeratevent.remove(player.getUniqueId());
-					break;
-				case "oxcart":
-					message = oxcartleavemessage();
-					plugin.cart.playeratevent.remove(player.getUniqueId());
-					break;
-				case "dragoncoach":
-					message = dragoncartleave();
-					plugin.dragon.playeratevent.remove(player.getUniqueId());
-					break;
-				default:
-					message = "you passed out.";
-					break;
-				}
-				fw.AddDesserter(player.getUniqueId().toString(), message);
+			String type = splitted[2].trim();
+			String message;
+			switch (type) {
+			case "boat":
+				message = boatleavemessage();
+				plugin.boat.playeratevent.remove(player.getUniqueId());
+				break;
+			case "oxcart":
+				message = oxcartleavemessage();
+				plugin.cart.playeratevent.remove(player.getUniqueId());
+				break;
+			case "dragoncoach":
+				message = dragoncartleave();
+				plugin.dragon.playeratevent.remove(player.getUniqueId());
+				break;
+			default:
+				message = "you passed out.";
+				break;
 			}
+			fw.AddDesserter(player.getUniqueId().toString(), message);
 		}
 	}
 
@@ -439,7 +495,6 @@ public class Travel implements Listener {
 
 		double time2 = Math.ceil(time);
 		int timeint = (int) time2;
-		System.out.println(timeint);
 		return timeint;
 	}
 
@@ -609,4 +664,316 @@ public class Travel implements Listener {
 		this.cart = instance.cart;
 		this.dragon = instance.dragon;
 	}
+
+	public void loadhardbor(int id, String type, Location loc) {
+		HarborWaitLocations h = new HarborWaitLocations(id);
+		h.setLocation(loc);
+		h.setType(type);
+		if (waiting.get(type) != null) {
+			waiting.get(type).add(h);
+		} else {
+			Set<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
+			t.add(h);
+			waiting.put(type, t);
+		}
+	}
+
+	public void loadtrip(int id, String type, Location loc) {
+		TripLocations t = new TripLocations(id);
+		t.setLocation(loc);
+		t.setType(type);
+		if (trip.get(type) != null) {
+			trip.get(type).add(t);
+		} else {
+			Set<TripLocations> tr = new HashSet<TripLocations>();
+			tr.add(t);
+			trip.put(type, tr);
+		}
+	}
+
+	public void removetrip(String type, int number) {
+		for (TripLocations t : trip.get(type)) {
+			if (t.getId() == number) {
+				trip.get(type).remove(t);
+				plugin.database.deletetrip(number);
+				break;
+			}
+		}
+	}
+
+	public void removeharbor(String type, int number) {
+		for (HarborWaitLocations h : waiting.get(type)) {
+			if (h.getId() == number) {
+				waiting.get(type).remove(h);
+				plugin.database.deleteharbor(number);
+				break;
+			}
+		}
+	}
+
+	public int createnewtrip() {
+		int i = 0;
+		String type = "none";
+		ArrayList<TripLocations> t;
+		if (trip.get(type) != null) {
+			t = Lists.newArrayList(trip.get(type).iterator());
+		} else {
+			t = new ArrayList<TripLocations>();
+		}
+		if (t.size() != 0) {
+			for (; i <= t.size(); i++) {
+				if (t.get(i) == null) {
+					break;
+				}
+			}
+		}
+		TripLocations tr = new TripLocations(i);
+		if (trip.get(type) != null) {
+			trip.get(type).add(tr);
+		} else {
+			trip.put(type, new HashSet<TripLocations>(Arrays.asList(tr)));
+		}
+		return i;
+	}
+
+	public int createnewharbor() {
+		int i = 0;
+		String type = "none";
+		ArrayList<HarborWaitLocations> t;
+		if (waiting.get(type) != null) {
+			t = Lists.newArrayList(waiting.get(type).iterator());
+		} else {
+			t = new ArrayList<HarborWaitLocations>();
+		}
+		if (t.size() != 0) {
+			for (; i <= t.size(); i++) {
+				if (t.get(i) == null) {
+					break;
+				}
+			}
+		}
+		HarborWaitLocations tr = new HarborWaitLocations(i);
+		if (waiting.get(type) != null) {
+			waiting.get(type).add(tr);
+		} else {
+			waiting.put(type,
+					new HashSet<HarborWaitLocations>(Arrays.asList(tr)));
+		}
+		return i;
+	}
+
+	public TripLocations GetTrip(int number) {
+		for (String in : trip.keySet()) {
+			for (TripLocations i : trip.get(in)) {
+				if (i.getId() == number) {
+					return i;
+				}
+			}
+		}
+
+		for (String in : tripac.keySet()) {
+			for (TripLocations i : tripac.get(in)) {
+				if (i.getId() == number) {
+					return i;
+				}
+			}
+		}
+		return null;
+	}
+
+	public HarborWaitLocations GetHarbor(int number) {
+		for (String in : waiting.keySet()) {
+			for (HarborWaitLocations i : waiting.get(in)) {
+				if (i.getId() == number) {
+					return i;
+				}
+			}
+		}
+
+		for (String in : waitingac.keySet()) {
+			for (HarborWaitLocations i : waitingac.get(in)) {
+				if (i.getId() == number) {
+					return i;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected static void RemoveTrip(String tripid, UUID player) {
+		if (players.get(tripid) != null) {
+			players.get(tripid).remove(player);
+			if (players.get(tripid).size() == 0) {
+				players.remove(tripid);
+			}
+		}
+	}
+
+	public Set<Integer> AllTrips() {
+		HashSet<Integer> t = new HashSet<Integer>();
+		for (String in : trip.keySet()) {
+			for (TripLocations tr : trip.get(in)) {
+				t.add(tr.getId());
+			}
+		}
+
+		for (String in : tripac.keySet()) {
+			for (TripLocations tr : tripac.get(in)) {
+				t.add(tr.getId());
+			}
+		}
+		return t;
+	}
+
+	public Set<Integer> AllHarbors() {
+		HashSet<Integer> t = new HashSet<Integer>();
+		for (String in : waiting.keySet()) {
+			for (HarborWaitLocations tr : waiting.get(in)) {
+				t.add(tr.getId());
+			}
+		}
+
+		for (String in : waitingac.keySet()) {
+			for (HarborWaitLocations tr : waitingac.get(in)) {
+				t.add(tr.getId());
+			}
+		}
+		return t;
+	}
+
+	public void EditHarbors(Player player) {
+		ArrayList<ItemStack> t = new ArrayList<ItemStack>();
+		for (String types : waiting.keySet()) {
+			for (HarborWaitLocations in : waiting.get(types)) {
+				ItemStack info = ItemGenerator.InfoQuest(in.getType(), in.getId(),
+						6, null);
+				t.add(info);
+			}
+		}
+
+		for (String types : waitingac.keySet()) {
+			for (HarborWaitLocations in : waitingac.get(types)) {
+				ItemStack info = ItemGenerator.InfoQuest(in.getType(), in.getId(),
+						6, null);
+				t.add(info);
+			}
+		}
+
+		int rowcount = 0;
+		if (t != null) {
+			rowcount = t.size();
+			if (rowcount % 9 == 0) {
+				rowcount++;
+			}
+			while (rowcount % 9 != 0) {
+				rowcount++;
+			}
+		}
+		if (rowcount == 0) {
+			rowcount = 9;
+		}
+		Inventory inv = Bukkit.createInventory(null, rowcount, "AllHarbors");
+		for (ItemStack in : t) {
+			inv.addItem(in);
+		}
+		player.openInventory(inv);
+
+	}
+
+	public void EditTrips(Player player) {
+		ArrayList<ItemStack> t = new ArrayList<ItemStack>();
+		for (String types : trip.keySet()) {
+			for (TripLocations in : trip.get(types)) {
+				ItemStack info = ItemGenerator.InfoQuest("trip", in.getId(), 6,
+						null);
+				t.add(info);
+			}
+		}
+
+		for (String types : tripac.keySet()) {
+			for (TripLocations in : tripac.get(types)) {
+				ItemStack info = ItemGenerator.InfoQuest("trip", in.getId(), 6,
+						null);
+				t.add(info);
+			}
+		}
+
+		int rowcount = 0;
+		if (t != null) {
+			rowcount = t.size();
+			if (rowcount % 9 == 0) {
+				rowcount++;
+			}
+			while (rowcount % 9 != 0) {
+				rowcount++;
+			}
+		}
+		if (rowcount == 0) {
+			rowcount = 9;
+		}
+		Inventory inv = Bukkit.createInventory(null, rowcount, "AllTrips");
+		for (ItemStack in : t) {
+			inv.addItem(in);
+		}
+		player.openInventory(inv);
+
+	}
+
+	public void TypeSwitchHarbor(HarborWaitLocations h, String old,
+			String type, int id) {
+		if (waiting.get(old) != null
+				&& Lists.newArrayList(waiting.get(old).iterator()).get(id) != null) {
+			waiting.get(old).remove(h);
+			if (waiting.get(type) != null) {
+				waiting.get(type).add(h);
+			} else {
+				HashSet<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
+				t.add(h);
+				waiting.put(type, t);
+			}
+			return;
+		}
+		if (waitingac.get(old) != null
+				&& Lists.newArrayList(waitingac.get(old).iterator()).get(id) != null) {
+			waitingac.get(old).remove(h);
+			if (waiting.get(type) != null) {
+				waiting.get(type).add(h);
+			} else {
+				HashSet<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
+				t.add(h);
+				waiting.put(type, t);
+			}
+			return;
+		}
+
+	}
+
+	public void TypeSwitchTrip(TripLocations h, String old, String type, int id) {
+		if (trip.get(old) != null
+				&& Lists.newArrayList(trip.get(old).iterator()).get(id) != null) {
+			trip.get(old).remove(h);
+			if (trip.get(type) != null) {
+				trip.get(type).add(h);
+			} else {
+				HashSet<TripLocations> t = new HashSet<TripLocations>();
+				t.add(h);
+				trip.put(type, t);
+			}
+			return;
+		}
+		if (tripac.get(old) != null
+				&& Lists.newArrayList(tripac.get(old).iterator()).get(id) != null) {
+			tripac.get(old).remove(h);
+			if (trip.get(type) != null) {
+				trip.get(type).add(h);
+			} else {
+				HashSet<TripLocations> t = new HashSet<TripLocations>();
+				t.add(h);
+				trip.put(type, t);
+			}
+			return;
+		}
+
+	}
+
 }

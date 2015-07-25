@@ -29,7 +29,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 
 @SuppressWarnings("deprecation")
 public class TravelDragonEvent implements Listener {
-	MoY plugin;
+	private MoY plugin;
 		
 	private  HashMap<Integer, ArrayList<Location>> spawners = new HashMap<Integer, ArrayList<Location>>(); //all the spawner locations needed for the controlling of monster borders
 	public  HashMap<Location, Entity> entities = new HashMap<Location, Entity>(); //all the spawner locations with their monster
@@ -52,7 +52,7 @@ public class TravelDragonEvent implements Listener {
 	
 	
 	
-	private void eventghast(int time, final int id){
+	private void eventghast(int time, final int id, final String tripid){
 		Location Border1 = Bordercalc(id, 1);
 		Location Border2 = Bordercalc(id, 2);
 		final World world = Border1.getWorld();
@@ -86,7 +86,7 @@ public class TravelDragonEvent implements Listener {
 							onplayer.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YTravel" + ChatColor.DARK_PURPLE + "]" + 
 									ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 							Travel.schedulerstor.remove(uuid);
-							Travel.startlocations.remove(uuid);
+							Travel.RemoveTrip(tripid, uuid);
 						}
 						}
 				}
@@ -95,7 +95,7 @@ public class TravelDragonEvent implements Listener {
 		}, time*20L);
 	}
 	
-	private void eventghost(int time, final int id){
+	private void eventghost(int time, final int id, final String tripid){
 		Location Border1 = Bordercalc(id, 1);
 		Location Border2 = Bordercalc(id, 2);
 		final ArrayList<Integer> coords = borderlocations(Border1, Border2);
@@ -156,7 +156,7 @@ public class TravelDragonEvent implements Listener {
 								ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 						playeratevent.remove(uuid);
 						Travel.schedulerstor.remove(uuid);
-						Travel.startlocations.remove(uuid);
+						Travel.RemoveTrip(tripid, uuid);
 					}
 					}
 			}
@@ -167,7 +167,7 @@ public class TravelDragonEvent implements Listener {
 			
 	}	
 	
-	private void eventwither(int time, final int id){
+	private void eventwither(int time, final int id, final String tripid){
 		Location Border1 = Bordercalc(id, 1);
 		Location Border2 = Bordercalc(id, 2);
 		final World world = Border1.getWorld();
@@ -193,7 +193,7 @@ public class TravelDragonEvent implements Listener {
 							onplayer.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YTravel" + ChatColor.DARK_PURPLE + "]" + 
 									ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 							Travel.schedulerstor.remove(uuid);
-							Travel.startlocations.remove(uuid);
+							Travel.RemoveTrip(tripid, uuid);
 						}
 						}
 				}
@@ -202,7 +202,7 @@ public class TravelDragonEvent implements Listener {
 		}, time*20L);
 	}
 	
-	public void eventint(final Player player, final Location start, final Location end, final int time){
+	public void eventint(final Player player, final Location start, final Location end, final int time, final String tripid){
 		if(tempplayers.get(start) == null){
 			HashMap<Location, ArrayList<UUID>> temp = new HashMap<Location, ArrayList<UUID>>();
 			ArrayList<UUID> players = new ArrayList<UUID>();
@@ -242,13 +242,13 @@ public class TravelDragonEvent implements Listener {
 							}
 						}
 					}
-					runevents(time, start, end);
+					runevents(time, start, end, tripid);
 				}
 			}, 2*20L);
 		}
 	}
 	
-	private void runevents(int time, Location start, Location end){
+	private void runevents(int time, Location start, Location end, final String tripid){
 		ArrayList<Integer> ids = new ArrayList<Integer>();
 		ids.addAll(playersatevent.keySet());
 		String[] locations = null;
@@ -270,15 +270,15 @@ public class TravelDragonEvent implements Listener {
 				tempplayers.remove(start);
 				switch(eventlocations.get(id).get(3)){
 				case "ghost":
-						eventghost(time, id);
+						eventghost(time, id, tripid);
 						endlocid.put(id, end);
 						break;
 				case "ghast":
-						eventghast(time, id);
+						eventghast(time, id, tripid);
 						endlocid.put(id, end);
 						break;
 				case "wither":
-						eventwither(time, id);
+						eventwither(time, id, tripid);
 						endlocid.put(id, end);
 						break;
 				}

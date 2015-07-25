@@ -1,7 +1,6 @@
 package MoY.tollenaar.stephen.Travel;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -14,16 +13,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
 
 public class HarborWaitLocations {
-	//perhaps to change this later on.
-	public static HashSet<HarborWaitLocations> locations = new HashSet<HarborWaitLocations>();
-	public static HashSet<HarborWaitLocations> inuse = new HashSet<HarborWaitLocations>();
 	
 	
 	public HarborWaitLocations(int id){
 		this.id = id;
-		this.type = "undefined";
+		this.type = "none";
 		this.location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
-		locations.add(this);
 	}
 	
 	
@@ -83,13 +78,7 @@ public class HarborWaitLocations {
 	}
 
 
-	public static HashSet<HarborWaitLocations> getLocations() {
-		return locations;
-	}
 
-	public static void setLocations(HashSet<HarborWaitLocations> locations) {
-		HarborWaitLocations.locations = locations;
-	}
 
 	public int getId() {
 		return id;
@@ -115,13 +104,7 @@ public class HarborWaitLocations {
 		this.location = location;
 	}
 
-	public static HashSet<HarborWaitLocations> getInuse() {
-		return inuse;
-	}
 
-	public static void setInuse(HashSet<HarborWaitLocations> inuse) {
-		HarborWaitLocations.inuse = inuse;
-	}
 
 
 	

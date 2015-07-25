@@ -10,17 +10,21 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ItemGenerator {
-	public static ItemStack InfoQuest(String name, int id, int type, String npcuuid) {
+	public static ItemStack InfoQuest(String name, int id, int type,
+			String npcuuid) {
 		ItemStack item = new ItemStack(Material.BOOK);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> info = new ArrayList<String>();
 		info.add(name);
 
 		info.add("§" + type);
-		info.add("§" + id);
+		info.add(Integer.toString(id));
+
 		String builder = "";
-		for(String in : npcuuid.split("")){
-			builder += "§" + in;
+		if (npcuuid != null) {
+			for (String in : npcuuid.split("")) {
+				builder += "§" + in;
+			}
 		}
 		info.add(builder);
 		meta.setDisplayName("Title");
@@ -30,12 +34,13 @@ public class ItemGenerator {
 	}
 
 	// the difference in the quests
-	
+
 	@SuppressWarnings("deprecation")
-	public static ItemStack QuestReq(String thing){
+	public static ItemStack QuestReq(String thing) {
 		ItemStack item;
-		try{
-			EntityType ent =EntityType.valueOf(thing.toUpperCase());
+		try {
+
+			EntityType ent = EntityType.valueOf(thing.toUpperCase());
 			ent.getName().charAt(0);
 			item = new ItemStack(Material.SKULL_ITEM);
 			ItemMeta meta = item.getItemMeta();
@@ -45,8 +50,8 @@ public class ItemGenerator {
 			meta.setLore(info);
 			item.setItemMeta(meta);
 			return item;
-			
-		}catch(Exception ex){
+
+		} catch (Exception ex) {
 			item = new ItemStack(Material.IRON_BLOCK);
 			ItemMeta meta = item.getItemMeta();
 			ArrayList<String> info = new ArrayList<String>();
@@ -59,7 +64,8 @@ public class ItemGenerator {
 			if (id.length == 1) {
 				temp = new ItemStack(Material.getMaterial(id[0]));
 			} else if (id.length == 2) {
-				temp = new ItemStack(Material.getMaterial(id[0]), 1, (short) id[1]);
+				temp = new ItemStack(Material.getMaterial(id[0]), 1,
+						(short) id[1]);
 			}
 			info.add(thing);
 			info.add(temp.toString());
@@ -119,7 +125,7 @@ public class ItemGenerator {
 	}
 
 	public static ItemStack MessageQuest(String message) {
-		ItemStack item = new ItemStack(Material.IRON_BLOCK);
+		ItemStack item = new ItemStack(Material.PAPER);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> info = new ArrayList<String>();
 		info.add(message);
@@ -150,15 +156,15 @@ public class ItemGenerator {
 		item.setItemMeta(meta);
 		return item;
 	}
-	
-	public static ItemStack DateQuest(long date, boolean start){
+
+	public static ItemStack DateQuest(long date, boolean start) {
 		ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> info = new ArrayList<String>();
 		info.add(new Date(date).toString());
-		if(start){
+		if (start) {
 			meta.setDisplayName("Start Date");
-		}else{
+		} else {
 			meta.setDisplayName("End Date");
 		}
 		meta.setLore(info);

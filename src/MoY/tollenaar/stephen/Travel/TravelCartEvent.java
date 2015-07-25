@@ -29,7 +29,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 
 	@SuppressWarnings("deprecation")
 	public class TravelCartEvent implements Listener {
-		MoY plugin;
+		private MoY plugin;
 
 		private  HashMap<Integer, ArrayList<Location>> spawners = new HashMap<Integer, ArrayList<Location>>(); //all the spawner locations needed for the controlling of monster borders
 		public  HashMap<Location, Entity> entities = new HashMap<Location, Entity>(); //all the spawner locations with their monster
@@ -50,7 +50,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 		private HashMap<Location, Location> temprunonce = new HashMap<Location, Location>();
 
 		
-		private void eventbandit(int time, final int id){
+		private void eventbandit(int time, final int id, final String tripid){
 			Location Border1 = Bordercalc(id, 1);
 			Location Border2 = Bordercalc(id, 2);
 			final ArrayList<Integer> coords = borderlocations(Border1, Border2);
@@ -111,7 +111,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 									ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 							playeratevent.remove(uuid);
 							Travel.schedulerstor.remove(uuid);
-							Travel.startlocations.remove(uuid);
+							Travel.RemoveTrip(tripid, uuid);
 						}
 						}
 				}
@@ -122,7 +122,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 				
 		}	
 		
-		private void eventgiant(int time, final int id){
+		private void eventgiant(int time, final int id, final String tripid){
 			Location Border1 = Bordercalc(id, 1);
 			Location Border2 = Bordercalc(id, 2);
 			final ArrayList<Integer> coords = borderlocations(Border1, Border2);
@@ -148,7 +148,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 								onplayer.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YTravel" + ChatColor.DARK_PURPLE + "]" + 
 										ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 								Travel.schedulerstor.remove(uuid);
-								Travel.startlocations.remove(uuid);
+								Travel.RemoveTrip(tripid, uuid);
 							}
 							}
 					}
@@ -157,7 +157,7 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 			}, time*20L);
 		}
 		
-		public void eventint(final Player player, final Location start, final Location end, final int time){
+		public void eventint(final Player player, final Location start, final Location end, final int time, final String tripid){
 			if(tempplayers.get(start) == null){
 				HashMap<Location, ArrayList<UUID>> temp = new HashMap<Location, ArrayList<UUID>>();
 				ArrayList<UUID> players = new ArrayList<UUID>();
@@ -197,13 +197,13 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 								}
 							}
 						}
-						runevents(time, start, end);
+						runevents(time, start, end, tripid);
 					}
 				}, 2*20L);
 			}
 		}
 		
-		private void runevents(int time, Location start, Location end){
+		private void runevents(int time, Location start, Location end, final String tripid){
 			ArrayList<Integer> ids = new ArrayList<Integer>();
 			ids.addAll(playersatevent.keySet());
 			String[] locations = null;
@@ -225,11 +225,11 @@ import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 					tempplayers.remove(start);
 					switch(eventlocations.get(id).get(3)){
 					case "bandit":
-						eventbandit(time, id);
+						eventbandit(time, id, tripid);
 						endlocid.put(id, end);
 							break;
 					case "giant":
-						eventgiant(time, id);
+						eventgiant(time, id, tripid);
 						endlocid.put(id, end);
 							break;
 					}

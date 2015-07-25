@@ -100,10 +100,9 @@ public class QuestParticles {
 		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
 		if (p.getcompletedtype() != null) {
 			for (String type : p.getcompletedtype()) {
-				if (type.equals("kill")) {
 					for (int number : p.getcompleted(type)) {
 						try {
-							if (plugin.questers.killquests.get(npcuuid)
+							if (plugin.questers.GetIds(type, npcuuid)
 									.contains(number)) {
 								return true;
 							}
@@ -111,30 +110,6 @@ public class QuestParticles {
 							continue;
 						}
 					}
-				} else if (type.equals("harvest")) {
-					for (int number : p.getcompleted(type)) {
-						try {
-							if (plugin.questers.harvestquests.get(npcuuid)
-									.contains(number)) {
-								return true;
-							}
-						} catch (NullPointerException ex) {
-							continue;
-						}
-					}
-				} else {
-					for (int number : p.getcompleted(type)) {
-						try {
-							if (plugin.questers.talktoquests.get(npcuuid) != null
-									&& plugin.questers.talktoquests
-											.get(npcuuid).contains(number)) {
-								return true;
-							}
-						} catch (NullPointerException ex) {
-							continue;
-						}
-					}
-				}
 			}
 		}
 		return checks;
@@ -142,7 +117,7 @@ public class QuestParticles {
 
 	private static boolean aviablew(UUID npcuuid) {
 		boolean checks = false;
-		if (plugin.questers.warplists.get(npcuuid) != null) {
+		if (plugin.questers.getId(npcuuid) != -1) {
 			checks = true;
 		}
 		return checks;
@@ -150,8 +125,8 @@ public class QuestParticles {
 
 	private static boolean aviableq(UUID npcuuid, Player player) {
 		boolean checks = false;
-		if (plugin.questers.killquests.get(npcuuid) != null) {
-			for (Integer in : plugin.questers.killquests.get(npcuuid)) {
+		if (plugin.questers.GetIds("kill", npcuuid) != null) {
+			for (Integer in : plugin.questers.GetIds("kill", npcuuid)) {
 				if (check(npcuuid, player, in, "kill")) {
 					checks = true;
 					break;
@@ -159,8 +134,8 @@ public class QuestParticles {
 			}
 		}
 
-		if (plugin.questers.harvestquests.get(npcuuid) != null) {
-			for (Integer in : plugin.questers.harvestquests.get(npcuuid)) {
+		if (plugin.questers.GetIds("harvest", npcuuid) != null) {
+			for (Integer in : plugin.questers.GetIds("harvest", npcuuid)) {
 				if (check(npcuuid, player, in, "harvest")) {
 					checks = true;
 					break;
@@ -168,8 +143,8 @@ public class QuestParticles {
 			}
 		}
 
-		if (plugin.questers.talktoquests.get(npcuuid) != null) {
-			for (Integer in : plugin.questers.talktoquests.get(npcuuid)) {
+		if (plugin.questers.GetIds("talkto", npcuuid) != null) {
+			for (Integer in : plugin.questers.GetIds("talkto", npcuuid)) {
 				if (check(npcuuid, player, in, "talkto")) {
 					checks = true;
 					break;
@@ -187,6 +162,7 @@ public class QuestParticles {
 		switch (type) {
 		case "kill":
 			QuestKill kill = q.returnkill(questnumber);
+			if(kill != null){
 			if (!kill.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = kill.getPrereq().split("=");
 
@@ -229,9 +205,6 @@ public class QuestParticles {
 
 								p.deleterewarded(type, questnumber);
 								q.playerinfo.saveplayerdata(p);
-								plugin.database.deletecomkill(Integer
-										.toString(questnumber), player
-										.getUniqueId().toString());
 							} else {
 								check = false;
 							}
@@ -241,10 +214,14 @@ public class QuestParticles {
 					}
 				}
 			}
-
+			}else{
+				check = false;
+				q.removekill(questnumber);
+			}
 			break;
 		case "harvest":
 			QuestHarvest harvest = q.returnharvest(questnumber);
+			if(harvest != null){
 			if (!harvest.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = harvest.getPrereq().split("=");
 
@@ -286,9 +263,6 @@ public class QuestParticles {
 							if (logged <= System.currentTimeMillis()) {
 								p.deleterewarded(type, questnumber);
 								q.playerinfo.saveplayerdata(p);
-								plugin.database.deletecomkill(Integer
-										.toString(questnumber), player
-										.getUniqueId().toString());
 							} else {
 								check = false;
 							}
@@ -298,9 +272,14 @@ public class QuestParticles {
 					}
 				}
 			}
+			}else{
+				check = false;
+				q.removeharvest(questnumber);
+			}
 			break;
 		case "talkto":
 			QuestTalkto talk = q.returntalkto(questnumber);
+			if(talk != null){
 			if (!talk.getPrereq().split("=")[0].equals("none")) {
 				String[] preq = talk.getPrereq().split("=");
 
@@ -342,9 +321,6 @@ public class QuestParticles {
 							if (logged <= System.currentTimeMillis()) {
 								p.deleterewarded(type, questnumber);
 								q.playerinfo.saveplayerdata(p);
-								plugin.database.deletecomtalk(Integer
-										.toString(questnumber), player
-										.getUniqueId().toString());
 							} else {
 								check = false;
 							}
@@ -355,6 +331,10 @@ public class QuestParticles {
 				}
 			}
 			break;
+		}else{
+			check = false;
+			q.removetalkto(questnumber);
+		}
 		}
 
 		return check;

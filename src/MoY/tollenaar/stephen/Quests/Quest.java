@@ -33,8 +33,6 @@ import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
-import MoY.tollenaar.stephen.Travel.HarborWaitLocations;
-import MoY.tollenaar.stephen.Travel.TripLocations;
 
 public class Quest {
 
@@ -56,24 +54,10 @@ public class Quest {
 
 	private static HashMap<Integer, QuestEvent> eventquests = new HashMap<Integer, QuestEvent>();
 
-	private static HashMap<Integer, TripLocations> triplocations = new HashMap<Integer, TripLocations>();
-
-	private static HashMap<Integer, HarborWaitLocations> harborlocation = new HashMap<Integer, HarborWaitLocations>();
-
 	public static HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>> progress = new HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>>();
 
 	public int returnProgress(UUID playeruuid, String type, int number) {
 		return progress.get(playeruuid).get(type).get(number);
-	}
-
-	public void removetrip(int number) {
-		triplocations.remove(number);
-		plugin.database.deletetrip(number);
-	}
-
-	public void removeharbor(int number) {
-		harborlocation.remove(number);
-		plugin.database.deleteharbor(number);
 	}
 
 	public void removekill(int number) {
@@ -102,29 +86,6 @@ public class Quest {
 		plugin.fw.deletequest("event", number);
 	}
 
-	public int createnewtrip() {
-		int i = 0;
-		for (; i <= triplocations.size(); i++) {
-			if (triplocations.get(i) == null) {
-				break;
-			}
-		}
-		TripLocations trip = new TripLocations(i);
-		triplocations.put(i, trip);
-		return i;
-	}
-
-	public int createnewharbor() {
-		int i = 0;
-		for (; i <= harborlocation.size(); i++) {
-			if (harborlocation.get(i) == null) {
-				break;
-			}
-		}
-		HarborWaitLocations trip = new HarborWaitLocations(i);
-		harborlocation.put(i, trip);
-		return i;
-	}
 
 	public int createnewkill() {
 		int i = 0;
@@ -190,7 +151,7 @@ public class Quest {
 		}
 		QuestEvent event = new QuestEvent(i);
 		eventquests.put(i, event);
-		
+
 		return i;
 	}
 
@@ -224,14 +185,6 @@ public class Quest {
 		} else {
 			return null;
 		}
-	}
-
-	public TripLocations returntrip(int number) {
-		return triplocations.get(number);
-	}
-
-	public HarborWaitLocations returnharbor(int number) {
-		return harborlocation.get(number);
 	}
 
 	public QuestEvent returneventquest(int number) {
@@ -291,23 +244,13 @@ public class Quest {
 		Warps warp = new Warps(number, start);
 		warp.setCosts(costs);
 		warp.setName(name);
-		warp.SetType(type);
+		String[] splitted = type.split("_");
+		warp.SetLine(0, splitted[0].trim());
+		for(int i = 1; i < splitted.length; i++){
+			warp.AddLine(splitted[i].trim());
+		}
 
 		warplist.put(number, warp);
-	}
-
-	public void loadhardbor(int id, String type, Location loc) {
-		HarborWaitLocations h = new HarborWaitLocations(id);
-		h.setLocation(loc);
-		h.setType(type);
-		harborlocation.put(id, h);
-	}
-
-	public void loadtrip(int id, String type, Location loc) {
-		TripLocations t = new TripLocations(id);
-		t.setLocation(loc);
-		t.setType(type);
-		triplocations.put(id, t);
 	}
 
 	public void loadevent(int id, String type, String title, long start,
@@ -458,13 +401,15 @@ public class Quest {
 
 	public void allwarps(Player player, Integer quests, UUID npcuuid) {
 		int rowcount = 9;
-
 		Inventory inv = Bukkit.createInventory(null, rowcount, "AllWarps");
-		Warps kill = warplist.get(quests);
-		if (kill != null) {
-			ItemStack title = ItemGenerator.InfoQuest(kill.getName(),
-					kill.getWarpid(), 4, npcuuid.toString());
-			inv.addItem(title);
+		if (quests != -1) {
+
+			Warps kill = warplist.get(quests);
+			if (kill != null) {
+				ItemStack title = ItemGenerator.InfoQuest(kill.getName(),
+						kill.getWarpid(), 4, npcuuid.toString());
+				inv.addItem(title);
+			}
 		}
 		Wool wool = new Wool(DyeColor.LIME);
 		ItemStack create = wool.toItemStack();
@@ -549,7 +494,7 @@ public class Quest {
 
 	@SuppressWarnings("deprecation")
 	public void ActiveQuest(Player player) {
-		Playerstats p  = playerinfo.getplayer(player.getUniqueId());
+		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		ArrayList<ItemStack> items = new ArrayList<ItemStack>();
 		if (p.getactivetype() != null) {
 			for (String type : p.getactivetype()) {
@@ -557,114 +502,143 @@ public class Quest {
 					switch (type) {
 					case "kill":
 						QuestKill kill = returnkill(number);
-						ItemStack kil = new ItemStack(Material.STONE_SWORD);
-						{
-							ItemMeta meta = kil.getItemMeta();
-							meta.setDisplayName(kill.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							lore.add("Kill: " + kill.getMonster());
-							lore.add("Progress: "
-									+ progress.get(player.getUniqueId())
-											.get(type).get(number) + "/"
-									+ kill.getCount());
-							meta.setLore(lore);
-							kil.setItemMeta(meta);
-							items.add(kil);
+						if (kill != null) {
+							ItemStack kil = new ItemStack(Material.STONE_SWORD);
+							{
+								ItemMeta meta = kil.getItemMeta();
+								meta.setDisplayName(kill.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								lore.add("Kill: " + kill.getMonster());
+								lore.add("Progress: "
+										+ progress.get(player.getUniqueId())
+												.get(type).get(number) + "/"
+										+ kill.getCount());
+								meta.setLore(lore);
+								kil.setItemMeta(meta);
+								items.add(kil);
+							}
+						} else {
+							p.deleteactive(type, number);
+							removekill(number);
 						}
 						break;
 					case "harvest":
 						QuestHarvest harvest = returnharvest(number);
-						ItemStack har = new ItemStack(Material.STONE_PICKAXE);
-						{
-							ItemMeta meta = har.getItemMeta();
-							meta.setDisplayName(harvest.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							String[] itemid = harvest.getItemId().split(":");
-							ItemStack item;
-							if (itemid.length == 2) {
-								item = new ItemStack(
-										Material.getMaterial(Integer
-												.parseInt(itemid[0].trim())),
-										1, Short.parseShort(itemid[1].trim()));
-							} else {
-								item = new ItemStack(
-										Material.getMaterial(Integer
-												.parseInt(itemid[0].trim())));
-							}
+						if (harvest != null) {
+							ItemStack har = new ItemStack(
+									Material.STONE_PICKAXE);
+							{
+								ItemMeta meta = har.getItemMeta();
+								meta.setDisplayName(harvest.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								String[] itemid = harvest.getItemId()
+										.split(":");
+								ItemStack item;
+								if (itemid.length == 2) {
+									item = new ItemStack(
+											Material.getMaterial(Integer
+													.parseInt(itemid[0].trim())),
+											1, Short.parseShort(itemid[1]
+													.trim()));
+								} else {
+									item = new ItemStack(
+											Material.getMaterial(Integer
+													.parseInt(itemid[0].trim())));
+								}
 
-							lore.add("get: " + GetItemName(item));
-							lore.add("Progress: "
-									+ progress.get(player.getUniqueId())
-											.get(type).get(number) + "/"
-									+ harvest.getCount());
-							meta.setLore(lore);
-							har.setItemMeta(meta);
-							items.add(har);
+								lore.add("get: " + GetItemName(item));
+								lore.add("Progress: "
+										+ progress.get(player.getUniqueId())
+												.get(type).get(number) + "/"
+										+ harvest.getCount());
+								meta.setLore(lore);
+								har.setItemMeta(meta);
+								items.add(har);
+							}
+						} else {
+							p.deleteactive(type, number);
+							removeharvest(number);
 						}
 						break;
 					case "talkto":
 						QuestTalkto talk = returntalkto(number);
-						ItemStack tal = new ItemStack(Material.FEATHER);
-						{
-							ItemMeta meta = tal.getItemMeta();
-							meta.setDisplayName(talk.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							NPCRegistry reg = CitizensAPI.getNPCRegistry();
-							NPC npc = reg
-									.getByUniqueId(plugin.questers.uniquenpcid
-											.get(talk.getNpcid()));
-							lore.add("Talk to: " + npc.getName());
-							meta.setLore(lore);
-							tal.setItemMeta(meta);
-							items.add(tal);
+						if (talk != null) {
+							ItemStack tal = new ItemStack(Material.FEATHER);
+							{
+								ItemMeta meta = tal.getItemMeta();
+								meta.setDisplayName(talk.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								NPCRegistry reg = CitizensAPI.getNPCRegistry();
+								NPC npc = reg
+										.getByUniqueId(plugin.questers.uniquenpcid
+												.get(talk.getNpcid()));
+								lore.add("Talk to: " + npc.getName());
+								meta.setLore(lore);
+								tal.setItemMeta(meta);
+								items.add(tal);
+							}
+						} else {
+							p.deleteactive(type, number);
+							removetalkto(number);
 						}
 						break;
 
 					case "eventkill":
 						QuestEvent event = returneventquest(number);
-						ItemStack ki = new ItemStack(Material.STONE_SWORD);
-						{
-							ItemMeta meta = ki.getItemMeta();
-							meta.setDisplayName(event.getTitle());
-							ArrayList<String> lore = new ArrayList<String>();
-							lore.add("Kill: " + event.getType());
-							lore.add("Progress: "
-									+ progress.get(player.getUniqueId())
-											.get(type).get(number) + "/"
-									+ event.getCount());
-							meta.setLore(lore);
-							ki.setItemMeta(meta);
-							items.add(ki);
+						if (event != null) {
+							ItemStack ki = new ItemStack(Material.STONE_SWORD);
+							{
+								ItemMeta meta = ki.getItemMeta();
+								meta.setDisplayName(event.getTitle());
+								ArrayList<String> lore = new ArrayList<String>();
+								lore.add("Kill: " + event.getType());
+								lore.add("Progress: "
+										+ progress.get(player.getUniqueId())
+												.get(type).get(number) + "/"
+										+ event.getCount());
+								meta.setLore(lore);
+								ki.setItemMeta(meta);
+								items.add(ki);
+							}
+						} else {
+							p.deleteactive(type, number);
+							removeevent(number);
 						}
 						break;
 					case "eventharvest":
 						QuestEvent e = returneventquest(number);
-						ItemStack ie = new ItemStack(Material.STONE_PICKAXE);
-						{
-							ItemMeta meta = ie.getItemMeta();
-							meta.setDisplayName(e.getTitle());
-							ArrayList<String> lore = new ArrayList<String>();
-							String[] itemid = e.getType().split(":");
-							ItemStack item;
-							if (itemid.length == 2) {
-								item = new ItemStack(
-										Material.getMaterial(Integer
-												.parseInt(itemid[0].trim())),
-										1, Short.parseShort(itemid[1].trim()));
-							} else {
-								item = new ItemStack(
-										Material.getMaterial(Integer
-												.parseInt(itemid[0].trim())));
-							}
+						if (e != null) {
+							ItemStack ie = new ItemStack(Material.STONE_PICKAXE);
+							{
+								ItemMeta meta = ie.getItemMeta();
+								meta.setDisplayName(e.getTitle());
+								ArrayList<String> lore = new ArrayList<String>();
+								String[] itemid = e.getType().split(":");
+								ItemStack item;
+								if (itemid.length == 2) {
+									item = new ItemStack(
+											Material.getMaterial(Integer
+													.parseInt(itemid[0].trim())),
+											1, Short.parseShort(itemid[1]
+													.trim()));
+								} else {
+									item = new ItemStack(
+											Material.getMaterial(Integer
+													.parseInt(itemid[0].trim())));
+								}
 
-							lore.add("get: " + GetItemName(item));
-							lore.add("Progress: "
-									+ progress.get(player.getUniqueId())
-											.get(type).get(number) + "/"
-									+ e.getCount());
-							meta.setLore(lore);
-							ie.setItemMeta(meta);
-							items.add(ie);
+								lore.add("get: " + GetItemName(item));
+								lore.add("Progress: "
+										+ progress.get(player.getUniqueId())
+												.get(type).get(number) + "/"
+										+ e.getCount());
+								meta.setLore(lore);
+								ie.setItemMeta(meta);
+								items.add(ie);
+							}
+						} else {
+							p.deleteactive(type, number);
+							removeevent(number);
 						}
 						break;
 					}
@@ -698,6 +672,7 @@ public class Quest {
 					case "kill":
 						QuestKill kill = returnkill(number);
 						if (kill == null) {
+							p.deletecompleted(type, number);
 							removekill(number);
 							continue;
 						}
@@ -712,6 +687,7 @@ public class Quest {
 					case "harvest":
 						QuestHarvest harvest = returnharvest(number);
 						if (harvest == null) {
+							p.deletecompleted(type, number);
 							removeharvest(number);
 							continue;
 						}
@@ -726,6 +702,7 @@ public class Quest {
 					case "talkto":
 						QuestTalkto talk = returntalkto(number);
 						if (talk == null) {
+							p.deletecompleted(type, number);
 							removetalkto(number);
 							continue;
 						}
@@ -740,6 +717,7 @@ public class Quest {
 					case "eventharvest":
 						QuestEvent event = returneventquest(number);
 						if (event == null) {
+							p.deletecompleted(type, number);
 							removeevent(number);
 							continue;
 						}
@@ -754,6 +732,7 @@ public class Quest {
 					case "eventkill":
 						QuestEvent e = returneventquest(number);
 						if (e == null) {
+							p.deletecompleted(type, number);
 							removeevent(number);
 							continue;
 						}
@@ -809,10 +788,7 @@ public class Quest {
 								items.add(kil);
 							}
 						} else {
-							p.deleterewarded(type, number);;
-							plugin.database.deletecomkill(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							p.deleterewarded(type, number);
 							removekill(number);
 						}
 						break;
@@ -830,10 +806,7 @@ public class Quest {
 								items.add(har);
 							}
 						} else {
-							p.deleterewarded(type, number);;
-							plugin.database.deletecomhar(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							p.deleterewarded(type, number);
 							removeharvest(number);
 						}
 						break;
@@ -851,10 +824,7 @@ public class Quest {
 								items.add(tal);
 							}
 						} else {
-							p.deleterewarded(type, number);;
-							plugin.database.deletecomtalk(Integer
-									.toString(number), player.getUniqueId()
-									.toString());
+							p.deleterewarded(type, number);
 							removetalkto(number);
 
 						}
@@ -873,10 +843,7 @@ public class Quest {
 								items.add(kil);
 							}
 						} else {
-							p.deleterewarded(type, number);;
-							// plugin.database.deletecomkill(Integer
-							// .toString(number), player.getUniqueId()
-							// .toString());
+							p.deleterewarded(type, number);
 							removeevent(number);
 						}
 						break;
@@ -894,10 +861,7 @@ public class Quest {
 								items.add(har);
 							}
 						} else {
-							p.deleterewarded(type, number);;
-							// plugin.database.deletecomhar(Integer
-							// .toString(number), player.getUniqueId()
-							// .toString());
+							p.deleterewarded(type, number);
 							removeevent(number);
 						}
 						break;
@@ -937,14 +901,6 @@ public class Quest {
 
 	public Set<Integer> AllWarpId() {
 		return warplist.keySet();
-	}
-
-	public Set<Integer> AllHarbors() {
-		return harborlocation.keySet();
-	}
-
-	public Set<Integer> AllTrips() {
-		return triplocations.keySet();
 	}
 
 	public Set<Integer> AllEvents() {

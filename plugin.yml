@@ -22,5 +22,11 @@ commands:
              description: event parameters
              usage: /<command> 
      quest:
-             description: active quests
+             description: lets you see the quests quests
              usage: /<command>		 
+     harbor:
+             description: these are the waiting locations
+             usage: /<command>
+     trip:
+             description: these are the waiting locations
+             usage: /<command>

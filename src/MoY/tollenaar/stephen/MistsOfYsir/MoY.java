@@ -1,6 +1,5 @@
 package MoY.tollenaar.stephen.MistsOfYsir;
 
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +40,6 @@ import MoY.tollenaar.stephen.Travel.TravelDragonEvent;
 import code.husky.mysql.MySQL;
 
 public class MoY extends JavaPlugin {
-	Connection con = null;
 
 	private MoY plugin;
 	public QuestsServerSide questers;
@@ -110,9 +108,9 @@ public class MoY extends JavaPlugin {
 		database.intvar();
 		MySQL MySQl = database.MySQl;
 		int poging = 0;
-		while (con == null) {
-			con = MySQl.openConnection();
-			if (con == null) {
+		while (MySQl.getConnection() == null) {
+			MySQl.openConnection();
+			if (MySQl.getConnection() == null) {
 				poging++;
 				getLogger()
 						.info("Database connection lost. Reconection will be started");
@@ -126,8 +124,8 @@ public class MoY extends JavaPlugin {
 			}
 
 		}
-		if (con != null) {
-			database.setcon(con);
+		if (MySQl.getConnection() != null) {
+			database.setcon(MySQl.getConnection());
 			getLogger().info("Databse connection has succeed");
 			database.TableCreate();
 			database.closecon();
@@ -166,6 +164,8 @@ public class MoY extends JavaPlugin {
 			getCommand("qnpc").setExecutor(new CommandsNPC(this));
 			getCommand("lvl").setExecutor(new CommandsPlayerinfo(this));
 			getCommand("event").setExecutor(new CommandsEvent(this));
+			getCommand("harbor").setExecutor(new CommandsEvent(this));
+			getCommand("trip").setExecutor(new CommandsEvent(this));
 			getCommand("quest").setExecutor(new CommandsPlayerinfo(this));
 			re.playerevent();
 		}

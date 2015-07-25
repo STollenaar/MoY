@@ -115,7 +115,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 					try {
 						Player player = Bukkit.getPlayer(args[2]);
 						Playerstats p = playerinfo.getplayer(player.getUniqueId());
-						int newlvl = Integer.parseInt(args[1]);
+						int xp = Integer.parseInt(args[1]);
 						int type = 0;
 						if (args[0].equalsIgnoreCase("wood")) {
 							type = 1;
@@ -128,15 +128,17 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						} else if (args[0].equalsIgnoreCase("smelting")) {
 							type = 4;
 						} else if (args[0].equalsIgnoreCase("strength")) {
-							p.setStrength(newlvl);
+							type = -1;
+							xp = 1;
 						} else if (args[0].equalsIgnoreCase("dex")) {
-							p.setDex(newlvl);
+							type = -2;
+							xp = 1;
 						} else if (args[0].equalsIgnoreCase("level")) {
 							type = 6;
 						}
 						if (type != 0) {
 							ProgEvent e = new ProgEvent(player.getUniqueId(),
-									type, Integer.parseInt(args[1]), true);
+									type, xp, true);
 							Bukkit.getServer().getPluginManager().callEvent(e);
 						}
 						playerinfo.saveplayerdata(p);

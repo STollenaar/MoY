@@ -3,6 +3,7 @@ package MoY.tollenaar.stephen.Quests;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import net.citizensnpcs.api.npc.NPC;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -28,27 +30,28 @@ public class QuestClientSide {
 		this.questers = instance.questers;
 	}
 
+	private HashMap<String, ArrayList<Integer>> tempav = new HashMap<String, ArrayList<Integer>>();
+
 	// private Main plugin;
 
 	@SuppressWarnings("deprecation")
 	public void avquest(NPC npc, Player player, String npcname) {
 		UUID npcuuid = npc.getUniqueId();
 		int rowcount = 0;
-		if (questers.killquests.get(npcuuid) != null) {
-			rowcount += questers.killquests.get(npcuuid).size();
+		if (questers.GetIds("kill", npcuuid) != null) {
+			rowcount += questers.GetIds("kill", npcuuid).size();
 		}
-		if (questers.harvestquests.get(npcuuid) != null) {
-			rowcount += questers.harvestquests.get(npcuuid).size();
+		if (questers.GetIds("harvest", npcuuid) != null) {
+			rowcount += questers.GetIds("harvest", npcuuid).size();
 		}
-		if (questers.talktoquests.get(npcuuid) != null) {
-			rowcount += questers.talktoquests.get(npcuuid).size();
+		if (questers.GetIds("talkto", npcuuid) != null) {
+			rowcount += questers.GetIds("talkto", npcuuid).size();
 		}
-		if (questers.warplists.get(npcuuid) != null) {
-			// rowcount += questers.warplists.get(npcuuid).size();
+		if (questers.getId(npcuuid) != -1) {
 			rowcount++;
 		}
-		if (questers.eventquests.get(npcuuid) != null) {
-			for (int numbers : questers.eventquests.get(npcuuid)) {
+		if (questers.GetIds("event", npcuuid) != null) {
+			for (int numbers : questers.GetIds("event", npcuuid)) {
 				if (questers.EventCheck(numbers)) {
 					rowcount++;
 				}
@@ -64,155 +67,206 @@ public class QuestClientSide {
 		if (rowcount == 0) {
 			rowcount = 9;
 		}
+
+		boolean bounced = false;
+
 		Inventory inv = Bukkit
 				.createInventory(null, rowcount, "Aviable Quests");
-		if (questers.killquests.get(npcuuid) != null) {
-			for (Integer i : questers.killquests.get(npcuuid)) {
+		if (questers.GetIds("kill", npcuuid) != null) {
+			for (Integer i : questers.GetIds("kill", npcuuid)) {
 
 				QuestKill kill = questers.returnkill(i);
-				boolean pass = false;
-				if (!kill.getPrereq().split("=")[0].equals("none")) {
-					if (check(kill.getPrereq().split("=")[0],
-							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true,
-							kill.getMinlvl())
-							&& check("kill", i, player, npcname, false,
-									kill.getMinlvl())) {
-						pass = true;
-					}
-				} else {
-					if (check("kill", i, player, npcname, false,
-							kill.getMinlvl())) {
-						pass = true;
-					}
-				}
-				if (pass) {
-					ItemStack killquest = new ItemStack(Material.DIAMOND_SWORD);
-					{
-						ItemMeta meta = killquest.getItemMeta();
-						meta.setDisplayName(kill.getName());
-						ArrayList<String> lore = new ArrayList<String>();
-						lore.add("§" + Integer.toString(kill.getQuestnumber()));
-						meta.setLore(lore);
-						killquest.setItemMeta(meta);
-						inv.addItem(killquest);
-					}
-				}
-			}
-		}
-		if (questers.harvestquests.get(npcuuid) != null) {
-			for (Integer i : questers.harvestquests.get(npcuuid)) {
-				QuestHarvest kill = questers.returnharvest(i);
-				boolean pass = false;
-				if (!kill.getPrereq().split("=")[0].equals("none")) {
-					if (check(kill.getPrereq().split("=")[0],
-							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true,
-							kill.getMinlvl())
-							&& check("harvest", i, player, npcname, false,
-									kill.getMinlvl())) {
-						pass = true;
-					}
-				} else {
-					if (check("harvest", i, player, npcname, false,
-							kill.getMinlvl())) {
-						pass = true;
-					}
-				}
-				if (pass) {
-					ItemStack harvestquest = new ItemStack(
-							Material.DIAMOND_PICKAXE);
-					{
-						ItemMeta meta = harvestquest.getItemMeta();
-						meta.setDisplayName(kill.getName());
-						ArrayList<String> lore = new ArrayList<String>();
-						lore.add("§" + Integer.toString(kill.getQuestnumber()));
-						meta.setLore(lore);
-						harvestquest.setItemMeta(meta);
-						inv.addItem(harvestquest);
-					}
-				}
-			}
-		}
-		if (questers.talktoquests.get(npcuuid) != null) {
-			for (Integer i : questers.talktoquests.get(npcuuid)) {
-				QuestTalkto kill = questers.returntalkto(i);
-				boolean pass = false;
-				if (!kill.getPrereq().split("=")[0].equals("none")) {
-					if (check(kill.getPrereq().split("=")[0],
-							Integer.parseInt(kill.getPrereq().split("=")[1]
-									.trim()), player, npcname, true,
-							kill.getMinlvl())
-							&& check("talkto", i, player, npcname, false,
-									kill.getMinlvl())) {
-						pass = true;
-					}
-				} else {
-					if (check("talkto", i, player, npcname, false,
-							kill.getMinlvl())) {
-						pass = true;
-					}
-				}
-				if (pass) {
-					ItemStack talktoquest = new ItemStack(Material.FEATHER);
-					{
-						ItemMeta meta = talktoquest.getItemMeta();
-						meta.setDisplayName(kill.getName());
-						ArrayList<String> lore = new ArrayList<String>();
-						lore.add("§" + Integer.toString(kill.getQuestnumber()));
-						meta.setLore(lore);
-						talktoquest.setItemMeta(meta);
-						inv.addItem(talktoquest);
-					}
-				}
-			}
-		}
-		if (questers.warplists.get(npcuuid) != null) {
-			// for (Integer i : questers.warplists.get(npcuuid)) {
-			int i = questers.warplists.get(npcuuid);
-			Warps kill = questers.returnwarp(i);
-			for (String type : kill.GetType().split(",")) {
-				for (Warps w : Warps.TypeReturned(type)) {
-					if (w.getWarpid() != kill.getWarpid()) {
-						ItemStack title = new ItemStack(Material.BOAT);
-						{
-							ArrayList<String> lore = new ArrayList<String>();
-							int time = Travel.traveltime(npcuuid,
-									kill.getWarpid(), type, w.getStartloc());
-							SimpleDateFormat df = new SimpleDateFormat("mm:ss");
-							Date date = new Date(time * 1000);
-							date.setHours(date.getHours() - 9);
-							date.setMinutes(date.getMinutes() - 30);
-							lore.add("Duration: " + df.format(date));
-							lore.add("§" + Integer.toString(w.getWarpid()));
-							lore.add("§" + Integer.toString(kill.getWarpid()));
-							ItemMeta meta = title.getItemMeta();
-							meta.setLore(lore);
-							meta.setDisplayName(kill.getName() + " - "
-									+ w.getName());
-							title.setItemMeta(meta);
+				if (kill != null) {
+					boolean pass = false;
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname, true,
+								kill.getMinlvl())
+								&& check("kill", i, player, npcname, false,
+										kill.getMinlvl())) {
+							pass = true;
 						}
+					} else {
+						if (check("kill", i, player, npcname, false,
+								kill.getMinlvl())) {
+							pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack killquest = new ItemStack(
+								Material.DIAMOND_SWORD);
+						{
+							ItemMeta meta = killquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							killquest.setItemMeta(meta);
+							inv.addItem(killquest);
+						}
+					}
+				} else {
+					questers.removekill(i);
+				}
+			}
+		}
+		if (questers.GetIds("harvest", npcuuid) != null) {
+			for (Integer i : questers.GetIds("harvest", npcuuid)) {
+				QuestHarvest kill = questers.returnharvest(i);
+				if (kill != null) {
+					boolean pass = false;
+					if (!bounced) {
+						bounced = !rewardcheck("harvest", i, player, null);
+					}
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname, true,
+								kill.getMinlvl())
+								&& check("harvest", i, player, npcname, false,
+										kill.getMinlvl())) {
+							pass = true;
+						}
+					} else {
+						if (check("harvest", i, player, npcname, false,
+								kill.getMinlvl())) {
+							pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack harvestquest = new ItemStack(
+								Material.DIAMOND_PICKAXE);
+						{
+							ItemMeta meta = harvestquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							harvestquest.setItemMeta(meta);
+							inv.addItem(harvestquest);
+						}
+					}
+				} else {
+					questers.removeharvest(i);
+				}
+			}
+		}
+		if (questers.GetIds("talkto", npcuuid) != null) {
+			for (Integer i : questers.GetIds("talkto", npcuuid)) {
+				QuestTalkto kill = questers.returntalkto(i);
+				if (kill != null) {
+					boolean pass = false;
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						if (check(kill.getPrereq().split("=")[0],
+								Integer.parseInt(kill.getPrereq().split("=")[1]
+										.trim()), player, npcname, true,
+								kill.getMinlvl())
+								&& check("talkto", i, player, npcname, false,
+										kill.getMinlvl())) {
+							pass = true;
+						}
+					} else {
+						if (check("talkto", i, player, npcname, false,
+								kill.getMinlvl())) {
+							pass = true;
+						}
+					}
+					if (pass) {
+						ItemStack talktoquest = new ItemStack(Material.FEATHER);
+						{
+							ItemMeta meta = talktoquest.getItemMeta();
+							meta.setDisplayName(kill.getName());
+							ArrayList<String> lore = new ArrayList<String>();
+							lore.add("§"
+									+ Integer.toString(kill.getQuestnumber()));
+							meta.setLore(lore);
+							talktoquest.setItemMeta(meta);
+							inv.addItem(talktoquest);
+						}
+					}
+				} else {
+					questers.removetalkto(i);
+				}
+			}
+		}
+		if (questers.getId(npcuuid)!= -1) {
+			// for (Integer i : questers.warplists.get(npcuuid)) {
+			int i = questers.getId(npcuuid);
+			Warps kill = questers.returnwarp(i);
+			if (kill != null) {
+				for (String type : kill.getType()) {
+					for (Warps w : Warps.TypeReturned(type)) {
+						if (w.getWarpid() != kill.getWarpid()) {
+							ItemStack title = new ItemStack(Material.BOAT);
+							{
+								ArrayList<String> lore = new ArrayList<String>();
+								int time = Travel
+										.traveltime(npcuuid, kill.getWarpid(),
+												type, w.getStartloc());
+								SimpleDateFormat df = new SimpleDateFormat(
+										"mm:ss");
+								Date date = new Date(time * 1000);
+								date.setHours(date.getHours() - 9);
+								date.setMinutes(date.getMinutes() - 30);
+								lore.add("Duration: " + df.format(date));
+								lore.add(type);
+								lore.add("§" + Integer.toString(w.getWarpid()));
+								lore.add("§"
+										+ Integer.toString(kill.getWarpid()));
+								
+								ItemMeta meta = title.getItemMeta();
+								meta.setLore(lore);
+								meta.setDisplayName(kill.getName() + " - "
+										+ w.getName());
+								title.setItemMeta(meta);
+							}
 
-						inv.addItem(title);
+							inv.addItem(title);
+						}
 					}
 				}
+			} else {
+				questers.removewarp(i);
 			}
 
 		}
-		if (questers.eventquests.get(npcuuid) != null) {
-			for (int i : questers.eventquests.get(npcuuid)) {
+		if (questers.GetIds("event", npcuuid) != null) {
+			for (int i : questers.GetIds("event", npcuuid)) {
 				if (questers.EventCheck(i)) {
 					QuestEvent event = questers.returneventquest(i);
+					if (event != null) {
+						if (lvlcheck(player, event.getMinlvl())) {
+							ItemStack item = new ItemStack(
+									Material.ENCHANTED_BOOK);
+							ItemMeta meta = item.getItemMeta();
+							ArrayList<String> lore = new ArrayList<String>();
+							meta.setDisplayName(event.getTitle());
 
-					if (lvlcheck(player, event.getMinlvl())) {
-						ItemStack item = new ItemStack(Material.ENCHANTED_BOOK);
-						ItemMeta meta = item.getItemMeta();
-						ArrayList<String> lore = new ArrayList<String>();
-						meta.setDisplayName(event.getTitle());
-						lore.add("§" + event.getNumber());
-						meta.setLore(lore);
-						item.setItemMeta(meta);
-						inv.addItem(item);
+							try {
+								EntityType.valueOf(event.getType()
+										.toUpperCase());
+								String build = "";
+								for (String in : "eventkill".split("")) {
+									build += "§" + in;
+								}
+								lore.add(build);
+							} catch (Exception e) {
+								String build = "";
+								for (String in : "eventharvest".split("")) {
+									build += "§" + in;
+								}
+								lore.add(build);
+							}
+							lore.add("§" + event.getNumber());
+							meta.setLore(lore);
+							item.setItemMeta(meta);
+							inv.addItem(item);
+						}
+					} else {
+						questers.removeevent(i);
 					}
 				}
 			}
@@ -261,9 +315,10 @@ public class QuestClientSide {
 		}
 		if (poss && type) {
 			player.openInventory(inv);
-		} else {
+		} else if (!bounced) {
 			questers.plugin.qinteract.dummymessage(player, npc);
 		}
+		tempav.clear();
 	}
 
 	public boolean check(String type, int number, Player player,
@@ -327,16 +382,20 @@ public class QuestClientSide {
 							if (type.equals("kill")) {
 								reward = questers.returnkill(number)
 										.getReward();
+							} else if (type.equals("eventkill")) {
+								reward = questers.returneventquest(number)
+										.getReward();
 							}
 							// harvestquest
-							else if (type.equals("harvest")) {
+							else if (type.equals("harvest")
+									|| type.equals("eventharvest")) {
 								boolean passing = false;
 								int needed = 0;
 								String name = null;
 								ItemStack saveditem = null;
 								for (ItemStack items : player.getInventory()
 										.getContents()) {
-									saveditem = items;
+									
 									if (items != null
 											&& items.getType() != Material.AIR) {
 										if (items.getDurability() != 0) {
@@ -346,39 +405,86 @@ public class QuestClientSide {
 											name = Integer.toString(items
 													.getTypeId());
 										}
-
-										if (questers.returnharvest(number)
-												.getItemId().equals(name)) {
-											needed = questers.returnharvest(
-													number).getCount();
-											if (items.getAmount() >= questers
-													.returnharvest(number)
-													.getCount()) {
-
-												passing = true;
-												break;
-											} else {
-
-												saveditem.setAmount(saveditem
-														.getAmount()
-														+ items.getAmount());
-												if (saveditem.getAmount() >= questers
+										if (type.equals("harvest")) {
+											if (questers.returnharvest(number)
+													.getItemId().equals(name)) {
+												needed = questers
+														.returnharvest(number)
+														.getCount();
+												
+												if (saveditem == null || saveditem.getType() == Material.AIR) {
+													saveditem = new ItemStack(items.getType(), 0, items.getDurability());
+												}
+												if (items.getAmount() >= questers
 														.returnharvest(number)
 														.getCount()) {
-
+													saveditem.setAmount(questers.returnharvest(number).getCount());
 													passing = true;
 													break;
+												} else {
+													if(saveditem.getAmount() + items.getAmount() < questers.returnharvest(number).getCount()){
+														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
+													}else if(saveditem.getAmount()+items.getAmount() == questers.returnharvest(number).getCount()){
+														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
+														passing  = true;
+														break;
+													}else{
+														saveditem.setAmount(questers.returnharvest(number).getCount());
+														passing  = true;
+														break;
+													}
 												}
+
 											}
 
-										}
+										} else {
+											if (questers
+													.returneventquest(number)
+													.getType().equals(name)) {
 
+												if (saveditem == null || saveditem.getType() == Material.AIR) {
+													saveditem = new ItemStack(items.getType(), 0, items.getDurability());
+												}
+
+												needed = questers
+														.returneventquest(
+																number)
+														.getCount();
+												if (items.getAmount() >= questers
+														.returneventquest(
+																number)
+														.getCount()) {
+													saveditem.setAmount(questers.returnharvest(number).getCount());
+													passing = true;
+													break;
+												}  else {
+													if(saveditem.getAmount() + items.getAmount() < questers.returneventquest(number).getCount()){
+														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
+													}else if(saveditem.getAmount()+items.getAmount() == questers.returneventquest(number).getCount()){
+														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
+														passing  = true;
+														break;
+													}else{
+														saveditem.setAmount(questers.returneventquest(number).getCount());
+														passing  = true;
+														break;
+													}
+												}
+
+											}
+										}
 									}
 								}
-								if (saveditem == null) {
-									String[] id = questers
-											.returnharvest(number).getItemId()
-											.split(":");
+								if (saveditem == null
+										|| saveditem.getType() == Material.AIR) {
+									String[] id;
+									if (type.equals("harvest")) {
+										id = questers.returnharvest(number)
+												.getItemId().split(":");
+									} else {
+										id = questers.returneventquest(number)
+												.getType().split(":");
+									}
 									if (id.length == 2) {
 										saveditem = new ItemStack(
 												Material.getMaterial(Integer
@@ -393,9 +499,8 @@ public class QuestClientSide {
 								}
 
 								if (passing) {
-									while (needed != 0) {
-										for (ItemStack item : player
-												.getInventory().getContents()) {
+										for (int index = 0; index < player.getInventory().getContents().length; index++) {
+											ItemStack item = player.getInventory().getContents()[index];
 											if (item != null
 													&& item.getType() != Material.AIR) {
 												if (item.getDurability() != 0) {
@@ -407,78 +512,104 @@ public class QuestClientSide {
 															.toString(item
 																	.getTypeId());
 												}
-												if (questers
+												if ((type.equals("harvest") && questers
 														.returnharvest(number)
 														.getItemId()
-														.equals(name)) {
-													if (needed
-															- item.getAmount() <= 0) {
-														if (item.getAmount()
-																- needed == 0) {
-															player.getInventory()
-																	.remove(item);
-															player.updateInventory();
-														} else {
-															item.setAmount(item
-																	.getAmount()
-																	- needed);
-															player.updateInventory();
-														}
+														.equals(name))
+														|| (type.equals("eventharvest") && questers
+																.returneventquest(
+																		number)
+																.getType()
+																.equals(name))) {
+													if (item.getAmount() > needed) {
+														item.setAmount(item.getAmount()-needed);
 														needed = 0;
-													} else {
-														needed -= item
-																.getAmount();
-														player.getInventory()
-																.remove(item);
+														player.updateInventory();
+													}else if(item.getAmount() == needed){
+														needed = 0;
+														player.getInventory().setItem(index, new ItemStack(Material.AIR));
+														player.updateInventory();
+													}else{
+														needed -= item.getAmount();
+														player.getInventory().setItem(index, new ItemStack(Material.AIR));
 														player.updateInventory();
 													}
 												}
 											}
+											if(needed == 0){
+												break;
+											}
 										}
+									if (type.equals("harvest")) {
+										reward = questers.returnharvest(number)
+												.getReward();
+									} else {
+										reward = questers.returneventquest(
+												number).getReward();
 									}
-									reward = questers.returnharvest(number)
-											.getReward();
 
 								} else {
-									player.sendMessage(ChatColor.DARK_PURPLE
-											+ "["
-											+ ChatColor.GOLD
-											+ npcname
-											+ ChatColor.DARK_PURPLE
-											+ "] "
-											+ ChatColor.AQUA
-											+ "You didn't bring me "
-											+ questers.returnharvest(number)
-													.getCount()
-											+ " "
-											+ questers.GetItemName(saveditem)
-											+ ". Come back with the right amount for your reward");
+									String count;
+									if (type.equals("harvest")) {
+										count = Integer.toString(questers
+												.returnharvest(number)
+												.getCount());
+									} else {
+										count = Integer.toString(questers
+												.returneventquest(number)
+												.getCount());
+									}
+									if (npcname != null) {
+										if (tempav.get(type) == null) {
+											ArrayList<Integer> t = new ArrayList<Integer>();
+											tempav.put(type, t);
+										}
+											if (!tempav.get(type).contains(
+													number)) {
+												player.sendMessage(ChatColor.DARK_PURPLE
+														+ "["
+														+ ChatColor.GOLD
+														+ npcname
+														+ ChatColor.DARK_PURPLE
+														+ "] "
+														+ ChatColor.AQUA
+														+ "You didn't bring me "
+														+ count
+														+ " "
+														+ questers
+																.GetItemName(saveditem)
+														+ ". Come back with the right amount for your reward");
+												tempav.get(type).add(number);
+											}
+									}
 									pass = false;
 									return pass;
 								}
 								// talktoquest
-							} else {
+							} else if (type.equals("talkto")) {
 								reward = questers.returntalkto(number)
 										.getReward();
 
 							}
-
 							// giving the reward
-							System.out.println(Ansi.ansi().fg(Ansi.Color.RED)
-									+ "QUEST COMPLETE"
-									+ Ansi.ansi().fg(Ansi.Color.WHITE));
 							if (reward != null && !reward.contains("unknown")) {
+								System.out.println(Ansi.ansi().fg(
+										Ansi.Color.RED)
+										+ "QUEST COMPLETE"
+										+ Ansi.ansi().fg(Ansi.Color.WHITE));
+
 								for (String in : reward) {
 									String r = in.replace("player",
 											player.getName());
 									Bukkit.dispatchCommand(
 											Bukkit.getConsoleSender(), r);
 								}
+								p.deletecompleted(type, i);
+								p.addrewarded(type, number,
+										System.currentTimeMillis());
+								questers.playerinfo.saveplayerdata(p);
+								return pass;
 							}
-							p.deletecompleted(type, i);
-							p.addrewarded(type, number, System.currentTimeMillis());
-							questers.playerinfo.saveplayerdata(p);
-						
 						}
 					}
 				}

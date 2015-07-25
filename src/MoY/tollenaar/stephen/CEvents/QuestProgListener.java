@@ -18,11 +18,9 @@ import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 
 public class QuestProgListener implements Listener {
 
-	private MoY plugin;
 	private QuestsServerSide quest;
 
 	public QuestProgListener(MoY instance) {
-		this.plugin = instance;
 		this.quest = instance.questers;
 	}
 
@@ -30,7 +28,8 @@ public class QuestProgListener implements Listener {
 	@EventHandler
 	public void OnQuestProg(QuestProgEvent event) {
 		if (event.getType().equals("kill")) {
-			if (IsRightEntity(event.getEntity().getName(), event.getQuest(), false)) {
+			if (IsRightEntity(event.getEntity().getName(), event.getQuest(),
+					false)) {
 				QuestKill kill = quest.returnkill(event.getQuest());
 				HashMap<Integer, Integer> amount = quest.progress.get(
 						event.getPlayer().getUniqueId()).get("kill");
@@ -40,9 +39,9 @@ public class QuestProgListener implements Listener {
 				} else {
 					NPCRegistry reg = CitizensAPI.getNPCRegistry();
 
-					for (UUID npcuuid : plugin.questers.killquests.keySet()) {
+					for (UUID npcuuid : quest.GetKeysSets("kill")) {
 
-						if (quest.killquests.get(npcuuid).contains(
+						if (quest.GetIds("kill", npcuuid).contains(
 								event.getQuest())) {
 							NPC npc = reg.getByUniqueId(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
@@ -52,12 +51,12 @@ public class QuestProgListener implements Listener {
 					}
 				}
 			}
-		} else if(event.getType().equals("harvest")){
+		} else if (event.getType().equals("harvest")) {
 			String name = Integer.toString(event.getItem().getType().getId());
 			if (event.getItem().getDurability() != 0) {
 				name += ":" + event.getItem().getDurability();
 			}
-			if (name != null &&IsRightItem(name, event.getQuest(), false)) {
+			if (name != null && IsRightItem(name, event.getQuest(), false)) {
 				QuestHarvest harvest = quest.returnharvest(event.getQuest());
 				if (event.getItem().getAmount() >= harvest.getCount()
 						|| quest.progress.get(event.getPlayer().getUniqueId())
@@ -65,8 +64,8 @@ public class QuestProgListener implements Listener {
 								+ event.getItem().getAmount() >= harvest
 									.getCount()) {
 
-					for (UUID npcuuid : plugin.questers.harvestquests.keySet()) {
-						if (plugin.questers.harvestquests.get(npcuuid)
+					for (UUID npcuuid : quest.GetKeysSets("harvest")) {
+						if (quest.GetIds("harvest", npcuuid)
 								.contains(event.getQuest())) {
 							NPCRegistry reg = CitizensAPI.getNPCRegistry();
 							NPC npc = reg.getByUniqueId(npcuuid);
@@ -88,12 +87,12 @@ public class QuestProgListener implements Listener {
 											+ event.getItem().getAmount());
 				}
 			}
-		}else if(event.getType().equals("eventharvest")){
+		} else if (event.getType().equals("eventharvest")) {
 			String name = Integer.toString(event.getItem().getType().getId());
 			if (event.getItem().getDurability() != 0) {
 				name += ":" + event.getItem().getDurability();
 			}
-			if (name != null &&IsRightItem(name, event.getQuest(), true)) {
+			if (name != null && IsRightItem(name, event.getQuest(), true)) {
 				QuestEvent harvest = quest.returneventquest(event.getQuest());
 				if (event.getItem().getAmount() >= harvest.getCount()
 						|| quest.progress.get(event.getPlayer().getUniqueId())
@@ -101,13 +100,14 @@ public class QuestProgListener implements Listener {
 								+ event.getItem().getAmount() >= harvest
 									.getCount()) {
 
-					for (UUID npcuuid : plugin.questers.eventquests.keySet()) {
-						if (plugin.questers.eventquests.get(npcuuid)
-								.contains(event.getQuest())) {
+					for (UUID npcuuid : quest.GetKeysSets("event")) {
+						if (quest.GetIds("event", npcuuid).contains(
+								event.getQuest())) {
 							NPCRegistry reg = CitizensAPI.getNPCRegistry();
 							NPC npc = reg.getByUniqueId(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "eventharvest", npc.getName());
+									event.getQuest(), "eventharvest",
+									npc.getName());
 							break;
 						}
 					}
@@ -124,8 +124,9 @@ public class QuestProgListener implements Listener {
 											+ event.getItem().getAmount());
 				}
 			}
-		}else if(event.getType().equals("eventkill")){
-			if (IsRightEntity(event.getEntity().getName(), event.getQuest(), true)) {
+		} else if (event.getType().equals("eventkill")) {
+			if (IsRightEntity(event.getEntity().getName(), event.getQuest(),
+					true)) {
 				QuestEvent kill = quest.returneventquest(event.getQuest());
 				HashMap<Integer, Integer> amount = quest.progress.get(
 						event.getPlayer().getUniqueId()).get("eventkill");
@@ -135,13 +136,14 @@ public class QuestProgListener implements Listener {
 				} else {
 					NPCRegistry reg = CitizensAPI.getNPCRegistry();
 
-					for (UUID npcuuid : plugin.questers.eventquests.keySet()) {
+					for (UUID npcuuid : quest.GetKeysSets("event")) {
 
-						if (quest.eventquests.get(npcuuid).contains(
+						if (quest.GetIds("event", npcuuid).contains(
 								event.getQuest())) {
 							NPC npc = reg.getByUniqueId(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "eventkill", npc.getName());
+									event.getQuest(), "eventkill",
+									npc.getName());
 							break;
 						}
 					}
@@ -151,39 +153,59 @@ public class QuestProgListener implements Listener {
 	}
 
 	private boolean IsRightItem(String name, int q, boolean event) {
-		if(!event){
-		QuestHarvest harvest = quest.returnharvest(q);
-		if (harvest.getItemId().equals(name)) {
-			return true;
+		if (!event) {
+			QuestHarvest harvest = quest.returnharvest(q);
+			if (harvest != null) {
+				if (harvest.getItemId().equals(name)) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				quest.removeharvest(q);
+				return false;
+			}
 		} else {
-			return false;
-		}
-		}else{
 			QuestEvent e = quest.returneventquest(q);
-			if(e.getType().equals(name)){
-				return true;
-			}else{
+			if (e != null) {
+				if (e.getType().equals(name)) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				quest.removeevent(q);
 				return false;
 			}
 		}
 	}
-	
 
 	private boolean IsRightEntity(String name, int q, boolean event) {
-		if(!event){
-		QuestKill kill = quest.returnkill(q);
-		if (kill.getMonster().equals(name)) {
-			return true;
+		if (!event) {
+			QuestKill kill = quest.returnkill(q);
+			if (kill != null) {
+				if (kill.getMonster().equals(name)) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				quest.removeharvest(q);
+				return false;
+			}
 		} else {
-			return false;
-		}
-		}else{
 			QuestEvent e = quest.returneventquest(q);
-			if(e.getType().equals(name)){
-				return true;
-			}else{
+			if (e != null) {
+				if (e.getType().equals(name)) {
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				quest.removeevent(q);
 				return false;
 			}
 		}
 	}
+
 }

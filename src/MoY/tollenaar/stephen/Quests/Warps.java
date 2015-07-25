@@ -1,10 +1,9 @@
 package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-
 
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -20,28 +19,29 @@ import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 
 public class Warps {
 	private int warpid;
-	
+
 	private String name;
 
 	private Location startloc;
-	
-	private String type;
-	
+
+	private ArrayList<String> type;
+
 	private double costs;
 
 	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
-	
+
 	public void npcsettingswarplists(UUID npcuuid, Player player) {
 
 		Inventory warpinv = Bukkit.createInventory(null, 18, "WarpList");
 		// title
-		ItemStack title = ItemGenerator.InfoQuest(name, warpid, 4, npcuuid.toString());
+		ItemStack title = ItemGenerator.InfoQuest(name, warpid, 4,
+				npcuuid.toString());
 
 		// transportation
 		ItemStack transport = new ItemStack(Material.BOAT);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add("X: " +startloc.getX());
+			temp.add("X: " + startloc.getX());
 			temp.add("Y: " + startloc.getY());
 			temp.add("Z: " + startloc.getZ());
 			temp.add("World: " + startloc.getWorld().getName());
@@ -50,18 +50,20 @@ public class Warps {
 			tem.setLore(temp);
 			transport.setItemMeta(tem);
 		}
-		
+
 		// type
 		ItemStack typei = new ItemStack(Material.MINECART);
 		{
 			List<String> temp = new ArrayList<String>();
-			temp.add(type);
+			for (String in : type) {
+				temp.add(in);
+			}
 			ItemMeta tem = typei.getItemMeta();
 			tem.setDisplayName("Type of transportation");
 			tem.setLore(temp);
 			typei.setItemMeta(tem);
 		}
-		
+
 		// costs
 		ItemStack money = new ItemStack(Material.GOLD_NUGGET);
 		{
@@ -101,49 +103,46 @@ public class Warps {
 		player.openInventory(warpinv);
 
 	}
-	
-	
+
 	public Warps(int number, Location l) {
 		this.warpid = number;
 		this.name = "title";
 		this.startloc = l;
-		this.type = "none";
+		this.type = new ArrayList<String>(Arrays.asList("none"));
 		this.costs = 0.0;
 		allwarps.add(this);
 	}
 
-	
-	
 	public double getCosts() {
 		return costs;
 	}
 
-
-
-	public static ArrayList<Warps> TypeReturned(String type){
+	public static ArrayList<Warps> TypeReturned(String type) {
 		ArrayList<Warps> thewarps = new ArrayList<Warps>();
-		for(Warps w : allwarps){
-			if(w.GetType().contains(type)){
+		for (Warps w : allwarps) {
+			if (w.getType().contains(type)) {
 				thewarps.add(w);
 			}
 		}
 		return thewarps;
 	}
-	
+
 	public void setCosts(double costs2) {
 		this.costs = costs2;
 	}
 
-
-
-	public void SetType(String t){
-		this.type = t;
+	public void SetLine(int line, String typed) {
+		type.set(line, typed);
 	}
 	
-	public String GetType(){
+	public void AddLine(String typed){
+		type.add(typed);
+	}
+
+	public ArrayList<String> getType(){
 		return type;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
@@ -152,12 +151,9 @@ public class Warps {
 		this.name = name;
 	}
 
-	
-
 	public int getWarpid() {
 		return warpid;
 	}
-
 
 	public Location getStartloc() {
 		return startloc;

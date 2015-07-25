@@ -1,12 +1,11 @@
 package MoY.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import net.citizensnpcs.api.CitizensAPI;
@@ -37,11 +36,11 @@ public class QuestsServerSide extends Quest {
 																					// location
 
 	// quest storages all to db
-	public HashMap<UUID, HashSet<Integer>> killquests = new HashMap<UUID, HashSet<Integer>>();
-	public HashMap<UUID, HashSet<Integer>> harvestquests = new HashMap<UUID, HashSet<Integer>>();
-	public HashMap<UUID, HashSet<Integer>> talktoquests = new HashMap<UUID, HashSet<Integer>>();
-	public HashMap<UUID, HashSet<Integer>> eventquests = new HashMap<UUID, HashSet<Integer>>();
-	public HashMap<UUID, Integer> warplists = new HashMap<UUID, Integer>();
+	private static HashMap<UUID, HashSet<Integer>> killquests = new HashMap<UUID, HashSet<Integer>>();
+	private static HashMap<UUID, HashSet<Integer>> harvestquests = new HashMap<UUID, HashSet<Integer>>();
+	private static HashMap<UUID, HashSet<Integer>> talktoquests = new HashMap<UUID, HashSet<Integer>>();
+	private static HashMap<UUID, HashSet<Integer>> eventquests = new HashMap<UUID, HashSet<Integer>>();
+	private static HashMap<UUID, Integer> warplists = new HashMap<UUID, Integer>();
 
 	// active npc's
 	public HashMap<UUID, Integer> activenpc = new HashMap<UUID, Integer>(); // to
@@ -86,47 +85,58 @@ public class QuestsServerSide extends Quest {
 
 					@Override
 					public void run() {
-						Collection<? extends Player> ptemps = plugin.getServer().getOnlinePlayers();
-							Iterator<? extends Player> players = 	ptemps.iterator();
-
+						// HOTFIX
+						if (npc != null) {
 							Location location = npclocation.get(npcuuid);
-						double radiusSquared = 10 * 10;
+							double radiusSquared = 10 * 10;
 
-						ArrayList<Location> allclosep = new ArrayList<Location>();
-						if (ptemps.size() >= 1) {
-							Location closest = players.next().getLocation();
+							ArrayList<Location> allclosep = new ArrayList<Location>();
+							if (Bukkit.getOnlinePlayers().size() >= 1) {
+								Location closest = null;
 
-							while(players.hasNext()){
-								Player player = players.next();
-								if (player.getWorld().getName()
-										.equals(location.getWorld().getName())) {
-									if (player.getLocation()
-											.distanceSquared(location) <= radiusSquared) {
+								for (Player player : Bukkit.getOnlinePlayers()) {
 
-										allclosep.add(player.getLocation());
+									if (player
+											.getWorld()
+											.getName()
+											.equals(location.getWorld()
+													.getName())) {
+										if (closest == null) {
+											closest = player.getLocation();
+										}
 
+										if (player.getLocation()
+												.distanceSquared(location) <= radiusSquared) {
+
+											allclosep.add(player.getLocation());
+
+										}
 									}
 								}
-							}
 								for (Location loc : allclosep) {
 									if (loc.getWorld()
 											.getName()
 											.equals(location.getWorld()
 													.getName())) {
-										if (loc.distanceSquared(location) < closest
-												.distanceSquared(location)) {
-											closest = loc;
+										if (closest != null) {
+											if (loc.distanceSquared(location) < closest
+													.distanceSquared(location)) {
+												closest = loc;
+											}
 										}
 									}
 								}
-								npc.faceLocation(closest);
+								if (closest != null) {
+									npc.faceLocation(closest);
+								}
 							}
-						tickdelay++;
-						if (tickdelay == 20) {
-							QuestParticles.collectplayers(location, npcuuid);
-							tickdelay = 0;
+							tickdelay++;
+							if (tickdelay == 20) {
+								QuestParticles
+										.collectplayers(location, npcuuid);
+								tickdelay = 0;
+							}
 						}
-
 					}
 				}, 0L, 1L);
 		facelooker.put(npcuuid, id);
@@ -144,42 +154,44 @@ public class QuestsServerSide extends Quest {
 				new Runnable() {
 					@Override
 					public void run() {
+						// HOTFIX
+						if (npc != null) {
+							for (int i = 0; i < 3; i++) {
+								values[i] = rndGen.nextInt(4) + 1;
 
-						for (int i = 0; i < 3; i++) {
-							values[i] = rndGen.nextInt(4) + 1;
+							}
+							Location output = startFrom.clone();
+							Random x = new Random();
+							int y = x.nextInt(3) + 1;
+							switch (y) {
+							case 1:
+								output.add(values[0], 0, values[2]);
+								break;
+							case 2:
+								output.subtract(values[0], 0, values[2]);
+								break;
+							case 3:
+								int k = values[0] - values[0] * 2;
+								output.add(k, 0, values[2]);
+								break;
+							case 4:
+								int l = values[2] - values[2] * 2;
+								output.add(values[0], 0, l);
+								break;
+							}
+							Bukkit.getScheduler().cancelTask(
+									facelooker.get(npcuuid));
+							npc.getNavigator().setTarget(output);
+							npclocation.put(npc.getUniqueId(), output);
+							Bukkit.getScheduler().scheduleSyncDelayedTask(
+									plugin, new Runnable() {
+										@Override
+										public void run() {
+											npchear(npcuuid);
+										}
+									}, 40L);
 
 						}
-						Location output = startFrom.clone();
-						Random x = new Random();
-						int y = x.nextInt(3) + 1;
-						switch (y) {
-						case 1:
-							output.add(values[0], 0, values[2]);
-							break;
-						case 2:
-							output.subtract(values[0], 0, values[2]);
-							break;
-						case 3:
-							int k = values[0] - values[0] * 2;
-							output.add(k, 0, values[2]);
-							break;
-						case 4:
-							int l = values[2] - values[2] * 2;
-							output.add(values[0], 0, l);
-							break;
-						}
-						Bukkit.getScheduler().cancelTask(
-								facelooker.get(npcuuid));
-						npc.getNavigator().setTarget(output);
-						npclocation.put(npc.getUniqueId(), output);
-						Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-								new Runnable() {
-									@Override
-									public void run() {
-										npchear(npcuuid);
-									}
-								}, 40L);
-
 					}
 				}, 0L, 200L);
 		activenpc.put(npcuuid, id);
@@ -190,14 +202,16 @@ public class QuestsServerSide extends Quest {
 		activenpc.remove(npcuuid);
 	}
 
-	public void spawnNpc(Location location, String name, int uniqueid, String skin) {
+	public void spawnNpc(Location location, String name, int uniqueid,
+			String skin) {
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.createNPC(EntityType.PLAYER, name);
-		
-		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, NPCSkin.getNonPlayerProfile(skin).getName());
+
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA,
+				NPCSkin.getNonPlayerProfile(skin).getName());
 		npc.spawn(location);
 		UUID npcuuid = npc.getUniqueId();
-		
+
 		NPCSkin.getNonPlayerProfile(skin);
 		spawnlocation.put(npcuuid, location);
 		npclocation.put(npcuuid, location);
@@ -317,7 +331,7 @@ public class QuestsServerSide extends Quest {
 			npcnamemeta.setLore(nn);
 			npcname.setItemMeta(npcnamemeta);
 		}
-		
+
 		ItemStack npcskin = new ItemStack(Material.SKULL_ITEM);
 		{
 			ItemMeta meta = npcskin.getItemMeta();
@@ -416,7 +430,6 @@ public class QuestsServerSide extends Quest {
 			temp.setDisplayName("Event Quest");
 			event.setItemMeta(temp);
 		}
-		
 
 		String temp = "Main settings";
 		Inventory myinventory = Bukkit.createInventory(null, 18, temp);
@@ -437,4 +450,121 @@ public class QuestsServerSide extends Quest {
 		super(instance);
 	}
 
+	public void addKillquest(UUID npcuuid, int number) {
+		if (killquests.get(npcuuid) == null) {
+			HashSet<Integer> t = new HashSet<Integer>();
+			t.add(number);
+			killquests.put(npcuuid, t);
+		} else {
+			killquests.get(npcuuid).add(number);
+		}
+	}
+
+	public void addHarvestquest(UUID npcuuid, int number) {
+		if (harvestquests.get(npcuuid) == null) {
+			HashSet<Integer> t = new HashSet<Integer>();
+			t.add(number);
+			harvestquests.put(npcuuid, t);
+		} else {
+			harvestquests.get(npcuuid).add(number);
+		}
+	}
+
+	public void addTalktoquest(UUID npcuuid, int number) {
+		if (talktoquests.get(npcuuid) == null) {
+			HashSet<Integer> t = new HashSet<Integer>();
+			t.add(number);
+			talktoquests.put(npcuuid, t);
+		} else {
+			talktoquests.get(npcuuid).add(number);
+		}
+	}
+
+	public void addEventquest(UUID npcuuid, int number) {
+		if (eventquests.get(npcuuid) == null) {
+			HashSet<Integer> t = new HashSet<Integer>();
+			t.add(number);
+			eventquests.put(npcuuid, t);
+		} else {
+			eventquests.get(npcuuid).add(number);
+		}
+	}
+
+	public void addWarp(UUID npcuuid, int number) {
+		warplists.put(npcuuid, number);
+	}
+
+	public HashSet<Integer> GetIds(String type, UUID npcuuid) {
+		HashSet<Integer> t;
+		switch (type) {
+		case "kill":
+			t = killquests.get(npcuuid);
+			break;
+		case "harvest":
+			t = harvestquests.get(npcuuid);
+			break;
+		case "talkto":
+			t = talktoquests.get(npcuuid);
+			break;
+		case "event":
+			t = eventquests.get(npcuuid);
+			break;
+		default:
+			return null;
+		}
+		return t;
+	}
+
+	public Integer getId(UUID npcuuid) {
+		if (warplists.get(npcuuid) != null) {
+			return warplists.get(npcuuid);
+		} else {
+			return -1;
+		}
+	}
+
+	public void RemoveQuest(String type, UUID npcuuid, int number) {
+		switch (type) {
+		case "kill":
+			if (killquests.get(npcuuid) != null) {
+				killquests.get(npcuuid).remove(number);
+			}
+			break;
+		case "harvest":
+			if (harvestquests.get(npcuuid) != null) {
+				harvestquests.get(npcuuid).remove(number);
+			}
+			break;
+		case "talkto":
+			if (talktoquests.get(npcuuid) != null) {
+				talktoquests.get(npcuuid).remove(number);
+			}
+			break;
+		case "event":
+			if (eventquests.get(npcuuid) != null) {
+				eventquests.get(npcuuid).remove(number);
+			}
+			break;
+		case "warp":
+			warplists.remove(npcuuid);
+			break;
+		}
+	}
+
+	public Set<UUID> GetKeysSets(String type) {
+		switch (type) {
+		case "kill":
+			return killquests.keySet();
+		case "harvest":
+			return harvestquests.keySet();
+		case "talkto":
+			return talktoquests.keySet();
+		case "warp":
+			return warplists.keySet();
+		case "event":
+			return eventquests.keySet();
+		default:
+			return null;
+		}
+	}
 }

@@ -245,6 +245,19 @@ public class Filewriters {
 	}
 
 	
+	public void saveplayer(Playerstats p){
+		File f = new File(players, p.getPlayeruuid().toString() + ".dat");
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+			out.writeObject(p);
+			out.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void saveplayers(){
 		for(UUID player : playerinfo.getplayers()){
 			Playerstats p = playerinfo.getplayer(player);
@@ -257,6 +270,29 @@ public class Filewriters {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	public void loadplayer(UUID playeruuid){
+		for(File file : players.listFiles()){
+			if(file.getName().replace(".dat", "").equals(playeruuid.toString())){
+				try {
+					ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+					Playerstats p = (Playerstats) in.readObject();
+					if(playerinfo.getplayer(p.getPlayeruuid()) == null){
+					playerinfo.loadplayer(p);
+					}
+					in.close();
+					break;
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}

@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.citizensnpcs.api.CitizensAPI;
 import net.citizensnpcs.api.npc.NPC;
 import net.citizensnpcs.api.npc.NPCRegistry;
+import net.citizensnpcs.npc.entity.HumanController;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -206,9 +207,9 @@ public class QuestsServerSide extends Quest {
 			String skin) {
 		NPCRegistry registry = CitizensAPI.getNPCRegistry();
 		NPC npc = registry.createNPC(EntityType.PLAYER, name);
-
-		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA,
-				NPCSkin.getNonPlayerProfile(skin).getName());
+//		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA,
+//				NPCSkin.getNonPlayerProfile(skin).getName());
+		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, NPCSkin.getUrlBasedSkin("guitargun"));
 		npc.spawn(location);
 		UUID npcuuid = npc.getUniqueId();
 

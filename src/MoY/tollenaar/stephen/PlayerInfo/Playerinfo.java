@@ -30,6 +30,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -247,8 +248,13 @@ public class Playerinfo implements Listener{
 	public void onplayerjoin(PlayerJoinEvent event){
 		Player player = event.getPlayer();
 		if(getplayer(player.getUniqueId()) == null){
+			plugin.fw.loadplayer(event.getPlayer().getUniqueId());
 			createplayer(player.getUniqueId());
 		}
+	}
+	
+	public void onplayerleave(PlayerQuitEvent event){
+		Player player = event.getPlayer();
 	}
 	
 	@EventHandler

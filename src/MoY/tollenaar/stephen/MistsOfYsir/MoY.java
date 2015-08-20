@@ -2,11 +2,10 @@ package MoY.tollenaar.stephen.MistsOfYsir;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +19,8 @@ import MoY.tollenaar.stephen.Commands.CommandsNPC;
 import MoY.tollenaar.stephen.Commands.CommandsParty;
 import MoY.tollenaar.stephen.Commands.CommandsPlayerinfo;
 import MoY.tollenaar.stephen.Files.Filewriters;
+import MoY.tollenaar.stephen.NPC.NPCNetworkManager;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.Quests.ProgressHarvest;
 import MoY.tollenaar.stephen.Quests.ProgressKill;
@@ -63,13 +64,27 @@ public class MoY extends JavaPlugin {
 	public QuestInvClick qi;
 	private List<QuestEvent> stortemp = new ArrayList<QuestEvent>();
 
+	private NPCHandler handler;
+	private NPCNetworkManager network;
+	
+	private FileConfiguration config;
 	
 	@Override
 	public void onEnable() {
-		final FileConfiguration config = this.getConfig();
+		config = this.getConfig();
 		config.options().copyDefaults(true);
 		saveConfig();
+		
 		plugin = this;
+	
+		
+		handler = new NPCHandler(this);
+		if(!config.getBoolean("status")){
+			handler.DublicateKiller();
+			config.set("status", true);
+			saveConfig();
+		}
+		network =  new NPCNetworkManager();
 		
 		playerinfo = new Playerinfo(this);
 		
@@ -106,6 +121,9 @@ public class MoY extends JavaPlugin {
 
 		database = new DbStuff(this);
 		database.intvar();
+		
+		
+		
 		MySQL MySQl = database.MySQl;
 		int poging = 0;
 		while (MySQl.getConnection() == null) {
@@ -125,11 +143,7 @@ public class MoY extends JavaPlugin {
 
 		}
 		if (MySQl.getConnection() != null) {
-			database.setcon(MySQl.getConnection());
-			getLogger().info("Databse connection has succeed");
-			database.TableCreate();
-			database.closecon();
-			database.loadall();
+
 			PluginManager pm = getServer().getPluginManager();
 
 			pm.registerEvents(qinteract, this);
@@ -158,7 +172,18 @@ public class MoY extends JavaPlugin {
 			pm.registerEvents(new QuestProgListener(this), this);
 			
 			pm.registerEvents(new ProgListener(this), this);
+			
+			pm.registerEvents(handler, this);
 
+			database.setcon(MySQl.getConnection());
+			getLogger().info("Databse connection has succeed");
+			database.TableCreate();
+			database.closecon();
+			database.loadall();
+			
+			config.set("status", false);
+			saveConfig();
+			
 			getCommand("party").setExecutor(new CommandsParty(this));
 			getCommand("skill").setExecutor(new CommandsPlayerinfo(this));
 			getCommand("qnpc").setExecutor(new CommandsNPC(this));
@@ -175,18 +200,23 @@ public class MoY extends JavaPlugin {
 	public void onDisable() {
 		database.saveall();
 		fw.saveall();
-		for (UUID uuid : questers.uniquenpcid.values()) {
-			NPCRegistry registry = CitizensAPI.getNPCRegistry();
-			NPC npc = registry.getByUniqueId(uuid);
-			npc.despawn();
-			registry.deregister(npc);
-		}
 		re.cancelsced();
-		
+		getNPCHandler().onDisableEvent();
+		config.set("status", true);
+		saveConfig();
 	}
 	
 	public void addStorage(QuestEvent event){
 		stortemp.add(event);
 	}
+	
+	public NPCHandler getNPCHandler(){
+		return handler;
+	}
+
+	public NPCNetworkManager getNetwork() {
+		return network;
+	}
+
 
 }

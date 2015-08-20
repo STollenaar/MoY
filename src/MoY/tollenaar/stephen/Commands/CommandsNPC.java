@@ -38,9 +38,12 @@ public class CommandsNPC implements CommandExecutor{
 				if(args.length >= 1){
 					if(args[0].equalsIgnoreCase("create")){
 						if(args.length == 3){
-						questers.spawnNpc(player.getLocation(), args[1], -1, args[2]);
+						questers.spawnNpc(player.getLocation(), args[1], -1, args[2], "normal");
 						return true;
-					}else{
+					}else if(args.length == 4){
+						questers.spawnNpc(player.getLocation(), args[1], -1, args[2], "shop");
+					}
+						else{
 						player.sendMessage(ChatColor.RED + "Please use /qnpc <create><npcname><npcskinname>.");
 						return true;
 					}

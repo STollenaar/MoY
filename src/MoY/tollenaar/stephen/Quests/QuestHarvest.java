@@ -34,6 +34,8 @@ public class QuestHarvest {
 	private String message;
 
 	private String itemid;
+	
+	private String state;
 
 	public void qinventory(Player player, UUID npcuuid) {
 
@@ -59,6 +61,10 @@ public class QuestHarvest {
 		ItemStack messagei = ItemGenerator.MessageQuest(message);
 		// prerequisite
 		ItemStack prereqi = ItemGenerator.PrereqQuest(prereq);
+		//queststate
+		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
+		
+		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -85,10 +91,19 @@ public class QuestHarvest {
 		harvestques.addItem(repeat);
 		harvestques.addItem(messagei);
 		harvestques.addItem(prereqi);
+		harvestques.addItem(qstate);
 		harvestques.setItem(harvestques.getSize() - 2, delete);
 		harvestques.setItem(harvestques.getSize() - 1, main);
 		player.openInventory(harvestques);
 
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 	public QuestHarvest(int number) {
@@ -102,6 +117,7 @@ public class QuestHarvest {
 		this.itemid = "1";
 		this.message = "message";
 		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
+		this.state = "disabled";
 	}
 
 	public int getQuestnumber() {

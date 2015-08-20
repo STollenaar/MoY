@@ -3,14 +3,15 @@ package MoY.tollenaar.stephen.CEvents;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+ 
+
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.Quests.QuestEvent;
 import MoY.tollenaar.stephen.Quests.QuestHarvest;
 import MoY.tollenaar.stephen.Quests.QuestKill;
@@ -19,14 +20,16 @@ import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 public class QuestProgListener implements Listener {
 
 	private QuestsServerSide quest;
-
+	private MoY plugin;
 	public QuestProgListener(MoY instance) {
 		this.quest = instance.questers;
+		this.plugin = instance;
 	}
 
 	@SuppressWarnings({ "deprecation", "static-access" })
 	@EventHandler
 	public void OnQuestProg(QuestProgEvent event) {
+		NPCHandler handler = plugin.getNPCHandler();
 		if (event.getType().equals("kill")) {
 			if (IsRightEntity(event.getEntity().getName(), event.getQuest(),
 					false)) {
@@ -37,13 +40,12 @@ public class QuestProgListener implements Listener {
 					amount.put(event.getQuest(),
 							amount.get(event.getQuest()) + 1);
 				} else {
-					NPCRegistry reg = CitizensAPI.getNPCRegistry();
 
 					for (UUID npcuuid : quest.GetKeysSets("kill")) {
 
 						if (quest.GetIds("kill", npcuuid).contains(
 								event.getQuest())) {
-							NPC npc = reg.getByUniqueId(npcuuid);
+							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
 									event.getQuest(), "kill", npc.getName());
 							break;
@@ -67,8 +69,7 @@ public class QuestProgListener implements Listener {
 					for (UUID npcuuid : quest.GetKeysSets("harvest")) {
 						if (quest.GetIds("harvest", npcuuid)
 								.contains(event.getQuest())) {
-							NPCRegistry reg = CitizensAPI.getNPCRegistry();
-							NPC npc = reg.getByUniqueId(npcuuid);
+							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
 									event.getQuest(), "harvest", npc.getName());
 							break;
@@ -103,8 +104,7 @@ public class QuestProgListener implements Listener {
 					for (UUID npcuuid : quest.GetKeysSets("event")) {
 						if (quest.GetIds("event", npcuuid).contains(
 								event.getQuest())) {
-							NPCRegistry reg = CitizensAPI.getNPCRegistry();
-							NPC npc = reg.getByUniqueId(npcuuid);
+							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
 									event.getQuest(), "eventharvest",
 									npc.getName());
@@ -134,13 +134,12 @@ public class QuestProgListener implements Listener {
 					amount.put(event.getQuest(),
 							amount.get(event.getQuest()) + 1);
 				} else {
-					NPCRegistry reg = CitizensAPI.getNPCRegistry();
 
 					for (UUID npcuuid : quest.GetKeysSets("event")) {
 
 						if (quest.GetIds("event", npcuuid).contains(
 								event.getQuest())) {
-							NPC npc = reg.getByUniqueId(npcuuid);
+							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
 									event.getQuest(), "eventkill",
 									npc.getName());

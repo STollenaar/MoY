@@ -11,9 +11,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,6 +21,8 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.fusesource.jansi.Ansi;
 
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.Quests.QuestTalkto;
@@ -47,7 +48,7 @@ public class DbStuff {
 	private int dbsaver;
 	private Playerinfo playerinfo;
 	private Travel travel;
-	
+
 	public void TableCreate() {
 		Statement statement;
 		try {
@@ -89,7 +90,8 @@ public class DbStuff {
 			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_NPCData ("
 					+ "npcid INTEGER PRIMARY KEY, "
 					+ "npcname VARCHAR(45) NOT NULL, "
-					+ "npcskinname VARCHAR(45) NOT NULL, "
+					+ "npcskinname VARCHAR(45) NOT NULL,"
+					+ "active  TINYINT(1) NOT NULL,"
 					+ "spawnlocationx INTEGER NOT NULL, "
 					+ "spawnlocationy INTEGER NOT NULL, "
 					+ "spawnlocationz INTEGER NOT NULL, "
@@ -104,8 +106,7 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY, "
 							+ "killquests TEXT, "
 							+ "harvestquests TEXT, "
-							+ "talktoquests TEXT,"
-							+ "eventquest TEXT);");
+							+ "talktoquests TEXT," + "eventquest TEXT);");
 
 			// quest ready to recieve award
 			statement
@@ -113,8 +114,7 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY,"
 							+ "killquests TEXT,"
 							+ "harvestquests TEXT,"
-							+ "talktoquests TEXT,"
-							+ "eventquest TEXT);");
+							+ "talktoquests TEXT," + "eventquest TEXT);");
 
 			// quest completed kill
 			statement
@@ -135,10 +135,13 @@ public class DbStuff {
 							+ "questnumber TEXT, " + "timereward TEXT);");
 
 			// warps
-			statement.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Warp ("
-					+ "id INTEGER PRIMARY KEY, " + "title TEXT NOT NULL, "
-					+ "startloc TEXT NOT NULL, "
-					+ "type VARCHAR(45) NOT NULL, " + "costs DOUBLE);");
+			statement
+					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_Warp ("
+							+ "id INTEGER PRIMARY KEY, "
+							+ "title TEXT NOT NULL, "
+							+ "startloc TEXT NOT NULL, "
+							+ "type VARCHAR(45) NOT NULL, state VARCHAR(45) NOT NULL,  "
+							+ "costs DOUBLE);");
 
 			// event boat
 			statement
@@ -199,7 +202,6 @@ public class DbStuff {
 					+ "locationz INTEGER NOT NULL,"
 					+ "world VARCHAR(50) NOT NULL,"
 					+ "type VARCHAR(16) NOT NULL);");
-			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -505,12 +507,12 @@ public class DbStuff {
 
 	public void savewarp() {
 		String insert = "INSERT INTO Mist_Warp (" + "`id`," + "`title`,"
-				+ "`startloc`," + "`type`," + "`costs`) VALUES"
-				+ "(?,?,?,?,?);";
+				+ "`startloc`," + "`type`," + "`costs`, `state`) VALUES"
+				+ "(?,?,?,?,?,?);";
 
 		String update = "UPDATE Mist_Warp SET"
 				+ "`title`=?, `startloc`=?, `type`=?,"
-				+ "`costs`=? WHERE `id`=?;";
+				+ "`costs`=?, `state`=? WHERE `id`=?;";
 
 		String test = "SELECT * FROM Mist_Warp WHERE `id`=?;";
 		for (int warps : questers.AllWarpId()) {
@@ -531,12 +533,12 @@ public class DbStuff {
 							+ warp.getStartloc().getWorld().getName();
 					pst.setString(3, fake);
 					String build = "";
-					for(String in : warp.getType()){
+					for (String in : warp.getType()) {
 						build += in + "_";
 					}
 					pst.setString(4, build);
 					pst.setDouble(5, warp.getCosts());
-
+					pst.setString(6, warp.getState());
 					pst.execute();
 				} else {
 					pst.close();
@@ -548,12 +550,13 @@ public class DbStuff {
 							+ warp.getStartloc().getWorld().getName();
 					pst.setString(2, fake);
 					String build = "";
-					for(String in : warp.getType()){
+					for (String in : warp.getType()) {
 						build += in + "_";
 					}
 					pst.setString(3, build);
 					pst.setDouble(4, warp.getCosts());
-					pst.setInt(5, warp.getWarpid());
+					pst.setString(5, warp.getState());
+					pst.setInt(6, warp.getWarpid());
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -774,14 +777,20 @@ public class DbStuff {
 				+ "`npcname`," + "`spawnlocationx`," + "`spawnlocationy`,"
 				+ "`spawnlocationz`, " + "`walking`," + "`killquests`,"
 				+ "`harvestquests`," + "`talktoquests`," + "`warps`, "
-				+ "`spawnworld`, `npcskinname`, `eventquests`) VALUES ("
-				+ "?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				+ "`spawnworld`, `npcskinname`, `eventquests` ,`active`) VALUES ("
+				+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
-		String update = "UPDATE Mist_NPCData SET" + "`npcname`=?,"
-				+ "`spawnlocationx`=?," + "`spawnlocationy`=?,"
-				+ "`spawnlocationz`=?," + "`walking`=?," + "`killquests`=?,"
-				+ "`harvestquests`=?," + "`talktoquests`=?," + "`warps`=?, "
-				+ "`spawnworld`=?, `npcskinname`=? , `eventquests`=? WHERE `npcid`=?;";
+		String update = "UPDATE Mist_NPCData SET"
+				+ "`npcname`=?,"
+				+ "`spawnlocationx`=?,"
+				+ "`spawnlocationy`=?,"
+				+ "`spawnlocationz`=?,"
+				+ "`walking`=?,"
+				+ "`killquests`=?,"
+				+ "`harvestquests`=?,"
+				+ "`talktoquests`=?,"
+				+ "`warps`=?, "
+				+ "`spawnworld`=?, `npcskinname`=? , `eventquests`=?, `active`=? WHERE `npcid`=?;";
 
 		String test = "SELECT * FROM Mist_NPCData WHERE `npcid`=?;";
 		for (Integer npcid : questers.uniquenpcid.keySet()) {
@@ -820,25 +829,33 @@ public class DbStuff {
 			if (questers.getId(npcuuid) != -1) {
 				warpids = Integer.toString(questers.getId(npcuuid));
 			}
-			
+
 			String eventquestids = null;
-			if(questers.GetIds("event", npcuuid)!= null){
-				for(Integer quests : questers.GetIds("event", npcuuid)){
-					if(eventquestids == null){
+			if (questers.GetIds("event", npcuuid) != null) {
+				for (Integer quests : questers.GetIds("event", npcuuid)) {
+					if (eventquestids == null) {
 						eventquestids = quests + "_";
-					}else{
+					} else {
 						eventquestids += quests + "_";
 					}
 				}
 			}
 
-			NPCRegistry registry = CitizensAPI.getNPCRegistry();
-			NPC pc = registry.getByUniqueId(npcuuid);
+			NPCHandler handler = plugin.getNPCHandler();
+			NPC pc = handler.getNPCByUUID(npcuuid);
 			String name = pc.getName();
 			int x = (int) questers.spawnlocation.get(npcuuid).getX();
 			int y = (int) questers.spawnlocation.get(npcuuid).getY();
 			int z = (int) questers.spawnlocation.get(npcuuid).getZ();
-			String world = questers.spawnlocation.get(npcuuid).getWorld().getName();
+			String world = questers.spawnlocation.get(npcuuid).getWorld()
+					.getName();
+			int active;
+			if(questers.activenpc.get(npcuuid) != null){
+				active = 1;
+			}else{
+				active = 0;
+			}
+			
 			PreparedStatement pst = null;
 			try {
 				pst = con.prepareStatement(test);
@@ -864,9 +881,9 @@ public class DbStuff {
 					pst.setString(11, world);
 					pst.setString(
 							12,
-							(String) pc.data().get(
-									NPC.PLAYER_SKIN_UUID_METADATA));
+							 pc.getSkinName());
 					pst.setString(13, eventquestids);
+					pst.setInt(14, active);
 					pst.execute();
 				} else {
 					pst.close();
@@ -888,10 +905,10 @@ public class DbStuff {
 					pst.setString(10, world);
 					pst.setString(
 							11,
-							(String) pc.data().get(
-									NPC.PLAYER_SKIN_UUID_METADATA));
+							pc.getSkinName());
 					pst.setString(12, eventquestids);
-					pst.setInt(13, npcid);
+					pst.setInt(13, active);
+					pst.setInt(14, npcid);
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -1069,7 +1086,7 @@ public class DbStuff {
 
 	public void saveall() {
 		checkcon();
-		
+
 		plugin.getLogger().info(
 				Ansi.ansi().fg(Ansi.Color.GREEN) + "SAVING"
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));
@@ -1380,7 +1397,8 @@ public class DbStuff {
 
 				double costs = rs.getDouble("costs");
 				String type = rs.getString("type");
-				questers.loadwarps(number, title, startloc, costs, type);
+				String state=  rs.getString("state");
+				questers.loadwarps(number, title, startloc, costs, type, state);
 
 			}
 		} catch (SQLException e) {
@@ -1415,7 +1433,7 @@ public class DbStuff {
 						rs.getInt("spawnlocationy"),
 						rs.getInt("spawnlocationz"));
 				questers.spawnNpc(spawn, rs.getString("npcname"),
-						rs.getInt("npcid"), rs.getString("npcskinname"));
+						rs.getInt("npcid"), rs.getString("npcskinname"), rs.getString("type"));
 				UUID npc = questers.uniquenpcid.get(rs.getInt("npcid"));
 				for (UUID tu : questers.GetKeysSets("talkto")) {
 					for (Integer qn : questers.GetIds("talkto", tu)) {
@@ -1429,7 +1447,7 @@ public class DbStuff {
 				if (rs.getString("killquests") != null) {
 					String[] killtemp = rs.getString("killquests").split("_");
 					for (String t : killtemp) {
-					questers.addKillquest(npc, Integer.parseInt(t));
+						questers.addKillquest(npc, Integer.parseInt(t));
 					}
 				}
 				if (rs.getString("harvestquests") != null) {
@@ -1448,12 +1466,16 @@ public class DbStuff {
 				if (rs.getString("warps") != null) {
 					questers.addWarp(npc, rs.getInt("warps"));
 				}
-				
-				if(rs.getString("eventquests") != null){
+
+				if (rs.getString("eventquests") != null) {
 					String[] temp = rs.getString("eventquests").split("_");
-					for(String in : temp){
+					for (String in : temp) {
 						questers.addEventquest(npc, Integer.parseInt(in));
 					}
+				}
+				int active = rs.getInt("active");
+				if(active == 1){
+					questers.runpoints(npc);
 				}
 			}
 		} catch (SQLException e) {
@@ -1475,7 +1497,6 @@ public class DbStuff {
 			}
 		}
 	}
-
 
 	public void loadmining() {
 		String loading = "SELECT * FROM Mist_MiningBlocks;";
@@ -1633,7 +1654,7 @@ public class DbStuff {
 		mysqlhost = plugin.getConfig().getString("mysqlhost");
 		MySQl = new MySQL(plugin, mysqlhost, mysqlpot, mysqldb, mysqluser,
 				mysqlpass);
-		
+
 	}
 
 	public DbStuff(MoY instance) {
@@ -1944,12 +1965,14 @@ public class DbStuff {
 	public void setcon(Connection connect) {
 		con = connect;
 	}
-	public Connection GetCon(){
+
+	public Connection GetCon() {
 		return con;
 	}
-	public void checkcon(){
+
+	public void checkcon() {
 		try {
-			if(con.isClosed()){
+			if (con.isClosed()) {
 				opencon();
 				intvar();
 				OpenConnect();
@@ -1960,8 +1983,8 @@ public class DbStuff {
 			OpenConnect();
 		}
 	}
-	
-	public void OpenConnect(){
+
+	public void OpenConnect() {
 		setcon(MySQl.openConnection());
 	}
 }

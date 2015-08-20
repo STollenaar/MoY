@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -19,16 +18,19 @@ import org.bukkit.inventory.ItemStack;
 
 import MoY.tollenaar.stephen.InventoryUtils.InventoryType;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.Travel.Travel;
 
 public class QuestInvClick implements Listener {
 
 	private Travel tr;
 	protected QuestsServerSide questers;
-
+	private MoY plugin;
 	public QuestInvClick(MoY instance) {
 		this.tr = instance.tr;
 		this.questers = instance.questers;
+		this.plugin = instance;
 	}
 
 	@EventHandler
@@ -304,6 +306,18 @@ public class QuestInvClick implements Listener {
 						temp.add("prereq");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
+					if(item.getItemMeta().getDisplayName().equals("Active Quest")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("Type true if the quest can be active otherwise type false");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(type);
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("state");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+					
 					if (item.getItemMeta().getDisplayName()
 							.equals("Delete Quest")) {
 						event.setCancelled(true);
@@ -447,7 +461,17 @@ public class QuestInvClick implements Listener {
 						temp.add("cost");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
-
+					if(item.getItemMeta().getDisplayName().equals("Active Warp")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("Type true if the warp can be active otherwise type false");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add("warplists");
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("state");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
 				}
 
 				if (!event.isCancelled()) {
@@ -461,8 +485,8 @@ public class QuestInvClick implements Listener {
 							Player player = (Player) event.getWhoClicked();
 							UUID tuuid = UUID.fromString(event.getCurrentItem()
 									.getItemMeta().getLore().get(0));
-							NPCRegistry registry = CitizensAPI.getNPCRegistry();
-							NPC npc = registry.getByUniqueId(tuuid);
+							NPCHandler handler = plugin.getNPCHandler();
+							NPC npc = handler.getNPCByUUID(tuuid);
 							UUID npcuid = npc.getUniqueId();
 							UUID npcuuid = UUID.fromString(npcinv
 									.getItem(npcinv.getSize() - 1)

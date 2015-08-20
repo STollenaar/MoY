@@ -5,6 +5,8 @@ mysqluser: 'System'
 mysqlpass: 'Updater'
 mysqldb: 'mistspad'
 
+status: 'true'
+
 antipumkin: 'false'
 convertedchainname: 'Chain Ring'
 

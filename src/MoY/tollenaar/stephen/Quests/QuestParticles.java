@@ -100,16 +100,16 @@ public class QuestParticles {
 		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
 		if (p.getcompletedtype() != null) {
 			for (String type : p.getcompletedtype()) {
-					for (int number : p.getcompleted(type)) {
-						try {
-							if (plugin.questers.GetIds(type, npcuuid)
-									.contains(number)) {
-								return true;
-							}
-						} catch (NullPointerException ex) {
-							continue;
+				for (int number : p.getcompleted(type)) {
+					try {
+						if (plugin.questers.GetIds(type, npcuuid).contains(
+								number)) {
+							return true;
 						}
+					} catch (NullPointerException ex) {
+						continue;
 					}
+				}
 			}
 		}
 		return checks;
@@ -118,7 +118,10 @@ public class QuestParticles {
 	private static boolean aviablew(UUID npcuuid) {
 		boolean checks = false;
 		if (plugin.questers.getId(npcuuid) != -1) {
+			Warps warp = plugin.questers.returnwarp(plugin.questers.getId(npcuuid));
+			if(warp.getState().equals("active")){
 			checks = true;
+			}
 		}
 		return checks;
 	}
@@ -162,49 +165,19 @@ public class QuestParticles {
 		switch (type) {
 		case "kill":
 			QuestKill kill = q.returnkill(questnumber);
-			if(kill != null){
-			if (!kill.getPrereq().split("=")[0].equals("none")) {
-				String[] preq = kill.getPrereq().split("=");
 
-				if (p.getrewardedtype() != null) {
-					if (p.getrewardednumber(preq[0].trim()) != null) {
-						if (!p.getrewardednumber(preq[0].trim()).contains(
-								Integer.parseInt(preq[1].trim()))) {
-							check = false;
-						}
-					} else {
-						check = false;
-					}
-				} else {
-					check = false;
-				}
-			}
+			if (kill != null) {
+				if (kill.getState().equals("active")) {
+					if (!kill.getPrereq().split("=")[0].equals("none")) {
+						String[] preq = kill.getPrereq().split("=");
 
-			if (p.getactivetype() != null) {
-				if (p.getactives(type) != null) {
-					if (p.getactives(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getcompletedtype() != null) {
-				if (p.getcompleted(type) != null) {
-					if (p.getcompleted(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getrewardedtype() != null) {
-				if (p.getrewardednumber(type) != null) {
-					if (p.getrewardedtime(type, questnumber) != 0) {
-						if (!q.returnkill(questnumber).getDelay().equals("-1")) {
-							long logged = parseDateDiff(
-									q.returnkill(questnumber).getDelay(), true,
-									p.getrewardedtime(type, questnumber));
-							if (logged <= System.currentTimeMillis()) {
-
-								p.deleterewarded(type, questnumber);
-								q.playerinfo.saveplayerdata(p);
+						if (p.getrewardedtype() != null) {
+							if (p.getrewardednumber(preq[0].trim()) != null) {
+								if (!p.getrewardednumber(preq[0].trim())
+										.contains(
+												Integer.parseInt(preq[1].trim()))) {
+									check = false;
+								}
 							} else {
 								check = false;
 							}
@@ -212,57 +185,67 @@ public class QuestParticles {
 							check = false;
 						}
 					}
+
+					if (p.getactivetype() != null) {
+						if (p.getactives(type) != null) {
+							if (p.getactives(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getcompletedtype() != null) {
+						if (p.getcompleted(type) != null) {
+							if (p.getcompleted(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getrewardedtype() != null) {
+						if (p.getrewardednumber(type) != null) {
+							if (p.getrewardedtime(type, questnumber) != 0) {
+								if (!q.returnkill(questnumber).getDelay()
+										.equals("-1")) {
+									long logged = parseDateDiff(
+											q.returnkill(questnumber)
+													.getDelay(),
+											true,
+											p.getrewardedtime(type, questnumber));
+									if (logged <= System.currentTimeMillis()) {
+
+										p.deleterewarded(type, questnumber);
+										q.playerinfo.saveplayerdata(p);
+									} else {
+										check = false;
+									}
+								} else {
+									check = false;
+								}
+							}
+						}
+					}
+				}else{
+					check = false;
 				}
-			}
-			}else{
+			} else {
 				check = false;
 				q.removekill(questnumber);
 			}
 			break;
 		case "harvest":
 			QuestHarvest harvest = q.returnharvest(questnumber);
-			if(harvest != null){
-			if (!harvest.getPrereq().split("=")[0].equals("none")) {
-				String[] preq = harvest.getPrereq().split("=");
 
-				if (p.getrewardedtype() != null) {
-					if (p.getrewardednumber(preq[0].trim()) != null) {
-						if (!p.getrewardednumber(preq[0].trim()).contains(
-								Integer.parseInt(preq[1].trim()))) {
-							check = false;
-						}
-					} else {
-						check = false;
-					}
-				} else {
-					check = false;
-				}
-			}
-			if (p.getactivetype() != null) {
-				if (p.getactives(type) != null) {
-					if (p.getactives(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getcompletedtype() != null) {
-				if (p.getcompleted(type) != null) {
-					if (p.getcompleted(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getrewardedtype() != null) {
-				if (p.getrewardednumber(type) != null) {
-					if (p.getrewardedtime(type, questnumber) != 0) {
-						if (!q.returnharvest(questnumber).getDelay()
-								.equals("-1")) {
-							long logged = parseDateDiff(
-									q.returnharvest(questnumber).getDelay(),
-									true, p.getrewardedtime(type, questnumber));
-							if (logged <= System.currentTimeMillis()) {
-								p.deleterewarded(type, questnumber);
-								q.playerinfo.saveplayerdata(p);
+			if (harvest != null) {
+				if (harvest.getState().equals("active")) {
+					if (!harvest.getPrereq().split("=")[0].equals("none")) {
+						String[] preq = harvest.getPrereq().split("=");
+
+						if (p.getrewardedtype() != null) {
+							if (p.getrewardednumber(preq[0].trim()) != null) {
+								if (!p.getrewardednumber(preq[0].trim())
+										.contains(
+												Integer.parseInt(preq[1].trim()))) {
+									check = false;
+								}
 							} else {
 								check = false;
 							}
@@ -270,57 +253,64 @@ public class QuestParticles {
 							check = false;
 						}
 					}
+					if (p.getactivetype() != null) {
+						if (p.getactives(type) != null) {
+							if (p.getactives(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getcompletedtype() != null) {
+						if (p.getcompleted(type) != null) {
+							if (p.getcompleted(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getrewardedtype() != null) {
+						if (p.getrewardednumber(type) != null) {
+							if (p.getrewardedtime(type, questnumber) != 0) {
+								if (!q.returnharvest(questnumber).getDelay()
+										.equals("-1")) {
+									long logged = parseDateDiff(
+											q.returnharvest(questnumber)
+													.getDelay(),
+											true,
+											p.getrewardedtime(type, questnumber));
+									if (logged <= System.currentTimeMillis()) {
+										p.deleterewarded(type, questnumber);
+										q.playerinfo.saveplayerdata(p);
+									} else {
+										check = false;
+									}
+								} else {
+									check = false;
+								}
+							}
+						}
+					}
+				}else{
+					check = false;
 				}
-			}
-			}else{
+			} else {
 				check = false;
 				q.removeharvest(questnumber);
 			}
 			break;
 		case "talkto":
 			QuestTalkto talk = q.returntalkto(questnumber);
-			if(talk != null){
-			if (!talk.getPrereq().split("=")[0].equals("none")) {
-				String[] preq = talk.getPrereq().split("=");
+			if (talk != null) {
+				if (talk.getState().equals("active")) {
+					if (!talk.getPrereq().split("=")[0].equals("none")) {
+						String[] preq = talk.getPrereq().split("=");
 
-				if (p.getrewardedtype() != null) {
-					if (p.getrewardednumber(preq[0].trim()) != null) {
-						if (!p.getrewardednumber(preq[0].trim()).contains(
-								Integer.parseInt(preq[1].trim()))) {
-							check = false;
-						}
-					} else {
-						check = false;
-					}
-				} else {
-					check = false;
-				}
-			}
-			if (p.getactivetype() != null) {
-				if (p.getactives(type) != null) {
-					if (p.getactives(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getcompletedtype() != null) {
-				if (p.getcompleted(type) != null) {
-					if (p.getcompleted(type).contains(questnumber)) {
-						check = false;
-					}
-				}
-			}
-			if (p.getrewardedtype() != null) {
-				if (p.getrewardednumber(type) != null) {
-					if (p.getrewardedtime(type, questnumber) != 0) {
-						if (!q.returntalkto(questnumber).getDelay()
-								.equals("-1")) {
-							long logged = parseDateDiff(
-									q.returntalkto(questnumber).getDelay(),
-									true, p.getrewardedtime(type, questnumber));
-							if (logged <= System.currentTimeMillis()) {
-								p.deleterewarded(type, questnumber);
-								q.playerinfo.saveplayerdata(p);
+						if (p.getrewardedtype() != null) {
+							if (p.getrewardednumber(preq[0].trim()) != null) {
+								if (!p.getrewardednumber(preq[0].trim())
+										.contains(
+												Integer.parseInt(preq[1].trim()))) {
+									check = false;
+								}
 							} else {
 								check = false;
 							}
@@ -328,13 +318,50 @@ public class QuestParticles {
 							check = false;
 						}
 					}
+					if (p.getactivetype() != null) {
+						if (p.getactives(type) != null) {
+							if (p.getactives(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getcompletedtype() != null) {
+						if (p.getcompleted(type) != null) {
+							if (p.getcompleted(type).contains(questnumber)) {
+								check = false;
+							}
+						}
+					}
+					if (p.getrewardedtype() != null) {
+						if (p.getrewardednumber(type) != null) {
+							if (p.getrewardedtime(type, questnumber) != 0) {
+								if (!q.returntalkto(questnumber).getDelay()
+										.equals("-1")) {
+									long logged = parseDateDiff(
+											q.returntalkto(questnumber)
+													.getDelay(),
+											true,
+											p.getrewardedtime(type, questnumber));
+									if (logged <= System.currentTimeMillis()) {
+										p.deleterewarded(type, questnumber);
+										q.playerinfo.saveplayerdata(p);
+									} else {
+										check = false;
+									}
+								} else {
+									check = false;
+								}
+							}
+						}
+					}
+					break;
+				}else{
+					check = false;
 				}
+			} else {
+				check = false;
+				q.removetalkto(questnumber);
 			}
-			break;
-		}else{
-			check = false;
-			q.removetalkto(questnumber);
-		}
 		}
 
 		return check;

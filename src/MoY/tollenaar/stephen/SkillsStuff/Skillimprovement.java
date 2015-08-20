@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
@@ -43,7 +44,7 @@ public class Skillimprovement implements Listener {
 	public void onblockplace(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
 		PermissionUser user = PermissionsEx.getUser(player);
-		if (user.has("MMOTEST")) {
+		if (user.has("MMOTEST") && player.getGameMode() != GameMode.CREATIVE) {
 			Block block = event.getBlock();
 			if (SkillLvls.GetSkill(block) != null) {
 				if (SkillLvls.GetSkill(block).getOre() != null) {
@@ -63,7 +64,7 @@ public class Skillimprovement implements Listener {
 		Player player = event.getPlayer();
 		Playerstats p = playerinfo.getplayer(player.getUniqueId());
 		PermissionUser user = PermissionsEx.getUser(player);
-		if (user.has("MMOTEST")) {
+		if (user.has("MMOTEST") && player.getGameMode() != GameMode.CREATIVE) {
 			if (event.getState() == State.CAUGHT_FISH) {
 				event.setCancelled(true);
 				
@@ -84,7 +85,7 @@ public class Skillimprovement implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		PermissionUser user = PermissionsEx.getUser(player);
-		if (user.has("MMOTEST")) {
+		if (user.has("MMOTEST") && player.getGameMode() != GameMode.CREATIVE) {
 
 			Block block = event.getBlock();
 			if (!miningblocksplaces.contains(block)
@@ -147,15 +148,12 @@ public class Skillimprovement implements Listener {
 
 	@EventHandler
 	public void onSmelt(FurnaceSmeltEvent event) {
-		if (event.getBlock().getLocation().getWorld().getName()
-				.equals("MMOTESTWORLD")) {
 			if (((Furnace) event.getBlock().getState()).getInventory()
 					.getSmelting().getType().isEdible() == true) {
 				cooking(event);
 			} else {
 				smelting(event);
 			}
-		}
 	}
 
 	@EventHandler

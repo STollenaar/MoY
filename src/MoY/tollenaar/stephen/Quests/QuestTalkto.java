@@ -34,7 +34,7 @@ public class QuestTalkto {
 	private int minlvl;
 	
 	private String prereq;
-	
+	private String state;
 	public QuestTalkto(int number){
 		this.questnumber = number;
 		this.name = "title";
@@ -44,6 +44,7 @@ public class QuestTalkto {
 		this.message = "message";
 		this.minlvl = 0;
 		this.prereq = "none=0";
+		this.state = "disbled";
 	}
 	
 	public void npcsettingstalkto(UUID npcuuid, Player player) {
@@ -64,6 +65,9 @@ public class QuestTalkto {
 		ItemStack messagei =ItemGenerator.MessageQuest(message);
 		// prerequisite
 		ItemStack prereqi =ItemGenerator.PrereqQuest(prereq);
+		//queststate
+		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
+		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -90,9 +94,18 @@ public class QuestTalkto {
 		talktoques.addItem(repeat);
 		talktoques.addItem(messagei);
 		talktoques.addItem(prereqi);
+		talktoques.addItem(qstate);
 		talktoques.setItem(talktoques.getSize() - 2, delete);
 		talktoques.setItem(talktoques.getSize() - 1, main);
 		player.openInventory(talktoques);
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 	public String getName() {

@@ -17,6 +17,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -275,7 +276,7 @@ public class Filewriters {
 	}
 	
 	
-	public void loadplayer(UUID playeruuid){
+	public boolean loadplayer(UUID playeruuid){
 		for(File file : players.listFiles()){
 			if(file.getName().replace(".dat", "").equals(playeruuid.toString())){
 				try {
@@ -285,7 +286,7 @@ public class Filewriters {
 					playerinfo.loadplayer(p);
 					}
 					in.close();
-					break;
+					return true;
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -295,6 +296,7 @@ public class Filewriters {
 				}
 			}
 		}
+		return false;
 	}
 	
 	public void loadplayers(){
@@ -412,6 +414,10 @@ public class Filewriters {
 	}
 
 	public void savefurnace(FurnaceStorage storage) {
+		if(storage.getFurnace().getType() != Material.FURNACE && storage.getFurnace().getType() != Material.BURNING_FURNACE){
+			FurnaceStorage.RemoveStorage(storage.getFurnace());
+			return;
+		}
 		File stor = new File(furnaces, storage.toString() + ".yml");
 		FileConfiguration config = YamlConfiguration.loadConfiguration(stor);
 		config.set("Block.X", storage.getFurnace().getLocation().getX());
@@ -440,6 +446,10 @@ public class Filewriters {
 		Location l = new Location(Bukkit.getWorld(config.getString("Block.W")),
 				config.getDouble("Block.X"), config.getDouble("Block.Y"),
 				config.getDouble("Block.Z"));
+		if(l.getBlock().getType() != Material.FURNACE && l.getBlock().getType() != Material.BURNING_FURNACE){
+			file.delete();
+			return;
+		}
 		FurnaceStorage storage = new FurnaceStorage(l.getBlock(), plugin);
 		ItemStack tob = config.getItemStack("ToBurn");
 		ItemStack failure = config.getItemStack("Failures");
@@ -911,7 +921,7 @@ public class Filewriters {
 		config.set("Message", h.getMessage());
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
-
+		config.set("State", h.getState());
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -930,8 +940,12 @@ public class Filewriters {
 		int count = config.getInt("Count");
 		String itemid = config.getString("Item");
 		String message = config.getString("Message");
+		String state = config.getString("State");
+		if(state == null){
+			state = "disabled";
+		}
 		quest.loadharvest(id, name, reward, delay, minlvl, message, prereq,
-				count, itemid);
+				count, itemid, state);
 	}
 
 	public void SaveKill(QuestKill h) {
@@ -953,7 +967,7 @@ public class Filewriters {
 		config.set("Message", h.getMessage());
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
-
+		config.set("State", h.getState());
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -972,8 +986,12 @@ public class Filewriters {
 		int count = config.getInt("Count");
 		String monster = config.getString("Monster");
 		String message = config.getString("Message");
+		String state = config.getString("State");
+		if(state == null){
+			state = "disabled";
+		}
 		quest.loadkill(id, name, reward, delay, minlvl, message, prereq, count,
-				monster);
+				monster, state);
 	}
 
 	public void deletequest(String type, int id) {
@@ -1037,7 +1055,7 @@ public class Filewriters {
 		config.set("Message", h.getMessage());
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
-
+		config.set("State", h.getState());
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -1055,8 +1073,12 @@ public class Filewriters {
 		String prereq = config.getString("Prereq");
 		int minlvl = config.getInt("MinLvl");
 		String message = config.getString("Message");
+		String state = config.getString("State");
+		if(state == null){
+			state = "disabled";
+		}
 		quest.loadtalkto(id, name, person, message, delay, minlvl, prereq,
-				reward);
+				reward, state);
 	}
 
 	public void SaveEvent(QuestEvent e) {
@@ -1079,6 +1101,7 @@ public class Filewriters {
 		config.set("End", e.getEnddate());
 		config.set("Count", e.getCount());
 		config.set("Message", e.getMessage());
+		config.set("State", e.getState());
 		try {
 			config.save(f);
 		} catch (IOException e1) {
@@ -1099,8 +1122,12 @@ public class Filewriters {
 		long end = config.getLong("End");
 		int count = config.getInt("Count");
 		String message = config.getString("Message");
+		String state = config.getString("State");
+		if(state == null){
+			state = "disabled";
+		}
 		quest.loadevent(id, thing, title, start, end, reward, message, count,
-				repeat, minlvl);
+				repeat, minlvl, state);
 	}
 
 }

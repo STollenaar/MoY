@@ -5,12 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
+
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -22,6 +21,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
+import MoY.tollenaar.stephen.NPC.NPCSpawnReason;
 import MoY.tollenaar.stephen.Travel.HarborWaitLocations;
 import MoY.tollenaar.stephen.Travel.Travel;
 import MoY.tollenaar.stephen.Travel.TripLocations;
@@ -31,10 +33,11 @@ public class QuestChat extends QuestInvClick implements Listener {
 
 	private QuestChatEvent e;
 	private Travel travel;
-	
+	private MoY plugin;
 	
 	public QuestChat(MoY instance) {
 		super(instance);
+		this.plugin = instance;
 		this.e = new QuestChatEvent(instance);
 		this.travel = instance.tr;
 	}
@@ -64,21 +67,19 @@ public class QuestChat extends QuestInvClick implements Listener {
 			if(!type.equals("harbor") && !type.equals("trip") && !type.equals("eventquest")){
 			UUID npcuuid = UUID.fromString(info.get(1));
 			if (type.equals("Main")) {
-				NPCRegistry registry = CitizensAPI.getNPCRegistry();
-				NPC npc = registry.getByUniqueId(npcuuid);
-				final Location loc = npc.getStoredLocation();
+				NPCHandler handler = plugin.getNPCHandler();
+				NPC npc = handler.getNPCByUUID(npcuuid);
+				
 				npc.setName(typed);
-				npc.despawn();
-				npc.spawn(loc);
+				
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
 			} else if (type.equals("Skin")) {
-				NPCRegistry registry = CitizensAPI.getNPCRegistry();
-				NPC npc = registry.getByUniqueId(npcuuid);
-				final Location loc = npc.getStoredLocation();
-				npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, typed);
-				npc.despawn();
-				npc.spawn(loc);
+				NPCHandler handler = plugin.getNPCHandler();
+				NPC npc = handler.getNPCByUUID(npcuuid);
+				
+				npc.setSkin(typed);
+				
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
 			} else if (type.equals("killquest")) {
@@ -174,6 +175,17 @@ public class QuestChat extends QuestInvClick implements Listener {
 						String pre = typeda[0] + "=0";
 						kill.setPrereq(pre);
 						pass = true;
+					}
+					break;
+				case "state":
+					if(typed.equalsIgnoreCase("true")){
+						kill.setState("active");
+						pass = true;
+					}else if(typed.equalsIgnoreCase("false")){
+						kill.setState("disabled");
+						pass = true;
+					}else{
+						player.sendMessage("type true or false");
 					}
 					break;
 				}
@@ -299,6 +311,17 @@ public class QuestChat extends QuestInvClick implements Listener {
 						pass = true;
 					}
 					break;
+				case "state":
+					if(typed.equalsIgnoreCase("true")){
+						kill.setState("active");
+						pass = true;
+					}else if(typed.equalsIgnoreCase("false")){
+						kill.setState("disabled");
+						pass = true;
+					}else{
+						player.sendMessage("type true or false");
+					}
+					break;
 				}
 				event.setCancelled(true);
 				if (pass) {
@@ -317,12 +340,11 @@ public class QuestChat extends QuestInvClick implements Listener {
 					pass = true;
 					break;
 				case "person":
-					NPCRegistry registry = CitizensAPI.getNPCRegistry();
+					NPCHandler handler = plugin.getNPCHandler();
 					ArrayList<NPC> allpossible = new ArrayList<NPC>();
 					HashMap<NPC, Integer> revervse = new HashMap<NPC, Integer>();
 					for (Integer id : questers.uniquenpcid.keySet()) {
-						NPC npc = registry.getByUniqueId(questers.uniquenpcid
-								.get(id));
+						NPC npc = handler.getNPCByUUID(questers.uniquenpcid.get(id));
 						if (npc.getName().equalsIgnoreCase(typed)) {
 							allpossible.add(npc);
 							revervse.put(npc, id);
@@ -350,11 +372,11 @@ public class QuestChat extends QuestInvClick implements Listener {
 							ArrayList<String> lore = new ArrayList<String>();
 							lore.add(npc.getUniqueId().toString());
 							lore.add(Integer.toString(revervse.get(npc)));
-							lore.add("X: " + npc.getStoredLocation().getX());
-							lore.add("Y: " + npc.getStoredLocation().getY());
-							lore.add("Z: " + npc.getStoredLocation().getZ());
+							lore.add("X: " + npc.getCurrentloc().getX());
+							lore.add("Y: " + npc.getCurrentloc().getY());
+							lore.add("Z: " + npc.getCurrentloc().getZ());
 							lore.add("World: "
-									+ npc.getStoredLocation().getWorld()
+									+ npc.getCurrentloc().getWorld()
 											.getName());
 							ItemMeta meta = item.getItemMeta();
 							meta.setDisplayName(npc.getName());
@@ -447,6 +469,18 @@ public class QuestChat extends QuestInvClick implements Listener {
 						pass = true;
 					}
 					break;
+					
+				case "state":
+					if(typed.equalsIgnoreCase("true")){
+						talk.setState("active");
+						pass = true;
+					}else if(typed.equalsIgnoreCase("false")){
+						talk.setState("disabled");
+						pass = true;
+					}else{
+						player.sendMessage("type true or false");
+					}
+					break;
 				}
 				event.setCancelled(true);
 				if (pass) {
@@ -494,6 +528,18 @@ public class QuestChat extends QuestInvClick implements Listener {
 						pass = true;
 					} catch (NumberFormatException ex) {
 						player.sendMessage("this was not a number try again");
+					}
+					break;
+					
+				case "state":
+					if(typed.equalsIgnoreCase("true")){
+						warp.setState("active");
+						pass = true;
+					}else if(typed.equalsIgnoreCase("false")){
+						warp.setState("disabled");
+						pass = true;
+					}else{
+						player.sendMessage("type true or false");
 					}
 					break;
 				}

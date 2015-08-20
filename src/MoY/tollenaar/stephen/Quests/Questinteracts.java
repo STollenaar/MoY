@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
@@ -18,6 +15,8 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import ru.tehkode.permissions.PermissionUser;
@@ -38,8 +37,16 @@ public class Questinteracts implements Listener {
 				PermissionUser user = PermissionsEx.getUser(player);
 				boolean dummy = true;
 				Entity entity = event.getRightClicked();
-				NPCRegistry registry = CitizensAPI.getNPCRegistry();
-				NPC npc = registry.getNPC(entity);
+				if (entity.hasMetadata("NPC")) {
+					if (entity.getMetadata("NPC").get(0).asString()
+							.equals("shop")) {
+						// open shop menu
+						Bukkit.dispatchCommand(player, "/shopmenu");
+						return;
+					}
+				}
+				NPCHandler handler = plugin.getNPCHandler();
+				NPC npc = handler.getNPCByEntity(entity);
 				if (npc != null) {
 
 					/**
@@ -54,11 +61,13 @@ public class Questinteracts implements Listener {
 								if (talk != null) {
 									if (plugin.questers.uniquenpcid.get(talk
 											.getNpcid()) == npc.getUniqueId()) {
-										for (UUID npcuuid : plugin.questers.GetKeysSets("talkto")) {
-											if (plugin.questers.GetIds("talkto", npcuuid).contains(
-															number)) {
-												NPC temp = registry
-														.getByUniqueId(npcuuid);
+										for (UUID npcuuid : plugin.questers
+												.GetKeysSets("talkto")) {
+											if (plugin.questers.GetIds(
+													"talkto", npcuuid)
+													.contains(number)) {
+												NPC temp = handler
+														.getNPCByUUID(npcuuid);
 												plugin.questers
 														.AddCompletedQuest(
 																player, number,
@@ -88,11 +97,20 @@ public class Questinteracts implements Listener {
 												npc.getUniqueId(), player);
 										dummy = false;
 									} else {
-										if (plugin.questers.GetKeysSets("kill").contains(npc.getUniqueId())
-												|| plugin.questers.GetKeysSets("harvest").contains(npc.getUniqueId())
-												|| plugin.questers.GetKeysSets("talkto").contains(npc.getUniqueId())
-												|| plugin.questers.GetKeysSets("warp").contains(npc.getUniqueId())
-												|| plugin.questers.GetKeysSets("event").contains(npc.getUniqueId())) {
+										if (plugin.questers.GetKeysSets("kill")
+												.contains(npc.getUniqueId())
+												|| plugin.questers.GetKeysSets(
+														"harvest").contains(
+														npc.getUniqueId())
+												|| plugin.questers.GetKeysSets(
+														"talkto").contains(
+														npc.getUniqueId())
+												|| plugin.questers.GetKeysSets(
+														"warp").contains(
+														npc.getUniqueId())
+												|| plugin.questers.GetKeysSets(
+														"event").contains(
+														npc.getUniqueId())) {
 											plugin.qqc.avquest(npc, player,
 													npc.getName());
 											dummy = false;
@@ -100,43 +118,69 @@ public class Questinteracts implements Listener {
 									}
 
 								} else {
-									if (plugin.questers.GetKeysSets("kill").contains(npc.getUniqueId())
-											|| plugin.questers.GetKeysSets("harvest").contains(npc.getUniqueId())
-											|| plugin.questers.GetKeysSets("talkto").contains(npc.getUniqueId())
-											|| plugin.questers.GetKeysSets("warp").contains(npc.getUniqueId())
-											|| plugin.questers.GetKeysSets("event").contains(npc.getUniqueId())) {
+									if (plugin.questers.GetKeysSets("kill")
+											.contains(npc.getUniqueId())
+											|| plugin.questers.GetKeysSets(
+													"harvest").contains(
+													npc.getUniqueId())
+											|| plugin.questers.GetKeysSets(
+													"talkto").contains(
+													npc.getUniqueId())
+											|| plugin.questers.GetKeysSets(
+													"warp").contains(
+													npc.getUniqueId())
+											|| plugin.questers.GetKeysSets(
+													"event").contains(
+													npc.getUniqueId())) {
 										plugin.qqc.avquest(npc, player,
 												npc.getName());
 										dummy = false;
 									}
 								}
 							} else {
-								if (plugin.questers.GetKeysSets("kill").contains(npc.getUniqueId())
-										|| plugin.questers.GetKeysSets("harvest").contains(npc.getUniqueId())
-										|| plugin.questers.GetKeysSets("talkto").contains(npc.getUniqueId())
-										|| plugin.questers.GetKeysSets("warp").contains(npc.getUniqueId())
-										|| plugin.questers.GetKeysSets("event").contains(npc.getUniqueId())) {
+								if (plugin.questers.GetKeysSets("kill")
+										.contains(npc.getUniqueId())
+										|| plugin.questers.GetKeysSets(
+												"harvest").contains(
+												npc.getUniqueId())
+										|| plugin.questers
+												.GetKeysSets("talkto")
+												.contains(npc.getUniqueId())
+										|| plugin.questers.GetKeysSets("warp")
+												.contains(npc.getUniqueId())
+										|| plugin.questers.GetKeysSets("event")
+												.contains(npc.getUniqueId())) {
 									plugin.qqc.avquest(npc, player,
 											npc.getName());
 									dummy = false;
 								}
 							}
 						} else {
-							if (plugin.questers.GetKeysSets("kill").contains(npc.getUniqueId())
-									|| plugin.questers.GetKeysSets("harvest").contains(npc.getUniqueId())
-									|| plugin.questers.GetKeysSets("talkto").contains(npc.getUniqueId())
-									|| plugin.questers.GetKeysSets("warp").contains(npc.getUniqueId())
-									|| plugin.questers.GetKeysSets("event").contains(npc.getUniqueId())) {
+							if (plugin.questers.GetKeysSets("kill").contains(
+									npc.getUniqueId())
+									|| plugin.questers.GetKeysSets("harvest")
+											.contains(npc.getUniqueId())
+									|| plugin.questers.GetKeysSets("talkto")
+											.contains(npc.getUniqueId())
+									|| plugin.questers.GetKeysSets("warp")
+											.contains(npc.getUniqueId())
+									|| plugin.questers.GetKeysSets("event")
+											.contains(npc.getUniqueId())) {
 								plugin.qqc.avquest(npc, player, npc.getName());
 								dummy = false;
 							}
 						}
 					} else {
-						if (plugin.questers.GetKeysSets("kill").contains(npc.getUniqueId())
-								|| plugin.questers.GetKeysSets("harvest").contains(npc.getUniqueId())
-								|| plugin.questers.GetKeysSets("talkto").contains(npc.getUniqueId())
-								|| plugin.questers.GetKeysSets("warp").contains(npc.getUniqueId())
-								|| plugin.questers.GetKeysSets("event").contains(npc.getUniqueId())) {
+						if (plugin.questers.GetKeysSets("kill").contains(
+								npc.getUniqueId())
+								|| plugin.questers.GetKeysSets("harvest")
+										.contains(npc.getUniqueId())
+								|| plugin.questers.GetKeysSets("talkto")
+										.contains(npc.getUniqueId())
+								|| plugin.questers.GetKeysSets("warp")
+										.contains(npc.getUniqueId())
+								|| plugin.questers.GetKeysSets("event")
+										.contains(npc.getUniqueId())) {
 							plugin.qqc.avquest(npc, player, npc.getName());
 							dummy = false;
 						}

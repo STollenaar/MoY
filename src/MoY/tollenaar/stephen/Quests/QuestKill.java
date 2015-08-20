@@ -38,7 +38,7 @@ public class QuestKill {
 
 	private String monster;
 
-	
+	private String state;
 	public void npcsettingskill(UUID npcuuid, Player player) {
 
 		Inventory killquest = Bukkit.createInventory(null, 18, "KillQuest");
@@ -60,6 +60,9 @@ public class QuestKill {
 		ItemStack messagei = ItemGenerator.MessageQuest(message);
 		// prerequisite
 		ItemStack prereqi = ItemGenerator.PrereqQuest(prereq);
+		//queststate
+		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
+		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -86,12 +89,23 @@ public class QuestKill {
 		killquest.addItem(repeat);
 		killquest.addItem(messagei);
 		killquest.addItem(prereqi);
+		killquest.addItem(qstate);
 		killquest.setItem(killquest.getSize() - 2, delete);
 		killquest.setItem(killquest.getSize() - 1, main);
 		player.openInventory(killquest);
 	}
 	
 	
+	public String getState() {
+		return state;
+	}
+
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+
 	public QuestKill(int number) {
 		this.questnumber = number;
 		this.name = "title";
@@ -102,7 +116,7 @@ public class QuestKill {
 		this.message = "message";
 		this.prereq = "none=0";
 		this.monster = "zombie";
-		
+		this.state = "disabled";
 	}
 
 	public int getQuestnumber() {

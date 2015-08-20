@@ -28,6 +28,8 @@ public class Warps {
 
 	private double costs;
 
+	private String state;
+	
 	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
 
 	public void npcsettingswarplists(UUID npcuuid, Player player) {
@@ -85,6 +87,12 @@ public class Warps {
 			main.setItemMeta(tem);
 		}
 
+		//queststate
+		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
+		ItemMeta meta = qstate.getItemMeta();
+		meta.setDisplayName("Active Warp");
+		qstate.setItemMeta(meta);
+		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -98,10 +106,19 @@ public class Warps {
 		warpinv.addItem(transport);
 		warpinv.addItem(typei);
 		warpinv.addItem(money);
+		warpinv.addItem(qstate);
 		warpinv.setItem(warpinv.getSize() - 2, delete);
 		warpinv.setItem(warpinv.getSize() - 1, main);
 		player.openInventory(warpinv);
 
+	}
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
 	}
 
 	public Warps(int number, Location l) {
@@ -110,6 +127,7 @@ public class Warps {
 		this.startloc = l;
 		this.type = new ArrayList<String>(Arrays.asList("none"));
 		this.costs = 0.0;
+		this.state = "disabled";
 		allwarps.add(this);
 	}
 

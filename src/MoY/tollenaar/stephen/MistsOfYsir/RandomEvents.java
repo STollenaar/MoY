@@ -7,10 +7,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
@@ -35,6 +31,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCEntity;
+import MoY.tollenaar.stephen.NPC.NPCProfile;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
+import MoY.tollenaar.stephen.NPC.NPCSpawnReason;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
@@ -188,13 +189,13 @@ public class RandomEvents implements Listener {
 				}else if(type.equals("npcitem")){
 					@SuppressWarnings("unchecked")
 					List<Integer> idlist = (List<Integer>) plugin.getConfig().getList("randomeventrewardid");
-					final NPCRegistry registry = CitizensAPI.getNPCRegistry();
-					final NPC npc = registry.createNPC(EntityType.PLAYER, "Antee");
+					
 					Location loc = player.getLocation().toVector().add(player.getLocation().getDirection().multiply(3)).toLocation(player.getWorld());
+					final NPCEntity npc = new NPCEntity(loc.getWorld(), loc, new NPCProfile("Antee"), plugin.getNetwork(), plugin, "normal");
+					npc.spawn(loc, NPCSpawnReason.NORMAL_SPAWN, npc);
 					loc.setY(loc.getY() + 1);
 					final Location loc2 = loc;
-					npc.spawn(loc);
-					npc.faceLocation(player.getLocation());
+					npc.lookatEntity(player);
 					player.getWorld().playSound(loc, Sound.EXPLODE, 10, 1);
 					player.getWorld().playEffect(loc2, Effect.EXPLOSION_HUGE, 10);
 					Random f = new Random();
@@ -208,8 +209,7 @@ public class RandomEvents implements Listener {
 						public void run(){
 							player.getWorld().playEffect(loc2, Effect.EXPLOSION_HUGE, 10);
 							player.getWorld().playSound(loc2, Sound.EXPLODE, 10, 1);
-							npc.despawn();
-							registry.deregister(npc);
+							npc.despawn(NPCSpawnReason.DESPAWN);
 						}
 					}, 60);
 				}else if(type.equals("skill")){

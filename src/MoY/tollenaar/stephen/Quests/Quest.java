@@ -13,9 +13,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +30,8 @@ import org.bukkit.material.Wool;
 
 import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
@@ -193,7 +194,7 @@ public class Quest {
 
 	public void loadkill(int number, String name, List<String> reward,
 			String delay, int minlvl, String message, String prereq, int count,
-			String monster) {
+			String monster, String state) {
 		QuestKill kill = new QuestKill(number);
 
 		kill.setName(name);
@@ -204,13 +205,14 @@ public class Quest {
 		kill.setCount(count);
 		kill.setMonster(monster);
 		kill.setMessage(message);
+		kill.setState(state);
 
 		killquests.put(number, kill);
 	}
 
 	public void loadharvest(int number, String name, List<String> reward,
 			String delay, int minlvl, String message, String prereq, int count,
-			String itemid) {
+			String itemid, String state) {
 		QuestHarvest kill = new QuestHarvest(number);
 
 		kill.setName(name);
@@ -221,12 +223,12 @@ public class Quest {
 		kill.setCount(count);
 		kill.setMessage(message);
 		kill.setItem(itemid);
-
+		kill.setState(state);
 		harvestquests.put(number, kill);
 	}
 
 	public void loadtalkto(int number, String name, int id, String message,
-			String delay, int minlvl, String prereq, List<String> reward) {
+			String delay, int minlvl, String prereq, List<String> reward, String state) {
 		QuestTalkto temp = new QuestTalkto(number);
 		temp.setName(name);
 		temp.setNpcid(id);
@@ -235,12 +237,12 @@ public class Quest {
 		temp.setMinlvl(minlvl);
 		temp.setReward(reward);
 		temp.setPrereq(prereq);
-
+		temp.setState(state);
 		talktoquests.put(number, temp);
 	}
 
 	public void loadwarps(int number, String name, Location start,
-			double costs, String type) {
+			double costs, String type, String state) {
 		Warps warp = new Warps(number, start);
 		warp.setCosts(costs);
 		warp.setName(name);
@@ -250,12 +252,13 @@ public class Quest {
 			warp.AddLine(splitted[i].trim());
 		}
 
+		warp.setState(state);
 		warplist.put(number, warp);
 	}
 
 	public void loadevent(int id, String type, String title, long start,
 			long end, List<String> reward, String message, int count,
-			String repeat, int minlvl) {
+			String repeat, int minlvl, String state) {
 		QuestEvent e = new QuestEvent(id);
 		e.setCount(count);
 		e.setEnddate(end);
@@ -266,6 +269,7 @@ public class Quest {
 		e.setRepeat(repeat);
 		e.setStartdate(start);
 		e.setReward(reward);
+		e.setState(state);
 		RescheduleEvent(e);
 		eventquests.put(id, e);
 	}
@@ -568,9 +572,8 @@ public class Quest {
 								ItemMeta meta = tal.getItemMeta();
 								meta.setDisplayName(talk.getName());
 								ArrayList<String> lore = new ArrayList<String>();
-								NPCRegistry reg = CitizensAPI.getNPCRegistry();
-								NPC npc = reg
-										.getByUniqueId(plugin.questers.uniquenpcid
+								NPCHandler handler=  plugin.getNPCHandler();
+								NPC npc = handler.getNPCByUUID(plugin.questers.uniquenpcid
 												.get(talk.getNpcid()));
 								lore.add("Talk to: " + npc.getName());
 								meta.setLore(lore);

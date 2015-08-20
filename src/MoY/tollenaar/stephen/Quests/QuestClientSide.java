@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import net.citizensnpcs.api.npc.NPC;
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.fusesource.jansi.Ansi;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 import MoY.tollenaar.stephen.Travel.Travel;
 
@@ -77,34 +78,37 @@ public class QuestClientSide {
 
 				QuestKill kill = questers.returnkill(i);
 				if (kill != null) {
-					boolean pass = false;
-					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (check(kill.getPrereq().split("=")[0],
-								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname, true,
-								kill.getMinlvl())
-								&& check("kill", i, player, npcname, false,
-										kill.getMinlvl())) {
-							pass = true;
+					if (kill.getState().equals("active")) {
+						boolean pass = false;
+						if (!kill.getPrereq().split("=")[0].equals("none")) {
+							if (check(kill.getPrereq().split("=")[0],
+									Integer.parseInt(kill.getPrereq()
+											.split("=")[1].trim()), player,
+									npcname, true, kill.getMinlvl())
+									&& check("kill", i, player, npcname, false,
+											kill.getMinlvl())) {
+								pass = true;
+							}
+						} else {
+							if (check("kill", i, player, npcname, false,
+									kill.getMinlvl())) {
+								pass = true;
+							}
 						}
-					} else {
-						if (check("kill", i, player, npcname, false,
-								kill.getMinlvl())) {
-							pass = true;
-						}
-					}
-					if (pass) {
-						ItemStack killquest = new ItemStack(
-								Material.DIAMOND_SWORD);
-						{
-							ItemMeta meta = killquest.getItemMeta();
-							meta.setDisplayName(kill.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							lore.add("§"
-									+ Integer.toString(kill.getQuestnumber()));
-							meta.setLore(lore);
-							killquest.setItemMeta(meta);
-							inv.addItem(killquest);
+						if (pass) {
+							ItemStack killquest = new ItemStack(
+									Material.DIAMOND_SWORD);
+							{
+								ItemMeta meta = killquest.getItemMeta();
+								meta.setDisplayName(kill.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								lore.add("§"
+										+ Integer.toString(kill
+												.getQuestnumber()));
+								meta.setLore(lore);
+								killquest.setItemMeta(meta);
+								inv.addItem(killquest);
+							}
 						}
 					}
 				} else {
@@ -116,37 +120,40 @@ public class QuestClientSide {
 			for (Integer i : questers.GetIds("harvest", npcuuid)) {
 				QuestHarvest kill = questers.returnharvest(i);
 				if (kill != null) {
-					boolean pass = false;
-					if (!bounced) {
-						bounced = !rewardcheck("harvest", i, player, null);
-					}
-					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (check(kill.getPrereq().split("=")[0],
-								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname, true,
-								kill.getMinlvl())
-								&& check("harvest", i, player, npcname, false,
-										kill.getMinlvl())) {
-							pass = true;
+					if (kill.getState().equals("active")) {
+						boolean pass = false;
+						if (!bounced) {
+							bounced = !rewardcheck("harvest", i, player, null);
 						}
-					} else {
-						if (check("harvest", i, player, npcname, false,
-								kill.getMinlvl())) {
-							pass = true;
+						if (!kill.getPrereq().split("=")[0].equals("none")) {
+							if (check(kill.getPrereq().split("=")[0],
+									Integer.parseInt(kill.getPrereq()
+											.split("=")[1].trim()), player,
+									npcname, true, kill.getMinlvl())
+									&& check("harvest", i, player, npcname,
+											false, kill.getMinlvl())) {
+								pass = true;
+							}
+						} else {
+							if (check("harvest", i, player, npcname, false,
+									kill.getMinlvl())) {
+								pass = true;
+							}
 						}
-					}
-					if (pass) {
-						ItemStack harvestquest = new ItemStack(
-								Material.DIAMOND_PICKAXE);
-						{
-							ItemMeta meta = harvestquest.getItemMeta();
-							meta.setDisplayName(kill.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							lore.add("§"
-									+ Integer.toString(kill.getQuestnumber()));
-							meta.setLore(lore);
-							harvestquest.setItemMeta(meta);
-							inv.addItem(harvestquest);
+						if (pass) {
+							ItemStack harvestquest = new ItemStack(
+									Material.DIAMOND_PICKAXE);
+							{
+								ItemMeta meta = harvestquest.getItemMeta();
+								meta.setDisplayName(kill.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								lore.add("§"
+										+ Integer.toString(kill
+												.getQuestnumber()));
+								meta.setLore(lore);
+								harvestquest.setItemMeta(meta);
+								inv.addItem(harvestquest);
+							}
 						}
 					}
 				} else {
@@ -158,33 +165,37 @@ public class QuestClientSide {
 			for (Integer i : questers.GetIds("talkto", npcuuid)) {
 				QuestTalkto kill = questers.returntalkto(i);
 				if (kill != null) {
-					boolean pass = false;
-					if (!kill.getPrereq().split("=")[0].equals("none")) {
-						if (check(kill.getPrereq().split("=")[0],
-								Integer.parseInt(kill.getPrereq().split("=")[1]
-										.trim()), player, npcname, true,
-								kill.getMinlvl())
-								&& check("talkto", i, player, npcname, false,
-										kill.getMinlvl())) {
-							pass = true;
+					if (kill.getState().equals("active")) {
+						boolean pass = false;
+						if (!kill.getPrereq().split("=")[0].equals("none")) {
+							if (check(kill.getPrereq().split("=")[0],
+									Integer.parseInt(kill.getPrereq()
+											.split("=")[1].trim()), player,
+									npcname, true, kill.getMinlvl())
+									&& check("talkto", i, player, npcname,
+											false, kill.getMinlvl())) {
+								pass = true;
+							}
+						} else {
+							if (check("talkto", i, player, npcname, false,
+									kill.getMinlvl())) {
+								pass = true;
+							}
 						}
-					} else {
-						if (check("talkto", i, player, npcname, false,
-								kill.getMinlvl())) {
-							pass = true;
-						}
-					}
-					if (pass) {
-						ItemStack talktoquest = new ItemStack(Material.FEATHER);
-						{
-							ItemMeta meta = talktoquest.getItemMeta();
-							meta.setDisplayName(kill.getName());
-							ArrayList<String> lore = new ArrayList<String>();
-							lore.add("§"
-									+ Integer.toString(kill.getQuestnumber()));
-							meta.setLore(lore);
-							talktoquest.setItemMeta(meta);
-							inv.addItem(talktoquest);
+						if (pass) {
+							ItemStack talktoquest = new ItemStack(
+									Material.FEATHER);
+							{
+								ItemMeta meta = talktoquest.getItemMeta();
+								meta.setDisplayName(kill.getName());
+								ArrayList<String> lore = new ArrayList<String>();
+								lore.add("§"
+										+ Integer.toString(kill
+												.getQuestnumber()));
+								meta.setLore(lore);
+								talktoquest.setItemMeta(meta);
+								inv.addItem(talktoquest);
+							}
 						}
 					}
 				} else {
@@ -192,39 +203,42 @@ public class QuestClientSide {
 				}
 			}
 		}
-		if (questers.getId(npcuuid)!= -1) {
+		if (questers.getId(npcuuid) != -1) {
 			// for (Integer i : questers.warplists.get(npcuuid)) {
 			int i = questers.getId(npcuuid);
 			Warps kill = questers.returnwarp(i);
 			if (kill != null) {
-				for (String type : kill.getType()) {
-					for (Warps w : Warps.TypeReturned(type)) {
-						if (w.getWarpid() != kill.getWarpid()) {
-							ItemStack title = new ItemStack(Material.BOAT);
-							{
-								ArrayList<String> lore = new ArrayList<String>();
-								int time = Travel
-										.traveltime(npcuuid, kill.getWarpid(),
-												type, w.getStartloc());
-								SimpleDateFormat df = new SimpleDateFormat(
-										"mm:ss");
-								Date date = new Date(time * 1000);
-								date.setHours(date.getHours() - 9);
-								date.setMinutes(date.getMinutes() - 30);
-								lore.add("Duration: " + df.format(date));
-								lore.add(type);
-								lore.add("§" + Integer.toString(w.getWarpid()));
-								lore.add("§"
-										+ Integer.toString(kill.getWarpid()));
-								
-								ItemMeta meta = title.getItemMeta();
-								meta.setLore(lore);
-								meta.setDisplayName(kill.getName() + " - "
-										+ w.getName());
-								title.setItemMeta(meta);
-							}
+				if (kill.getState().equals("active")) {
+					for (String type : kill.getType()) {
+						for (Warps w : Warps.TypeReturned(type)) {
+							if (w.getWarpid() != kill.getWarpid()) {
+								ItemStack title = new ItemStack(Material.BOAT);
+								{
+									ArrayList<String> lore = new ArrayList<String>();
+									int time = Travel.traveltime(npcuuid,
+											kill.getWarpid(), type,
+											w.getStartloc());
+									SimpleDateFormat df = new SimpleDateFormat(
+											"mm:ss");
+									Date date = new Date(time * 1000);
+									date.setHours(date.getHours() - 9);
+									date.setMinutes(date.getMinutes() - 30);
+									lore.add("Duration: " + df.format(date));
+									lore.add(type);
+									lore.add("§"
+											+ Integer.toString(w.getWarpid()));
+									lore.add("§"
+											+ Integer.toString(kill.getWarpid()));
 
-							inv.addItem(title);
+									ItemMeta meta = title.getItemMeta();
+									meta.setLore(lore);
+									meta.setDisplayName(kill.getName() + " - "
+											+ w.getName());
+									title.setItemMeta(meta);
+								}
+
+								inv.addItem(title);
+							}
 						}
 					}
 				}
@@ -238,32 +252,34 @@ public class QuestClientSide {
 				if (questers.EventCheck(i)) {
 					QuestEvent event = questers.returneventquest(i);
 					if (event != null) {
-						if (lvlcheck(player, event.getMinlvl())) {
-							ItemStack item = new ItemStack(
-									Material.ENCHANTED_BOOK);
-							ItemMeta meta = item.getItemMeta();
-							ArrayList<String> lore = new ArrayList<String>();
-							meta.setDisplayName(event.getTitle());
+						if (event.getState().equals("active")) {
+							if (lvlcheck(player, event.getMinlvl())) {
+								ItemStack item = new ItemStack(
+										Material.ENCHANTED_BOOK);
+								ItemMeta meta = item.getItemMeta();
+								ArrayList<String> lore = new ArrayList<String>();
+								meta.setDisplayName(event.getTitle());
 
-							try {
-								EntityType.valueOf(event.getType()
-										.toUpperCase());
-								String build = "";
-								for (String in : "eventkill".split("")) {
-									build += "§" + in;
+								try {
+									EntityType.valueOf(event.getType()
+											.toUpperCase());
+									String build = "";
+									for (String in : "eventkill".split("")) {
+										build += "§" + in;
+									}
+									lore.add(build);
+								} catch (Exception e) {
+									String build = "";
+									for (String in : "eventharvest".split("")) {
+										build += "§" + in;
+									}
+									lore.add(build);
 								}
-								lore.add(build);
-							} catch (Exception e) {
-								String build = "";
-								for (String in : "eventharvest".split("")) {
-									build += "§" + in;
-								}
-								lore.add(build);
+								lore.add("§" + event.getNumber());
+								meta.setLore(lore);
+								item.setItemMeta(meta);
+								inv.addItem(item);
 							}
-							lore.add("§" + event.getNumber());
-							meta.setLore(lore);
-							item.setItemMeta(meta);
-							inv.addItem(item);
 						}
 					} else {
 						questers.removeevent(i);
@@ -395,7 +411,7 @@ public class QuestClientSide {
 								ItemStack saveditem = null;
 								for (ItemStack items : player.getInventory()
 										.getContents()) {
-									
+
 									if (items != null
 											&& items.getType() != Material.AIR) {
 										if (items.getDurability() != 0) {
@@ -411,26 +427,53 @@ public class QuestClientSide {
 												needed = questers
 														.returnharvest(number)
 														.getCount();
-												
-												if (saveditem == null || saveditem.getType() == Material.AIR) {
-													saveditem = new ItemStack(items.getType(), 0, items.getDurability());
+
+												if (saveditem == null
+														|| saveditem.getType() == Material.AIR) {
+													saveditem = new ItemStack(
+															items.getType(),
+															0,
+															items.getDurability());
 												}
 												if (items.getAmount() >= questers
 														.returnharvest(number)
 														.getCount()) {
-													saveditem.setAmount(questers.returnharvest(number).getCount());
+													saveditem
+															.setAmount(questers
+																	.returnharvest(
+																			number)
+																	.getCount());
 													passing = true;
 													break;
 												} else {
-													if(saveditem.getAmount() + items.getAmount() < questers.returnharvest(number).getCount()){
-														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
-													}else if(saveditem.getAmount()+items.getAmount() == questers.returnharvest(number).getCount()){
-														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
-														passing  = true;
+													if (saveditem.getAmount()
+															+ items.getAmount() < questers
+															.returnharvest(
+																	number)
+															.getCount()) {
+														saveditem
+																.setAmount(saveditem
+																		.getAmount()
+																		+ items.getAmount());
+													} else if (saveditem
+															.getAmount()
+															+ items.getAmount() == questers
+															.returnharvest(
+																	number)
+															.getCount()) {
+														saveditem
+																.setAmount(saveditem
+																		.getAmount()
+																		+ items.getAmount());
+														passing = true;
 														break;
-													}else{
-														saveditem.setAmount(questers.returnharvest(number).getCount());
-														passing  = true;
+													} else {
+														saveditem
+																.setAmount(questers
+																		.returnharvest(
+																				number)
+																		.getCount());
+														passing = true;
 														break;
 													}
 												}
@@ -442,8 +485,12 @@ public class QuestClientSide {
 													.returneventquest(number)
 													.getType().equals(name)) {
 
-												if (saveditem == null || saveditem.getType() == Material.AIR) {
-													saveditem = new ItemStack(items.getType(), 0, items.getDurability());
+												if (saveditem == null
+														|| saveditem.getType() == Material.AIR) {
+													saveditem = new ItemStack(
+															items.getType(),
+															0,
+															items.getDurability());
 												}
 
 												needed = questers
@@ -454,19 +501,42 @@ public class QuestClientSide {
 														.returneventquest(
 																number)
 														.getCount()) {
-													saveditem.setAmount(questers.returnharvest(number).getCount());
+													saveditem
+															.setAmount(questers
+																	.returnharvest(
+																			number)
+																	.getCount());
 													passing = true;
 													break;
-												}  else {
-													if(saveditem.getAmount() + items.getAmount() < questers.returneventquest(number).getCount()){
-														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
-													}else if(saveditem.getAmount()+items.getAmount() == questers.returneventquest(number).getCount()){
-														saveditem.setAmount(saveditem.getAmount()+items.getAmount());
-														passing  = true;
+												} else {
+													if (saveditem.getAmount()
+															+ items.getAmount() < questers
+															.returneventquest(
+																	number)
+															.getCount()) {
+														saveditem
+																.setAmount(saveditem
+																		.getAmount()
+																		+ items.getAmount());
+													} else if (saveditem
+															.getAmount()
+															+ items.getAmount() == questers
+															.returneventquest(
+																	number)
+															.getCount()) {
+														saveditem
+																.setAmount(saveditem
+																		.getAmount()
+																		+ items.getAmount());
+														passing = true;
 														break;
-													}else{
-														saveditem.setAmount(questers.returneventquest(number).getCount());
-														passing  = true;
+													} else {
+														saveditem
+																.setAmount(questers
+																		.returneventquest(
+																				number)
+																		.getCount());
+														passing = true;
 														break;
 													}
 												}
@@ -499,47 +569,56 @@ public class QuestClientSide {
 								}
 
 								if (passing) {
-										for (int index = 0; index < player.getInventory().getContents().length; index++) {
-											ItemStack item = player.getInventory().getContents()[index];
-											if (item != null
-													&& item.getType() != Material.AIR) {
-												if (item.getDurability() != 0) {
-													name = item.getTypeId()
-															+ ":"
-															+ item.getDurability();
-												} else {
-													name = Integer
-															.toString(item
-																	.getTypeId());
-												}
-												if ((type.equals("harvest") && questers
-														.returnharvest(number)
-														.getItemId()
-														.equals(name))
-														|| (type.equals("eventharvest") && questers
-																.returneventquest(
-																		number)
-																.getType()
-																.equals(name))) {
-													if (item.getAmount() > needed) {
-														item.setAmount(item.getAmount()-needed);
-														needed = 0;
-														player.updateInventory();
-													}else if(item.getAmount() == needed){
-														needed = 0;
-														player.getInventory().setItem(index, new ItemStack(Material.AIR));
-														player.updateInventory();
-													}else{
-														needed -= item.getAmount();
-														player.getInventory().setItem(index, new ItemStack(Material.AIR));
-														player.updateInventory();
-													}
-												}
+									for (int index = 0; index < player
+											.getInventory().getContents().length; index++) {
+										ItemStack item = player.getInventory()
+												.getContents()[index];
+										if (item != null
+												&& item.getType() != Material.AIR) {
+											if (item.getDurability() != 0) {
+												name = item.getTypeId() + ":"
+														+ item.getDurability();
+											} else {
+												name = Integer.toString(item
+														.getTypeId());
 											}
-											if(needed == 0){
-												break;
+											if ((type.equals("harvest") && questers
+													.returnharvest(number)
+													.getItemId().equals(name))
+													|| (type.equals("eventharvest") && questers
+															.returneventquest(
+																	number)
+															.getType()
+															.equals(name))) {
+												if (item.getAmount() > needed) {
+													item.setAmount(item
+															.getAmount()
+															- needed);
+													needed = 0;
+													player.updateInventory();
+												} else if (item.getAmount() == needed) {
+													needed = 0;
+													player.getInventory()
+															.setItem(
+																	index,
+																	new ItemStack(
+																			Material.AIR));
+													player.updateInventory();
+												} else {
+													needed -= item.getAmount();
+													player.getInventory()
+															.setItem(
+																	index,
+																	new ItemStack(
+																			Material.AIR));
+													player.updateInventory();
+												}
 											}
 										}
+										if (needed == 0) {
+											break;
+										}
+									}
 									if (type.equals("harvest")) {
 										reward = questers.returnharvest(number)
 												.getReward();
@@ -564,23 +643,22 @@ public class QuestClientSide {
 											ArrayList<Integer> t = new ArrayList<Integer>();
 											tempav.put(type, t);
 										}
-											if (!tempav.get(type).contains(
-													number)) {
-												player.sendMessage(ChatColor.DARK_PURPLE
-														+ "["
-														+ ChatColor.GOLD
-														+ npcname
-														+ ChatColor.DARK_PURPLE
-														+ "] "
-														+ ChatColor.AQUA
-														+ "You didn't bring me "
-														+ count
-														+ " "
-														+ questers
-																.GetItemName(saveditem)
-														+ ". Come back with the right amount for your reward");
-												tempav.get(type).add(number);
-											}
+										if (!tempav.get(type).contains(number)) {
+											player.sendMessage(ChatColor.DARK_PURPLE
+													+ "["
+													+ ChatColor.GOLD
+													+ npcname
+													+ ChatColor.DARK_PURPLE
+													+ "] "
+													+ ChatColor.AQUA
+													+ "You didn't bring me "
+													+ count
+													+ " "
+													+ questers
+															.GetItemName(saveditem)
+													+ ". Come back with the right amount for your reward");
+											tempav.get(type).add(number);
+										}
 									}
 									pass = false;
 									return pass;

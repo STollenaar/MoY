@@ -28,7 +28,7 @@ public class QuestEvent {
 	private String repeat;
 	
 	private String type;
-	
+	private String state;
 	public QuestEvent(int number){
 		this.number = number;
 		this.title = "title";
@@ -40,6 +40,7 @@ public class QuestEvent {
 		this.message = "message";
 		this.repeat = "-1";
 		this.type = "0";
+		this.state = "disabled";
 	}
 
 	public int getNumber() {
@@ -61,7 +62,7 @@ public class QuestEvent {
 		ItemStack start = ItemGenerator.DateQuest(startdate, true);
 		ItemStack end = ItemGenerator.DateQuest(enddate, false);
 		ItemStack rep = ItemGenerator.RepeatQuest(getRepeat());
-		
+		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
 		
 		inv.addItem(info);
 		inv.addItem(thing);
@@ -72,7 +73,7 @@ public class QuestEvent {
 		inv.addItem(rew);
 		inv.addItem(mes);
 		inv.addItem(rep);
-		
+		inv.addItem(qstate);
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -95,6 +96,14 @@ public class QuestEvent {
 		player.openInventory(inv);
 	}
 
+
+	public String getState() {
+		return state;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
 
 	public String getTitle() {
 		return title;

@@ -8,17 +8,12 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
-import net.citizensnpcs.npc.entity.HumanController;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +21,11 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCEntity;
+import MoY.tollenaar.stephen.NPC.NPCProfile;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
+import MoY.tollenaar.stephen.NPC.NPCSpawnReason;
 
 public class QuestsServerSide extends Quest {
 
@@ -75,10 +75,29 @@ public class QuestsServerSide extends Quest {
 	// not to db
 	protected HashMap<UUID, ArrayList<String>> npcpos = new HashMap<UUID, ArrayList<String>>();
 
+	public void canceltasks(UUID npcuuid) {
+		if (facelooker.get(npcuuid) != null) {
+			Bukkit.getScheduler().cancelTask(facelooker.get(npcuuid));
+		}
+		if (activenpc.get(npcuuid) != null) {
+			Bukkit.getScheduler().cancelTask(activenpc.get(npcuuid));
+		}
+	}
+
+	public void resetHear(UUID npcuuid) {
+		if (activenpc.get(npcuuid) == null) {
+			if (facelooker.get(npcuuid) != null) {
+				npchear(npcuuid);
+			}
+		} else {
+			runpoints(npcuuid);
+		}
+	}
+
 	// DYNAMIC NPC
 	public void npchear(final UUID npcuuid) {
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		final NPC npc = registry.getByUniqueId(npcuuid);
+		NPCHandler handler = plugin.getNPCHandler();
+		final NPC npc = handler.getNPCByUUID(npcuuid);
 
 		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,
 				new Runnable() {
@@ -96,21 +115,23 @@ public class QuestsServerSide extends Quest {
 								Location closest = null;
 
 								for (Player player : Bukkit.getOnlinePlayers()) {
+									if (!player.hasMetadata("NPC")) {
+										if (player
+												.getWorld()
+												.getName()
+												.equals(location.getWorld()
+														.getName())) {
+											if (closest == null) {
+												closest = player.getLocation();
+											}
 
-									if (player
-											.getWorld()
-											.getName()
-											.equals(location.getWorld()
-													.getName())) {
-										if (closest == null) {
-											closest = player.getLocation();
-										}
+											if (player.getLocation()
+													.distanceSquared(location) <= radiusSquared) {
 
-										if (player.getLocation()
-												.distanceSquared(location) <= radiusSquared) {
+												allclosep.add(player
+														.getLocation());
 
-											allclosep.add(player.getLocation());
-
+											}
 										}
 									}
 								}
@@ -128,7 +149,7 @@ public class QuestsServerSide extends Quest {
 									}
 								}
 								if (closest != null) {
-									npc.faceLocation(closest);
+									npc.lookatLocation(closest);
 								}
 							}
 							tickdelay++;
@@ -145,8 +166,8 @@ public class QuestsServerSide extends Quest {
 	}
 
 	public void runpoints(final UUID npcuuid) {
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		final NPC npc = registry.getByUniqueId(npcuuid);
+		NPCHandler handler = plugin.getNPCHandler();
+		final NPC npc = handler.getNPCByUUID(npcuuid);
 		final Location startFrom = spawnlocation.get(npcuuid);
 		final Random rndGen = new Random();
 		final int[] values = new int[3];
@@ -182,7 +203,7 @@ public class QuestsServerSide extends Quest {
 							}
 							Bukkit.getScheduler().cancelTask(
 									facelooker.get(npcuuid));
-							npc.getNavigator().setTarget(output);
+							npc.pathFinder(output);
 							npclocation.put(npc.getUniqueId(), output);
 							Bukkit.getScheduler().scheduleSyncDelayedTask(
 									plugin, new Runnable() {
@@ -204,16 +225,14 @@ public class QuestsServerSide extends Quest {
 	}
 
 	public void spawnNpc(Location location, String name, int uniqueid,
-			String skin) {
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.createNPC(EntityType.PLAYER, name);
-//		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA,
-//				NPCSkin.getNonPlayerProfile(skin).getName());
-		npc.data().set(NPC.PLAYER_SKIN_UUID_METADATA, NPCSkin.getUrlBasedSkin("guitargun"));
-		npc.spawn(location);
+			String skin, String type) {
+		NPCEntity npc = new NPCEntity(location.getWorld(), location,
+				NPCProfile.loadProfile(name, skin,
+						((CraftWorld) location.getWorld()).getHandle()),
+				plugin.getNetwork(), plugin, type);
+
 		UUID npcuuid = npc.getUniqueId();
 
-		NPCSkin.getNonPlayerProfile(skin);
 		spawnlocation.put(npcuuid, location);
 		npclocation.put(npcuuid, location);
 		if (uniqueid != -1) {
@@ -225,14 +244,16 @@ public class QuestsServerSide extends Quest {
 			}
 			uniquenpcid.put(id, npcuuid);
 		}
-
+		if (!npc.isSpawned()) {
+			npc.spawn(location, NPCSpawnReason.NORMAL_SPAWN, npc);
+		}
 		npchear(npcuuid);
 
 	}
 
 	public void despawnNPC(UUID npcuuid) {
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.getByUniqueId(npcuuid);
+		NPCHandler handler = plugin.getNPCHandler();
+		NPC npc = handler.getNPCByUUID(npcuuid);
 		if (npc != null) {
 			if (killquests.get(npcuuid) != null) {
 				for (int quest : killquests.get(npcuuid)) {
@@ -266,7 +287,7 @@ public class QuestsServerSide extends Quest {
 							if (returntalkto(number) != null) {
 								if (returntalkto(number).getNpcid() == targetnpcs
 										.get(npcuuid)) {
-									NPC tnpc = registry.getByUniqueId(tu);
+									NPC tnpc = handler.getNPCByUUID(tu);
 									Bukkit.broadcast(
 											ChatColor.DARK_PURPLE
 													+ "["
@@ -278,16 +299,16 @@ public class QuestsServerSide extends Quest {
 													+ "A talkto quest npc is removed. Please check npc "
 													+ tnpc.getName()
 													+ ". At X:"
-													+ tnpc.getStoredLocation()
+													+ tnpc.getCurrentloc()
 															.getX()
 													+ " Y:"
-													+ tnpc.getStoredLocation()
+													+ tnpc.getCurrentloc()
 															.getY()
 													+ " Z:"
-													+ tnpc.getStoredLocation()
+													+ tnpc.getCurrentloc()
 															.getZ()
 													+ " In the world "
-													+ tnpc.getStoredLocation()
+													+ tnpc.getCurrentloc()
 															.getWorld()
 															.getName(),
 											"MistCore.chat");
@@ -312,15 +333,13 @@ public class QuestsServerSide extends Quest {
 					break;
 				}
 			}
-
-			npc.despawn();
-			registry.deregister(npc);
+			npc.despawn(NPCSpawnReason.DESPAWN);
 		}
 	}
 
 	public void npcsettingsmain(UUID npcuuid, Player player) {
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.getByUniqueId(npcuuid);
+		NPCHandler handler = plugin.getNPCHandler();
+		NPC npc = handler.getNPCByUUID(npcuuid);
 
 		// npc name
 		ItemStack npcname = new ItemStack(Material.SKULL_ITEM);
@@ -328,7 +347,7 @@ public class QuestsServerSide extends Quest {
 			ItemMeta npcnamemeta = npcname.getItemMeta();
 			npcnamemeta.setDisplayName("NPC name");
 			List<String> nn = new ArrayList<String>();
-			nn.add(npc.getFullName());
+			nn.add(npc.getName());
 			npcnamemeta.setLore(nn);
 			npcname.setItemMeta(npcnamemeta);
 		}
@@ -338,7 +357,7 @@ public class QuestsServerSide extends Quest {
 			ItemMeta meta = npcskin.getItemMeta();
 			meta.setDisplayName("NPC skinName");
 			ArrayList<String> lore = new ArrayList<String>();
-			lore.add((String) npc.data().get(NPC.PLAYER_SKIN_UUID_METADATA));
+			lore.add(npc.getSkinName());
 			meta.setLore(lore);
 			npcskin.setItemMeta(meta);
 		}

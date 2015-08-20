@@ -16,6 +16,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
@@ -248,20 +249,25 @@ public class Playerinfo implements Listener{
 	public void onplayerjoin(PlayerJoinEvent event){
 		Player player = event.getPlayer();
 		if(getplayer(player.getUniqueId()) == null){
-			plugin.fw.loadplayer(event.getPlayer().getUniqueId());
+			if(!plugin.fw.loadplayer(event.getPlayer().getUniqueId())){
 			createplayer(player.getUniqueId());
+			}
 		}
 	}
 	
+	
+	@EventHandler
 	public void onplayerleave(PlayerQuitEvent event){
 		Player player = event.getPlayer();
+		plugin.fw.saveplayer(players.get(player.getUniqueId()));
+		players.remove(player.getUniqueId());
 	}
 	
 	@EventHandler
 	public void onplayeritemhold(PlayerItemHeldEvent event){
 		Player player = event.getPlayer();
 		Playerstats p = getplayer(player.getUniqueId());
-		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
+		if(player.getGameMode() != GameMode.CREATIVE){
 		ArrayList<ItemStack>pweapons = helditems("weapon", p.getStrength(), "strength");
 		ArrayList<ItemStack>pbows = helditems("bow", p.getDex(), "dex");
 		
@@ -485,7 +491,7 @@ public class Playerinfo implements Listener{
 	public void onplayeritemfrominv(InventoryClickEvent event){
 		Player player = (Player) event.getWhoClicked();
 		Playerstats p = getplayer(player.getUniqueId());
-		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
+		if(player.getGameMode() != GameMode.CREATIVE){
 		if(event.getAction() != InventoryAction.DROP_ALL_SLOT){
 		 
 		 
@@ -1031,7 +1037,7 @@ public class Playerinfo implements Listener{
 	public void onplayerrightarmor(PlayerInteractEvent event){
 		Player player = event.getPlayer();
 		Playerstats p = getplayer(player.getUniqueId());
-		if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
+		if(player.getGameMode() != GameMode.CREATIVE){
 		ArrayList<ItemStack> parmors = helditems("armors", p.getStrength(), "strength");
 		ArrayList<ItemStack> armors = helditems("armors", 90, "strength");
 		ArrayList<Material> armortype = new ArrayList<Material>();
@@ -1086,7 +1092,7 @@ public class Playerinfo implements Listener{
 	public void onplayerpickup(PlayerPickupItemEvent event){
 		 Player player = event.getPlayer();
 		 Playerstats p = getplayer(player.getUniqueId());
-			if(player.getLocation().getWorld().getName().equals("MMOTESTWORLD")){
+			if(player.getGameMode() != GameMode.CREATIVE){
 			 ArrayList<ItemStack>pweapons = helditems("weapon", p.getStrength(), "strength");
 			 ArrayList<ItemStack>pbows = helditems("bow", p.getDex(), "dex");
 			

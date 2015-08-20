@@ -3,9 +3,7 @@ package MoY.tollenaar.stephen.Quests;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -15,6 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.PlayerInfo.Playerinfo;
 import MoY.tollenaar.stephen.PlayerInfo.Playerstats;
 
@@ -37,6 +37,7 @@ public class ProgressKill implements Listener {
 			return;
 		}
 		if (event.getEntity().getKiller() instanceof Player) {
+			NPCHandler handler = plugin.getNPCHandler();
 			Player player = event.getEntity().getKiller();
 			Playerstats p = playerinfo.getplayer(player.getUniqueId());
 			Entity ent = event.getEntity();
@@ -55,12 +56,11 @@ public class ProgressKill implements Listener {
 							if (amount.get(quests) + 1 != kill.getCount()) {
 								amount.put(quests, amount.get(quests) + 1);
 							} else {
-								NPCRegistry reg =	CitizensAPI.getNPCRegistry();
 								
 								for(UUID npcuuid : plugin.questers.GetKeysSets("kill")){
 									
 									if(plugin.questers.GetIds("kill", npcuuid).contains(quests)){
-										NPC npc = reg.getByUniqueId(npcuuid);
+										NPC npc = handler.getNPCByUUID(npcuuid);
 										q.AddCompletedQuest(player, quests, "kill", npc.getName());
 										break;
 									}
@@ -85,12 +85,11 @@ public class ProgressKill implements Listener {
 							if (amount.get(quests) + 1 != kill.getCount()) {
 								amount.put(quests, amount.get(quests) + 1);
 							} else {
-								NPCRegistry reg =	CitizensAPI.getNPCRegistry();
 								
 								for(UUID npcuuid : plugin.questers.GetKeysSets("event")){
 									
 									if(plugin.questers.GetIds("event", npcuuid).contains(quests)){
-										NPC npc = reg.getByUniqueId(npcuuid);
+										NPC npc = handler.getNPCByUUID(npcuuid);
 										q.AddCompletedQuest(player, quests, "eventkill", npc.getName());
 										break;
 									}

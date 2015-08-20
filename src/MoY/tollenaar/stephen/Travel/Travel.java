@@ -12,9 +12,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
-import net.citizensnpcs.api.CitizensAPI;
-import net.citizensnpcs.api.npc.NPC;
-import net.citizensnpcs.api.npc.NPCRegistry;
+
+
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +30,8 @@ import org.bukkit.inventory.ItemStack;
 import MoY.tollenaar.stephen.Files.Filewriters;
 import MoY.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import MoY.tollenaar.stephen.MistsOfYsir.MoY;
+import MoY.tollenaar.stephen.NPC.NPC;
+import MoY.tollenaar.stephen.NPC.NPCHandler;
 import MoY.tollenaar.stephen.Quests.QuestsServerSide;
 
 import com.earth2me.essentials.api.Economy;
@@ -42,7 +43,7 @@ public class Travel implements Listener {
 	private TravelBoatEvent boat;
 	private TravelCartEvent cart;
 	private TravelDragonEvent dragon;
-	private MoY plugin;
+	private static MoY plugin;
 	private Filewriters fw;
 	private QuestsServerSide questers;
 
@@ -111,8 +112,8 @@ public class Travel implements Listener {
 		int minutes = 10; // Calendar.getInstance().get(Calendar.MINUTE);
 		int nearest = ((minutes + 5) / 10) * 10 % 60;
 
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.getByUniqueId(npcuuid);
+		NPCHandler handler = plugin.getNPCHandler();
+		NPC npc = handler.getNPCByUUID(npcuuid);
 
 		if (!type.equals("dragoncoach")) {
 			// time checking for next trip
@@ -279,9 +280,9 @@ public class Travel implements Listener {
 			player.teleport(groupedtrip.get(tripid).getLocation());
 		}
 
-		NPCRegistry registry = CitizensAPI.getNPCRegistry();
-		NPC npc = registry.getByUniqueId(npcuuid);
-		final Location start = npc.getStoredLocation();
+		NPCHandler handler = plugin.getNPCHandler();
+		NPC npc =handler.getNPCByUUID(npcuuid);
+		final Location start = npc.getCurrentloc();
 
 		int time = traveltime(npcuuid, questnumber, type, end);
 
@@ -449,8 +450,9 @@ public class Travel implements Listener {
 	public static int traveltime(UUID npcuuid, int questnumber, String type,
 			Location end) {
 
-		NPC npc = CitizensAPI.getNPCRegistry().getByUniqueId(npcuuid);
-		Location start = npc.getEntity().getLocation();
+		NPCHandler handler = plugin.getNPCHandler();
+		NPC npc =handler.getNPCByUUID(npcuuid);
+		Location start = npc.getCurrentloc();
 
 		double sx = start.getX();
 		double sy = start.getY();

@@ -21,7 +21,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import moy.tollenaar.stephen.CEvents.ProgEvent;
 import moy.tollenaar.stephen.Files.Filewriters;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
-import moy.tollenaar.stephen.MistsOfYsir.Party;
+import moy.tollenaar.stephen.PlayerInfo.Party;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 

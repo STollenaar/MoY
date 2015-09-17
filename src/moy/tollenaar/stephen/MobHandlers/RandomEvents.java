@@ -1,4 +1,4 @@
-package moy.tollenaar.stephen.MistsOfYsir;
+package moy.tollenaar.stephen.MobHandlers;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,6 +31,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.NPC.NPCProfile;
 import moy.tollenaar.stephen.NPC.NPCSpawnReason;

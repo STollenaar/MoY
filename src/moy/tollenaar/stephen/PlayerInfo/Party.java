@@ -1,4 +1,4 @@
-package moy.tollenaar.stephen.MistsOfYsir;
+package moy.tollenaar.stephen.PlayerInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,8 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import moy.tollenaar.stephen.Files.Filewriters;
-import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
-import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
 
 public class Party implements Listener{

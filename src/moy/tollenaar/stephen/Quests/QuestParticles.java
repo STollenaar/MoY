@@ -13,8 +13,8 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
-import moy.tollenaar.stephen.MistsOfYsir.ParticleEffect;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+import moy.tollenaar.stephen.Util.ParticleEffect;
 
 public class QuestParticles {
 	private static MoY plugin;

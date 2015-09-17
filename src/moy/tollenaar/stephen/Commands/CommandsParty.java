@@ -15,9 +15,10 @@ import org.bukkit.entity.Player;
 
 
 
+
 import moy.tollenaar.stephen.Files.Filewriters;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
-import moy.tollenaar.stephen.MistsOfYsir.Party;
+import moy.tollenaar.stephen.PlayerInfo.Party;
 
 import com.earth2me.essentials.OfflinePlayer;
 

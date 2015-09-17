@@ -25,6 +25,7 @@ import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.NPC.NPCMetadataStore;
 import moy.tollenaar.stephen.NPC.NPCProfile;
 import moy.tollenaar.stephen.NPC.NPCSpawnReason;
+import moy.tollenaar.stephen.PlayerInfo.Party;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 import moy.tollenaar.stephen.Quests.QuestTalkto;

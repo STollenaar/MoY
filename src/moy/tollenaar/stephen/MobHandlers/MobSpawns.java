@@ -1,4 +1,4 @@
-package moy.tollenaar.stephen.MistsOfYsir;
+package moy.tollenaar.stephen.MobHandlers;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +37,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 import moy.tollenaar.stephen.Travel.TravelBoatEvent;

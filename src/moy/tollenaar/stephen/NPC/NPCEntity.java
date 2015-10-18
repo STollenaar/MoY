@@ -58,7 +58,6 @@ public class NPCEntity extends EntityPlayer implements NPC {
 
 		this.skin = profile.getSkin();
 		this.uuid = profile.getUUID();
-		this.playerInteractManager.b(EnumGamemode.SURVIVAL);
 		this.fauxSleeping = true;
 		this.playerConnection = new NPCPlayerConnection(networkManager, this);
 		this.bukkitEntity = new CraftPlayer((CraftServer) Bukkit.getServer(),
@@ -71,6 +70,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		this.plugin = plugin;
 		this.shop = shop;
 		this.id = id;
+		this.playerInteractManager.b(EnumGamemode.CREATIVE);
 	}
 
 	public NPCEntity(World world, Location location, NPCProfile profile,
@@ -82,7 +82,6 @@ public class NPCEntity extends EntityPlayer implements NPC {
 
 		this.skin = profile.getSkin();
 		this.uuid = profile.getUUID();
-		this.playerInteractManager.b(EnumGamemode.SURVIVAL);
 		this.fauxSleeping = true;
 		this.playerConnection = new NPCPlayerConnection(networkManager, this);
 		this.bukkitEntity = new CraftPlayer((CraftServer) Bukkit.getServer(),
@@ -98,6 +97,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		if (reason != NPCSpawnReason.RESPAWN) {
 			spawn(location, reason, this);
 		}
+		this.playerInteractManager.b(EnumGamemode.CREATIVE);
 	}
 
 	public boolean pathFinder(Location loc) {
@@ -178,26 +178,24 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void sendPacketsTo(Iterable<? extends Player> recipients,
+	private void sendPacketsToListed(Iterable<? extends Player> recipients,
 			Packet... packets) {
-		Iterable<EntityPlayer> nmsRecipients = Iterables.transform(recipients,
-				new Function<Player, EntityPlayer>() {
-					public EntityPlayer apply(Player input) {
-						return (EntityPlayer) getHandle(input);
-					}
-				});
-		for (EntityPlayer recipient : nmsRecipients) {
-			sendPacketsTo(recipient, packets);
-		}
+			for(Player players : recipients){
+				try{
+				EntityPlayer nmsplayer = ((CraftPlayer)players).getHandle();
+				sendPacketsToPlayer(nmsplayer, packets);
+				}catch(ClassCastException ex){
+					continue;
+				}
+			}
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void sendPacketsTo(EntityPlayer player, Packet... packets) {
+	private void sendPacketsToPlayer(EntityPlayer player, Packet... packets) {
 		if (player != null) {
 			for (Packet p : packets) {
 				if (p == null) {
 					continue;
-
 				}
 				player.playerConnection.sendPacket(p);
 			}
@@ -205,7 +203,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	}
 
 	public void playerJoinPacket(Player player) {
-		sendPacketsTo((EntityPlayer) getHandle(player),
+		sendPacketsToPlayer((EntityPlayer) getHandle(player),
 				new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER,
 						this));
 	}
@@ -274,14 +272,14 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	@Override
 	public void spawn(Location location, NPCSpawnReason reason, NPCEntity npc) {
 		World world = location.getWorld();
-
-		sendPacketsTo(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
 				EnumPlayerInfoAction.ADD_PLAYER, npc));
 		WorldServer worldServer = ((CraftWorld) world).getHandle();
 
-		npc.setPositionRotation(location.getX(), location.getY(),
-				location.getZ(), location.getYaw(), location.getPitch());
+		npc.setPosition(location.getX(), location.getY(),
+				location.getZ());
 		worldServer.addEntity(npc, SpawnReason.CUSTOM);
+	
 		this.spawned = true;
 		Bukkit.getPluginManager().callEvent(
 				new NPCSpawnEvent(npc, location, reason, shop, id));
@@ -296,7 +294,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	public void despawn(NPCSpawnReason reason) {
 		this.spawned = false;
 		plugin.questers.canceltasks(getUniqueId());
-		sendPacketsTo(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
 				EnumPlayerInfoAction.REMOVE_PLAYER, this));
 		if (reason == NPCSpawnReason.DESPAWN) {
 			Bukkit.getPluginManager().callEvent(new NPCDespawnEvent(this));

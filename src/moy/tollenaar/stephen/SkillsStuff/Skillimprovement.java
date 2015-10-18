@@ -232,9 +232,11 @@ public class Skillimprovement implements Listener {
 		FurnaceStorage storage = FurnaceStorage.GetStorage(event.getBlock());
 		Playerstats p = playerinfo.getplayer(storage.returnfirst(storage.getPlayers().keySet()));
 		int current = p.getCooking();
-		if (r.nextInt(100) <= item.SuccesCalc(current)) {
+		int chance = r.nextInt(100);
+		if (chance <= item.SuccesCalc(current) || chance <= item.SuccesCalc(current, Recepy.getRecepy(item), p)) {
 			storage.addsucces(res);
-		} else {
+		}	
+		else {
 			res = new ItemStack(Material.ROTTEN_FLESH, 1);
 			storage.addfailure(res);
 			event.setCancelled(true);

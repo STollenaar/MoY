@@ -26,28 +26,28 @@ public class QuestProgListener implements Listener {
 		this.plugin = instance;
 	}
 
-	@SuppressWarnings({ "deprecation", "static-access" })
+	@SuppressWarnings({ "deprecation", })
 	@EventHandler
 	public void OnQuestProg(QuestProgEvent event) {
 		NPCHandler handler = plugin.getNPCHandler();
 		if (event.getType().equals("kill")) {
-			if (IsRightEntity(event.getEntity().getName(), event.getQuest(),
+			if (IsRightEntity(event.getEntity().getName(), event.getQuestnumber(),
 					false)) {
-				QuestKill kill = quest.returnkill(event.getQuest());
-				HashMap<Integer, Integer> amount = quest.progress.get(
+				QuestKill kill = quest.returnkill(event.getQuestnumber());
+				HashMap<Integer, Integer> amount = quest.getProgress(
 						event.getPlayer().getUniqueId()).get("kill");
-				if (amount.get(event.getQuest()) + 1 != kill.getCount()) {
-					amount.put(event.getQuest(),
-							amount.get(event.getQuest()) + 1);
+				if (amount.get(event.getQuestnumber()) + 1 != kill.getCount()) {
+					amount.put(event.getQuestnumber(),
+							amount.get(event.getQuestnumber()) + 1);
 				} else {
 
 					for (UUID npcuuid : quest.GetKeysSets("kill")) {
 
 						if (quest.GetIds("kill", npcuuid).contains(
-								event.getQuest())) {
+								event.getQuestnumber())) {
 							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "kill", npc.getName());
+									event.getQuestnumber(), "kill", npc.getName());
 							break;
 						}
 					}
@@ -58,33 +58,31 @@ public class QuestProgListener implements Listener {
 			if (event.getItem().getDurability() != 0) {
 				name += ":" + event.getItem().getDurability();
 			}
-			if (name != null && IsRightItem(name, event.getQuest(), false)) {
-				QuestHarvest harvest = quest.returnharvest(event.getQuest());
+			if (name != null && IsRightItem(name, event.getQuestnumber(), false)) {
+				QuestHarvest harvest = quest.returnharvest(event.getQuestnumber());
 				if (event.getItem().getAmount() >= harvest.getCount()
-						|| quest.progress.get(event.getPlayer().getUniqueId())
-								.get("harvest").get(event.getQuest())
+						|| quest.getProgress(event.getPlayer().getUniqueId())
+								.get("harvest").get(event.getQuestnumber())
 								+ event.getItem().getAmount() >= harvest
 									.getCount()) {
 
 					for (UUID npcuuid : quest.GetKeysSets("harvest")) {
 						if (quest.GetIds("harvest", npcuuid)
-								.contains(event.getQuest())) {
+								.contains(event.getQuestnumber())) {
 							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "harvest", npc.getName());
+									event.getQuestnumber(), "harvest", npc.getName());
 							break;
 						}
 					}
 				} else {
-					quest.progress
-							.get(event.getPlayer().getUniqueId())
+					quest.getProgress(event.getPlayer().getUniqueId())
 							.get("harvest")
-							.put(event.getQuest(),
-									quest.progress
-											.get(event.getPlayer()
+							.put(event.getQuestnumber(),
+									quest.getProgress(event.getPlayer()
 													.getUniqueId())
 											.get("harvest")
-											.get(event.getQuest())
+											.get(event.getQuestnumber())
 											+ event.getItem().getAmount());
 				}
 			}
@@ -93,55 +91,53 @@ public class QuestProgListener implements Listener {
 			if (event.getItem().getDurability() != 0) {
 				name += ":" + event.getItem().getDurability();
 			}
-			if (name != null && IsRightItem(name, event.getQuest(), true)) {
-				QuestEvent harvest = quest.returneventquest(event.getQuest());
+			if (name != null && IsRightItem(name, event.getQuestnumber(), true)) {
+				QuestEvent harvest = quest.returneventquest(event.getQuestnumber());
 				if (event.getItem().getAmount() >= harvest.getCount()
-						|| quest.progress.get(event.getPlayer().getUniqueId())
-								.get("eventharvest").get(event.getQuest())
+						|| quest.getProgress(event.getPlayer().getUniqueId())
+								.get("eventharvest").get(event.getQuestnumber())
 								+ event.getItem().getAmount() >= harvest
 									.getCount()) {
 
 					for (UUID npcuuid : quest.GetKeysSets("event")) {
 						if (quest.GetIds("event", npcuuid).contains(
-								event.getQuest())) {
+								event.getQuestnumber())) {
 							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "eventharvest",
+									event.getQuestnumber(), "eventharvest",
 									npc.getName());
 							break;
 						}
 					}
 				} else {
-					quest.progress
-							.get(event.getPlayer().getUniqueId())
+					quest.getProgress(event.getPlayer().getUniqueId())
 							.get("eventharvest")
-							.put(event.getQuest(),
-									quest.progress
-											.get(event.getPlayer()
+							.put(event.getQuestnumber(),
+									quest.getProgress(event.getPlayer()
 													.getUniqueId())
 											.get("eventharvest")
-											.get(event.getQuest())
+											.get(event.getQuestnumber())
 											+ event.getItem().getAmount());
 				}
 			}
 		} else if (event.getType().equals("eventkill")) {
-			if (IsRightEntity(event.getEntity().getName(), event.getQuest(),
+			if (IsRightEntity(event.getEntity().getName(), event.getQuestnumber(),
 					true)) {
-				QuestEvent kill = quest.returneventquest(event.getQuest());
-				HashMap<Integer, Integer> amount = quest.progress.get(
+				QuestEvent kill = quest.returneventquest(event.getQuestnumber());
+				HashMap<Integer, Integer> amount = quest.getProgress(
 						event.getPlayer().getUniqueId()).get("eventkill");
-				if (amount.get(event.getQuest()) + 1 != kill.getCount()) {
-					amount.put(event.getQuest(),
-							amount.get(event.getQuest()) + 1);
+				if (amount.get(event.getQuestnumber()) + 1 != kill.getCount()) {
+					amount.put(event.getQuestnumber(),
+							amount.get(event.getQuestnumber()) + 1);
 				} else {
 
 					for (UUID npcuuid : quest.GetKeysSets("event")) {
 
 						if (quest.GetIds("event", npcuuid).contains(
-								event.getQuest())) {
+								event.getQuestnumber())) {
 							NPC npc = handler.getNPCByUUID(npcuuid);
 							quest.AddCompletedQuest(event.getPlayer(),
-									event.getQuest(), "eventkill",
+									event.getQuestnumber(), "eventkill",
 									npc.getName());
 							break;
 						}

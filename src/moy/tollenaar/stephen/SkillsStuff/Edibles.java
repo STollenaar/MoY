@@ -1,5 +1,7 @@
 package moy.tollenaar.stephen.SkillsStuff;
 
+import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+
 import org.bukkit.inventory.ItemStack;
 
 public enum Edibles {
@@ -21,7 +23,7 @@ public enum Edibles {
 	}
 
 	public static Edibles GetEdible(ItemStack item) {
-		switch(item.getType()){
+		switch (item.getType()) {
 		case POTATO:
 			return POTATO;
 		case RAW_BEEF:
@@ -29,9 +31,9 @@ public enum Edibles {
 		case RAW_CHICKEN:
 			return CHICKEN;
 		case RAW_FISH:
-			if(item.getDurability() == 0 ){
+			if (item.getDurability() == 0) {
 				return FISH;
-			}else{
+			} else {
 				return SALMON;
 			}
 		case MUTTON:
@@ -46,21 +48,33 @@ public enum Edibles {
 	public String getName() {
 		return name;
 	}
-	
-	public int SuccesCalc(int current){
+
+	public int SuccesCalc(int current) {
 		int chance;
-		if(getLvl() <= current){
+		if (getLvl() <= current) {
 			chance = 100;
-		}else{
-			int cinc = current/10;
-			int vinc = getLvl()/10;
-			
+		} else {
+			int cinc = current / 10;
+			int vinc = getLvl() / 10;
+
 			int diff = vinc - cinc;
-			
-			chance = 23 - diff*3;
-		
+
+			chance = 23 - diff * 3;
+
 		}
 		return chance;
-		 
+
 	}
+
+	public int SuccesCalc(int current, Recepy recepy, Playerstats p) {
+		int initial = SuccesCalc(current);
+		if (p.hasRecepy(recepy)) {
+			if (initial < 50) {
+				initial += (recepy.getChance() * 2);
+			}
+		}
+
+		return initial;
+	}
+
 }

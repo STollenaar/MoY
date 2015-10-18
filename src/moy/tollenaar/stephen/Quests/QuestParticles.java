@@ -117,8 +117,8 @@ public class QuestParticles {
 
 	private static boolean aviablew(UUID npcuuid) {
 		boolean checks = false;
-		if (plugin.questers.getId(npcuuid) != -1) {
-			Warps warp = plugin.questers.returnwarp(plugin.questers.getId(npcuuid));
+		if (plugin.questers.getWarpId(npcuuid) != -1) {
+			Warps warp = plugin.questers.returnwarp(plugin.questers.getWarpId(npcuuid));
 			if(warp.getState().equals("active")){
 			checks = true;
 			}

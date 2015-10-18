@@ -22,13 +22,13 @@ import org.fusesource.jansi.Ansi;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
-import moy.tollenaar.stephen.Travel.Travel;
 
 public class QuestClientSide {
 	private QuestsServerSide questers;
-
+	private MoY plugin;
 	public QuestClientSide(MoY instance) {
 		this.questers = instance.questers;
+		this.plugin = instance;
 	}
 
 	private HashMap<String, ArrayList<Integer>> tempav = new HashMap<String, ArrayList<Integer>>();
@@ -48,7 +48,7 @@ public class QuestClientSide {
 		if (questers.GetIds("talkto", npcuuid) != null) {
 			rowcount += questers.GetIds("talkto", npcuuid).size();
 		}
-		if (questers.getId(npcuuid) != -1) {
+		if (questers.getWarpId(npcuuid) != -1) {
 			rowcount++;
 		}
 		if (questers.GetIds("event", npcuuid) != null) {
@@ -203,9 +203,9 @@ public class QuestClientSide {
 				}
 			}
 		}
-		if (questers.getId(npcuuid) != -1) {
+		if (questers.getWarpId(npcuuid) != -1) {
 			// for (Integer i : questers.warplists.get(npcuuid)) {
-			int i = questers.getId(npcuuid);
+			int i = questers.getWarpId(npcuuid);
 			Warps kill = questers.returnwarp(i);
 			if (kill != null) {
 				if (kill.getState().equals("active")) {
@@ -215,7 +215,7 @@ public class QuestClientSide {
 								ItemStack title = new ItemStack(Material.BOAT);
 								{
 									ArrayList<String> lore = new ArrayList<String>();
-									int time = Travel.traveltime(npcuuid,
+									int time = plugin.tr.traveltime(npcuuid,
 											kill.getWarpid(), type,
 											w.getStartloc());
 									SimpleDateFormat df = new SimpleDateFormat(
@@ -316,6 +316,7 @@ public class QuestClientSide {
 				for (String in : npcuuid.toString().split("")) {
 					builder += "§" + in;
 				}
+			
 				lore.add(builder);
 				meta.setLore(lore);
 				npcinfo.setItemMeta(meta);

@@ -307,6 +307,13 @@ public class Filewriters {
 				if(playerinfo.getplayer(p.getPlayeruuid()) == null){
 				playerinfo.loadplayer(p);
 				}
+				for(String type : p.getactivetype()){
+					for(int number : p.getactives(type)){
+						if(!type.equals("talkto")){
+							quest.addProgress(p.getPlayeruuid(), type, number);
+						}
+					}
+				}
 				in.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();

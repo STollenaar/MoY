@@ -11,7 +11,7 @@ import net.minecraft.server.v1_8_R3.NetworkManager;
 
 public class NPCNetworkManager extends NetworkManager{
 	public NPCNetworkManager() {
-		super(EnumProtocolDirection.SERVERBOUND);
+		super(EnumProtocolDirection.CLIENTBOUND);
 		try {
 	            Field channel = NetworkManager.class.getDeclaredField("channel");
 	            Field address = NetworkManager.class.getDeclaredField("l");

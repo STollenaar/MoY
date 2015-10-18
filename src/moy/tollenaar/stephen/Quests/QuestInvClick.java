@@ -4,18 +4,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-
-
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import moy.tollenaar.stephen.CEvents.EnchantEvent;
+import moy.tollenaar.stephen.CEvents.QuestProcessEvent;
 import moy.tollenaar.stephen.InventoryUtils.InventoryType;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
@@ -65,7 +68,7 @@ public class QuestInvClick implements Listener {
 								questers.GetIds("harvest", npcuuid), npcuuid);
 					} else if (name.equals("Warp Lists")) {
 						questers.allwarps(player,
-								questers.getId(npcuuid), npcuuid);
+								questers.getWarpId(npcuuid), npcuuid);
 					} else if (name.equals("Talk to Quest")) {
 						questers.alltalkto(player,
 								questers.GetIds("talkto", npcuuid), npcuuid);
@@ -433,7 +436,7 @@ public class QuestInvClick implements Listener {
 						questers.RemoveQuest("warp", npcuuid, -1);
 						player.closeInventory();
 						questers.allwarps(player,
-								questers.getId(npcuuid), npcuuid);
+								questers.getWarpId(npcuuid), npcuuid);
 					}
 
 					if (item.getItemMeta().getDisplayName()
@@ -596,14 +599,12 @@ public class QuestInvClick implements Listener {
 				int number = Integer.parseInt(item.getItemMeta().getLore()
 						.get(item.getItemMeta().getLore().size() - 1)
 						.replace("§", ""));
-				String message = GetMessage(item.getType(), number);
 				String quetstype = GetTypeQuest(item.getType());
 				
 				if(quetstype.equals("event")){
 					String t = item.getItemMeta().getLore().get(0);
 					quetstype = t.replaceAll("§", "").trim();
 				}
-				
 				UUID npcuuid = UUID.fromString(clickedinv
 						.getItem(clickedinv.getSize() - 1).getItemMeta()
 						.getLore().get(0).replaceAll("§", ""));
@@ -611,34 +612,17 @@ public class QuestInvClick implements Listener {
 				 * this is for adding new acitve quests
 				 */
 				if (!quetstype.equals("warp")) {
-					questers.AddActiveQuest(player, number, quetstype);
-					/**
-					 * going to send the player his confirmation etc.
-					 */
-					player.closeInventory();
-					player.sendMessage(ChatColor.BLUE + "[" + ChatColor.BLUE
-							+ "YQuest" + ChatColor.BLUE + "] " + ChatColor.GRAY
-							+ message);
-					if (!quetstype.equals("talkto")) {
-						if (Quest.progress.get(player.getUniqueId()) != null) {
-							if (Quest.progress.get(player.getUniqueId()).get(
-									quetstype) != null) {
-								Quest.progress.get(player.getUniqueId())
-										.get(quetstype).put(number, 0);
-							} else {
-								HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
-								numberq.put(number, 0);
-								Quest.progress.get(player.getUniqueId()).put(
-										quetstype, numberq);
-							}
-						} else {
-							HashMap<String, HashMap<Integer, Integer>> total = new HashMap<String, HashMap<Integer, Integer>>();
-							HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
-							numberq.put(number, 0);
-							total.put(quetstype, numberq);
-							Quest.progress.put(player.getUniqueId(), total);
-						}
+					try {
+						String message = ChatColor.BLUE + "[" + ChatColor.BLUE
+								+ plugin.getNPCHandler().getNPCByUUID(npcuuid).getName() + ChatColor.BLUE + "] " + ChatColor.GRAY + getmessage(quetstype, number);
+						player.sendMessage(message);
+						plugin.speech.removeCache(player.getUniqueId(), quetstype, number);
+						SpeechType.constructSpeech(player, quetstype, number, plugin.getNPCHandler().getNPCByUUID(npcuuid).getName());
+					} catch (CloneNotSupportedException e) {
+						e.printStackTrace();
 					}
+					player.closeInventory();
+					
 				} else {
 					int number2 = Integer.parseInt(item.getItemMeta().getLore()
 							.get(item.getItemMeta().getLore().size() - 2)
@@ -648,6 +632,28 @@ public class QuestInvClick implements Listener {
 							questers.returnwarp(number2).getStartloc(), item.getItemMeta().getLore().get(1), number + "-" + number2 + "-" +  item.getItemMeta().getLore().get(1));
 				}
 				event.setCancelled(true);
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onQuestProcess(QuestProcessEvent event){
+		
+		questers.AddActiveQuest(event.getPlayer(), event.getQuestnumber(), event.getType());
+		if (!event.getType().equals("talkto")) {
+			if (questers.getProgress(event.getPlayer().getUniqueId()) != null) {
+				if (questers.getProgress(event.getPlayer().getUniqueId()).get(
+						event.getType()) != null) {
+					questers.getProgress(event.getPlayer().getUniqueId())
+							.get(event.getType()).put(event.getQuestnumber(), 0);
+				} else {
+					HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
+					numberq.put(event.getQuestnumber(), 0);
+					questers.getProgress(event.getPlayer().getUniqueId()).put(
+							event.getType(), numberq);
+				}
+			} else {
+				questers.addProgress(event.getPlayer().getUniqueId(), event.getType(), event.getQuestnumber());
 			}
 		}
 	}
@@ -664,22 +670,8 @@ public class QuestInvClick implements Listener {
 		}
 	}
 
-	private String GetMessage(Material itemtype, int quetsnumber) {
-		switch (itemtype) {
-		case DIAMOND_SWORD:
-			QuestKill kill = questers.returnkill(quetsnumber);
-			return kill.getMessage();
-		case DIAMOND_PICKAXE:
-			QuestHarvest harvest = questers.returnharvest(quetsnumber);
-			return harvest.getMessage();
-		case FEATHER:
-			QuestTalkto talk = questers.returntalkto(quetsnumber);
-			return talk.getMessage();
-		default:
-			return "Enjoy your trip.";
-		}
-	}
 
+	
 	private String GetTypeQuest(Material itemtype) {
 		switch (itemtype) {
 		case DIAMOND_SWORD:
@@ -692,6 +684,20 @@ public class QuestInvClick implements Listener {
 			return "event";
 		default:
 			return "warp";
+		}
+	}
+	private String getmessage(String type, int number) {
+		switch (type) {
+		case "kill":
+			return questers.returnkill(number).getMessage();
+		case "harvest":
+			return questers.returnharvest(number).getMessage();
+		case "talkto":
+			return questers.returntalkto(number).getMessage();
+		case "event":
+			return questers.returneventquest(number).getMessage();
+		default:
+			return null;
 		}
 	}
 }

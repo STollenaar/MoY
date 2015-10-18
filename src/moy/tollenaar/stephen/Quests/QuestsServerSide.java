@@ -534,7 +534,7 @@ public class QuestsServerSide extends Quest {
 		return t;
 	}
 
-	public Integer getId(UUID npcuuid) {
+	public Integer getWarpId(UUID npcuuid) {
 		if (warplists.get(npcuuid) != null) {
 			return warplists.get(npcuuid);
 		} else {

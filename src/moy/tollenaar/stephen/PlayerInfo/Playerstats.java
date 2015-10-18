@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import moy.tollenaar.stephen.SkillsStuff.Recepy;
+
 public class Playerstats implements Serializable{
 
 	/**
@@ -30,7 +32,8 @@ public class Playerstats implements Serializable{
 	private int cookingprog;
 	private int fishingprog;
 	private int levelprog;
-
+	private Set<Recepy> recepies = new HashSet<Recepy>();
+	
 	public Playerstats(UUID playeruuid) {
 		this.playeruuid = playeruuid;
 		this.ability = 0;
@@ -155,6 +158,16 @@ public class Playerstats implements Serializable{
 				rewardedlist.get(type).remove(number);
 			}
 		}
+	}
+	public void learnRecepy(Recepy recepy){
+		recepies.add(recepy);
+	}
+	
+	public boolean hasRecepy(Recepy recepy){
+		if(recepies.contains(recepy)){
+			return true;
+		}
+		return false;
 	}
 	
 	

@@ -933,8 +933,8 @@ public class DbStuff {
 				}
 			}
 			String warpids = null;
-			if (questers.getId(npcuuid) != -1) {
-				warpids = Integer.toString(questers.getId(npcuuid));
+			if (questers.getWarpId(npcuuid) != -1) {
+				warpids = Integer.toString(questers.getWarpId(npcuuid));
 			}
 
 			String eventquestids = null;
@@ -1377,26 +1377,28 @@ public class DbStuff {
 				if (rs.getString("partyinvite") != null) {
 					party.invites.put(player, rs.getString("partyinvite"));
 				}
-				Playerstats p = playerinfo.createplayer(player);
+				if (playerinfo.getplayer(player) == null) {
+					Playerstats p = playerinfo.createplayer(player);
 
-				p.setWoodcutting(rs.getInt("woodcutting"));
-				p.setMining(rs.getInt("mining"));
-				p.setSmelting(rs.getInt("smelting"));
-				p.setCooking(rs.getInt("cooking"));
-				p.setFishing(rs.getInt("fishing"));
+					p.setWoodcutting(rs.getInt("woodcutting"));
+					p.setMining(rs.getInt("mining"));
+					p.setSmelting(rs.getInt("smelting"));
+					p.setCooking(rs.getInt("cooking"));
+					p.setFishing(rs.getInt("fishing"));
 
-				p.setWoodcuttingprog(rs.getInt("woodcuttingprog"));
-				p.setMiningprog(rs.getInt("miningprog"));
-				p.setSmeltingprog(rs.getInt("smeltingprog"));
-				p.setCookingprog(rs.getInt("cookingprog"));
-				p.setFishingprog(rs.getInt("fishingprog"));
+					p.setWoodcuttingprog(rs.getInt("woodcuttingprog"));
+					p.setMiningprog(rs.getInt("miningprog"));
+					p.setSmeltingprog(rs.getInt("smeltingprog"));
+					p.setCookingprog(rs.getInt("cookingprog"));
+					p.setFishingprog(rs.getInt("fishingprog"));
 
-				p.setAbility(rs.getInt("abilitie"));
-				p.setStrength(rs.getInt("strength"));
-				p.setDex(rs.getInt("dex"));
-				p.setLevel(rs.getInt("lvl"));
-				p.setLevelprog(rs.getInt("levelprog"));
-				playerinfo.saveplayerdata(p);
+					p.setAbility(rs.getInt("abilitie"));
+					p.setStrength(rs.getInt("strength"));
+					p.setDex(rs.getInt("dex"));
+					p.setLevel(rs.getInt("lvl"));
+					p.setLevelprog(rs.getInt("levelprog"));
+					playerinfo.saveplayerdata(p);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1578,8 +1580,7 @@ public class DbStuff {
 						rs.getInt("spawnlocationy"),
 						rs.getInt("spawnlocationz"));
 				questers.spawnNpc(spawn, rs.getString("npcname"),
-						rs.getInt("npcid"), rs.getString("npcskinname")
-						);
+						rs.getInt("npcid"), rs.getString("npcskinname"));
 				UUID npc = questers.uniquenpcid.get(rs.getInt("npcid"));
 				for (UUID tu : questers.GetKeysSets("talkto")) {
 					for (Integer qn : questers.GetIds("talkto", tu)) {

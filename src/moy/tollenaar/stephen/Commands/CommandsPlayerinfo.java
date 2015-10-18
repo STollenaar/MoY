@@ -1,28 +1,36 @@
 package moy.tollenaar.stephen.Commands;
 
+import java.util.ArrayList;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
+import moy.tollenaar.stephen.Books.AlchemyVol1;
 import moy.tollenaar.stephen.CEvents.ProgEvent;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 import moy.tollenaar.stephen.Quests.QuestsServerSide;
+import moy.tollenaar.stephen.Util.Runic;
 
 public class CommandsPlayerinfo implements CommandExecutor {
 
 	private Playerinfo playerinfo;
 	private QuestsServerSide questers;
-
+	private Runic runic;
 	public CommandsPlayerinfo(MoY instance) {
 		this.playerinfo = instance.playerinfo;
 		this.questers = instance.questers;
+		this.runic = instance.runic;
 	}
 
 	@Override
@@ -37,7 +45,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				if (args.length == 0) {
 					playerinfo.playerstatsinv(player);
 					return true;
-				} else {
+				} else if(user.has("Ysir.stafflvl")){
 					if (args.length == 2) {
 						try {
 							int newlvl = Integer.parseInt(args[1]);
@@ -55,6 +63,9 @@ public class CommandsPlayerinfo implements CommandExecutor {
 								p.setStrength(newlvl);
 							} else if (args[0].equalsIgnoreCase("dex")) {
 								p.setDex(newlvl);
+							}else if(args[0].equalsIgnoreCase("enchant")){
+								ItemStack book = new AlchemyVol1(runic).makeBook();
+								player.getInventory().addItem(book);
 							}
 						} catch (NumberFormatException ex) {
 							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");

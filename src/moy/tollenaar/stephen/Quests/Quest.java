@@ -55,10 +55,35 @@ public class Quest {
 
 	private static HashMap<Integer, QuestEvent> eventquests = new HashMap<Integer, QuestEvent>();
 
-	public static HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>> progress = new HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>>();
+	private static HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>> progress = new HashMap<UUID, HashMap<String, HashMap<Integer, Integer>>>();
 
 	public int returnProgress(UUID playeruuid, String type, int number) {
 		return progress.get(playeruuid).get(type).get(number);
+	}
+	
+	public HashMap<String, HashMap<Integer, Integer>> getProgress(UUID player){
+		return progress.get(player);
+	}
+	public void changeProgress(){
+		
+	}
+	
+	public void addProgress(UUID player, String type, int quest){
+		if(progress.get(player) != null){
+			if(progress.get(player).get(type) != null){
+				progress.get(player).get(type).put(quest, 0);
+			}else{
+				HashMap<Integer, Integer> id = new HashMap<Integer, Integer>();
+				id.put(quest, 0);
+				progress.get(player).put(type, id);
+			}
+		}else{
+			HashMap<Integer, Integer> id = new HashMap<Integer, Integer>();
+			id.put(quest, 0);
+			HashMap<String, HashMap<Integer, Integer>> t = new HashMap<String, HashMap<Integer, Integer>>();
+			t.put(type, id);
+			progress.put(player, t);
+		}
 	}
 
 	public void removekill(int number) {
@@ -495,6 +520,8 @@ public class Quest {
 				+ ChatColor.BLUE + "] " + ChatColor.GRAY + message);
 		playerinfo.saveplayerdata(p);
 	}
+	
+
 
 	@SuppressWarnings("deprecation")
 	public void ActiveQuest(Player player) {

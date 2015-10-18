@@ -44,7 +44,7 @@ public class Travel implements Listener {
 	private TravelBoatEvent boat;
 	private TravelCartEvent cart;
 	private TravelDragonEvent dragon;
-	private static MoY plugin;
+	private MoY plugin;
 	private Filewriters fw;
 	private QuestsServerSide questers;
 
@@ -448,7 +448,7 @@ public class Travel implements Listener {
 		}
 	}
 
-	public static int traveltime(UUID npcuuid, int questnumber, String type,
+	public int traveltime(UUID npcuuid, int questnumber, String type,
 			Location end) {
 
 		NPCHandler handler = plugin.getNPCHandler();

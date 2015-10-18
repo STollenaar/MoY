@@ -65,7 +65,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 			}
 			if(!type.equals("harbor") && !type.equals("trip") && !type.equals("eventquest")){
 			UUID npcuuid = UUID.fromString(info.get(1));
-			if (type.equals("Main")) {
+			if (type.equals("Main") && typed.length() < 16) {
 				NPCHandler handler = plugin.getNPCHandler();
 				NPC npc = handler.getNPCByUUID(npcuuid);
 				
@@ -73,7 +73,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 				
 				event.setCancelled(true);
 				questers.npcpos.remove(player.getUniqueId());
-			} else if (type.equals("Skin")) {
+			} else if (type.equals("Skin") && typed.length() < 16) {
 				NPCHandler handler = plugin.getNPCHandler();
 				NPC npc = handler.getNPCByUUID(npcuuid);
 				npc.setSkin(typed);

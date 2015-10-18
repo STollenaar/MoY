@@ -30,7 +30,7 @@ public class ProgressKill implements Listener {
 		this.playerinfo = instance.playerinfo;
 	}
 
-	@SuppressWarnings({ "static-access", "deprecation" })
+	@SuppressWarnings({ "deprecation" })
 	@EventHandler
 	public void OnMobKill(EntityDeathEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -51,7 +51,7 @@ public class ProgressKill implements Listener {
 							continue;
 						}
 						if (EntityType.valueOf(kill.getMonster().toUpperCase()).getName().equals(ent.getType().getName())) {
-							HashMap<Integer, Integer> amount = q.progress.get(
+							HashMap<Integer, Integer> amount = q.getProgress(
 									player.getUniqueId()).get("kill");
 							if (amount.get(quests) + 1 != kill.getCount()) {
 								amount.put(quests, amount.get(quests) + 1);
@@ -80,7 +80,7 @@ public class ProgressKill implements Listener {
 							continue;
 						}
 						if (EntityType.valueOf(kill.getType().toUpperCase()).getName().equals(ent.getType().getName())) {
-							HashMap<Integer, Integer> amount = q.progress.get(
+							HashMap<Integer, Integer> amount = q.getProgress(
 									player.getUniqueId()).get("eventkill");
 							if (amount.get(quests) + 1 != kill.getCount()) {
 								amount.put(quests, amount.get(quests) + 1);

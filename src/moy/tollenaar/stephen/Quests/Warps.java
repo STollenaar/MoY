@@ -30,6 +30,8 @@ public class Warps {
 
 	private String state;
 	
+	private String bypassed;
+	
 	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
 
 	public void npcsettingswarplists(UUID npcuuid, Player player) {
@@ -101,14 +103,17 @@ public class Warps {
 			temp.setDisplayName("Delete Warp");
 			delete.setItemMeta(temp);
 		}
+		ItemStack override = ItemGenerator.ByPassWarp(getBypassed());
 
 		warpinv.addItem(title);
 		warpinv.addItem(transport);
 		warpinv.addItem(typei);
 		warpinv.addItem(money);
 		warpinv.addItem(qstate);
+		warpinv.addItem(override);
 		warpinv.setItem(warpinv.getSize() - 2, delete);
 		warpinv.setItem(warpinv.getSize() - 1, main);
+		
 		player.openInventory(warpinv);
 
 	}
@@ -128,6 +133,7 @@ public class Warps {
 		this.type = new ArrayList<String>(Arrays.asList("none"));
 		this.costs = 0.0;
 		this.state = "disabled";
+		this.setBypassed("-1");
 		allwarps.add(this);
 	}
 
@@ -175,6 +181,14 @@ public class Warps {
 
 	public Location getStartloc() {
 		return startloc;
+	}
+
+	public String getBypassed() {
+		return bypassed;
+	}
+
+	public void setBypassed(String bypassed) {
+		this.bypassed = bypassed;
 	}
 
 }

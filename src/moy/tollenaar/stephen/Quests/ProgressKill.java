@@ -25,7 +25,7 @@ public class ProgressKill implements Listener {
 	private Playerinfo playerinfo;
 	
 	public ProgressKill(MoY instance) {
-		this.q = instance.questers;
+		this.q = instance.qserver;
 		this.plugin = instance;
 		this.playerinfo = instance.playerinfo;
 	}
@@ -57,9 +57,9 @@ public class ProgressKill implements Listener {
 								amount.put(quests, amount.get(quests) + 1);
 							} else {
 								
-								for(UUID npcuuid : plugin.questers.GetKeysSets("kill")){
+								for(UUID npcuuid : plugin.qserver.GetKeysSets("kill")){
 									
-									if(plugin.questers.GetIds("kill", npcuuid).contains(quests)){
+									if(plugin.qserver.GetIds("kill", npcuuid).contains(quests)){
 										NPC npc = handler.getNPCByUUID(npcuuid);
 										q.AddCompletedQuest(player, quests, "kill", npc.getName());
 										break;
@@ -86,9 +86,9 @@ public class ProgressKill implements Listener {
 								amount.put(quests, amount.get(quests) + 1);
 							} else {
 								
-								for(UUID npcuuid : plugin.questers.GetKeysSets("event")){
+								for(UUID npcuuid : plugin.qserver.GetKeysSets("event")){
 									
-									if(plugin.questers.GetIds("event", npcuuid).contains(quests)){
+									if(plugin.qserver.GetIds("event", npcuuid).contains(quests)){
 										NPC npc = handler.getNPCByUUID(npcuuid);
 										q.AddCompletedQuest(player, quests, "eventkill", npc.getName());
 										break;

@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -15,6 +16,9 @@ import java.util.UUID;
 
 
 
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -455,6 +459,13 @@ public class Travel implements Listener {
 		NPC npc =handler.getNPCByUUID(npcuuid);
 		Location start = npc.getCurrentloc();
 
+		if(!questers.returnwarp(questnumber).getBypassed().equals("-1")){
+			int time = getSeconds(questers.returnwarp(questnumber).getBypassed());
+			if(time != -1){
+				return time;
+			}
+		}
+		
 		double sx = start.getX();
 		double sy = start.getY();
 		double sz = start.getZ();
@@ -603,7 +614,7 @@ public class Travel implements Listener {
 
 	public Travel(MoY instance) {
 		this.plugin = instance;
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 		this.fw = instance.fw;
 		this.boat = instance.boat;
 		this.cart = instance.cart;
@@ -921,4 +932,26 @@ public class Travel implements Listener {
 
 	}
 
+	private int getSeconds(String time){
+		String[] splitted = time.split("");
+		try{
+		int duration = Integer.parseInt(splitted[0].trim());
+		switch (splitted[1]){
+		case "s":
+		case "S":
+			break;
+		case "m":
+		case "M":
+			duration *= 60;
+			break;
+		case "h":
+		case "H":
+			duration *= 60*60;
+			break;
+		}
+		return duration;
+		}catch(NumberFormatException ex){
+			return -1;
+		}
+	}
 }

@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerChatEvent;
 public class ChatController implements Listener{
 	MoY plugin;
 	Party party;
+	
 	@EventHandler
 	public void onPlayerChat(PlayerChatEvent event){
 		Player player  = event.getPlayer();

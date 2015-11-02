@@ -25,6 +25,8 @@ import net.minecraft.server.v1_8_R3.Entity;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 import net.minecraft.server.v1_8_R3.Packet;
 import net.minecraft.server.v1_8_R3.PacketPlayOutAnimation;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutNamedEntitySpawn;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
 import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo.EnumPlayerInfoAction;
 import net.minecraft.server.v1_8_R3.Pathfinder;
@@ -46,6 +48,9 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	private boolean spawned;
 	private final int id;
 
+	
+	
+	
 	public boolean isSpawned() {
 		return spawned;
 	}
@@ -203,9 +208,8 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	}
 
 	public void playerJoinPacket(Player player) {
-		sendPacketsToPlayer((EntityPlayer) getHandle(player),
-				new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.ADD_PLAYER,
-						this));
+		sendPacketsToPlayer(((CraftPlayer)player).getHandle(), new PacketPlayOutPlayerInfo(
+				EnumPlayerInfoAction.ADD_PLAYER, this), new PacketPlayOutNamedEntitySpawn(this), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, this));
 	}
 
 	public static Entity getHandle(org.bukkit.entity.Entity bukkitEntity) {
@@ -273,29 +277,29 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	public void spawn(Location location, NPCSpawnReason reason, NPCEntity npc) {
 		World world = location.getWorld();
 		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
-				EnumPlayerInfoAction.ADD_PLAYER, npc));
+				EnumPlayerInfoAction.ADD_PLAYER, npc), new PacketPlayOutNamedEntitySpawn(npc), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 		WorldServer worldServer = ((CraftWorld) world).getHandle();
 
 		npc.setPosition(location.getX(), location.getY(),
 				location.getZ());
 		worldServer.addEntity(npc, SpawnReason.CUSTOM);
-	
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
+				EnumPlayerInfoAction.ADD_PLAYER, npc), new PacketPlayOutNamedEntitySpawn(npc), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, npc));
 		this.spawned = true;
 		Bukkit.getPluginManager().callEvent(
 				new NPCSpawnEvent(npc, location, reason, shop, id));
 		if(reason != NPCSpawnReason.SHOP_SPAWN){
-		plugin.questers.resetHear(getUniqueId());
+		plugin.qserver.resetHear(getUniqueId());
 		}else{
-			plugin.questers.npchear(getUniqueId());
+			plugin.qserver.npchear(getUniqueId());
 		}
 	}
 
 	@Override
 	public void despawn(NPCSpawnReason reason) {
 		this.spawned = false;
-		plugin.questers.canceltasks(getUniqueId());
-		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
-				EnumPlayerInfoAction.REMOVE_PLAYER, this));
+		plugin.qserver.canceltasks(getUniqueId());
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutEntityDestroy(this.getId()));
 		if (reason == NPCSpawnReason.DESPAWN) {
 			Bukkit.getPluginManager().callEvent(new NPCDespawnEvent(this));
 		}

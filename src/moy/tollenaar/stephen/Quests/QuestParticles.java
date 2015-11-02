@@ -22,7 +22,7 @@ public class QuestParticles {
 
 	public QuestParticles(MoY instance) {
 		QuestParticles.plugin = instance;
-		QuestParticles.q = instance.questers;
+		QuestParticles.q = instance.qserver;
 	}
 
 	public static void collectplayers(Location loc, UUID npcuuid) {
@@ -85,7 +85,7 @@ public class QuestParticles {
 			if (p.getactives("talkto") != null) {
 				for (Integer i : p.getactives("talkto")) {
 					QuestTalkto talk = q.returntalkto(i);
-					if (plugin.questers.uniquenpcid.get(talk.getNpcid()) == npcuuid) {
+					if (plugin.qserver.uniquenpcid.get(talk.getNpcid()) == npcuuid) {
 						checks = true;
 						break;
 					}
@@ -102,7 +102,7 @@ public class QuestParticles {
 			for (String type : p.getcompletedtype()) {
 				for (int number : p.getcompleted(type)) {
 					try {
-						if (plugin.questers.GetIds(type, npcuuid).contains(
+						if (plugin.qserver.GetIds(type, npcuuid).contains(
 								number)) {
 							return true;
 						}
@@ -117,8 +117,8 @@ public class QuestParticles {
 
 	private static boolean aviablew(UUID npcuuid) {
 		boolean checks = false;
-		if (plugin.questers.getWarpId(npcuuid) != -1) {
-			Warps warp = plugin.questers.returnwarp(plugin.questers.getWarpId(npcuuid));
+		if (plugin.qserver.getWarpId(npcuuid) != -1) {
+			Warps warp = plugin.qserver.returnwarp(plugin.qserver.getWarpId(npcuuid));
 			if(warp.getState().equals("active")){
 			checks = true;
 			}
@@ -128,8 +128,8 @@ public class QuestParticles {
 
 	private static boolean aviableq(UUID npcuuid, Player player) {
 		boolean checks = false;
-		if (plugin.questers.GetIds("kill", npcuuid) != null) {
-			for (Integer in : plugin.questers.GetIds("kill", npcuuid)) {
+		if (plugin.qserver.GetIds("kill", npcuuid) != null) {
+			for (Integer in : plugin.qserver.GetIds("kill", npcuuid)) {
 				if (check(npcuuid, player, in, "kill")) {
 					checks = true;
 					break;
@@ -137,8 +137,8 @@ public class QuestParticles {
 			}
 		}
 
-		if (plugin.questers.GetIds("harvest", npcuuid) != null) {
-			for (Integer in : plugin.questers.GetIds("harvest", npcuuid)) {
+		if (plugin.qserver.GetIds("harvest", npcuuid) != null) {
+			for (Integer in : plugin.qserver.GetIds("harvest", npcuuid)) {
 				if (check(npcuuid, player, in, "harvest")) {
 					checks = true;
 					break;
@@ -146,8 +146,8 @@ public class QuestParticles {
 			}
 		}
 
-		if (plugin.questers.GetIds("talkto", npcuuid) != null) {
-			for (Integer in : plugin.questers.GetIds("talkto", npcuuid)) {
+		if (plugin.qserver.GetIds("talkto", npcuuid) != null) {
+			for (Integer in : plugin.qserver.GetIds("talkto", npcuuid)) {
 				if (check(npcuuid, player, in, "talkto")) {
 					checks = true;
 					break;

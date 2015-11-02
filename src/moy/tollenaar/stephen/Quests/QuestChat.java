@@ -488,7 +488,6 @@ public class QuestChat extends QuestInvClick implements Listener {
 				}
 
 			} else if (type.equals("warplists")) {
-				System.out.println(info);
 				int number = Integer.parseInt(info.get(2));
 				Warps warp = questers.returnwarp(number);
 				boolean pass = false;
@@ -539,6 +538,10 @@ public class QuestChat extends QuestInvClick implements Listener {
 					}else{
 						player.sendMessage("type true or false");
 					}
+					break;
+				case "override":
+					warp.setBypassed(typed);
+					pass = true;
 					break;
 				}
 				if (pass) {

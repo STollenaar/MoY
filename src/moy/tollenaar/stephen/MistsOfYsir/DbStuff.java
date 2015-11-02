@@ -69,12 +69,16 @@ public class DbStuff {
 							+ "smelting INTEGER NOT NULL, "
 							+ "cooking INTEGER NOT NULL, "
 							+ "fishing INTEGER NOT NULL, "
+							+ "enchanting INTEGER NOT NULL, "
+							+ "alchemy INTEGER NOT NULL,"
 
 							+ "woodcuttingprog INTEGER NOT NULL, "
 							+ "miningprog INTEGER NOT NULL, "
 							+ "smeltingprog INTEGER NOT NULL, "
 							+ "cookingprog INTEGER NOT NULL, "
 							+ "fishingprog INTEGER NOT NULL, "
+							+ "enchantingprog INTEGER NOT NULL, "
+							+ "alchemyprog INTEGER NOT NULL, "
 
 							+ "abilitie INTEGER NOT NULL, "
 							+ "strength INTEGER NOT NULL, "
@@ -441,8 +445,8 @@ public class DbStuff {
 					+ "`fishing`, " + "`woodcuttingprog`," + "`miningprog`,"
 					+ "`smeltingprog`," + "`cookingprog`," + "`fishingprog`,"
 					+ "`abilitie`," + "`strength`," + "`dex`," + "`lvl`,"
-					+ "`levelprog`)" + " VALUES("
-					+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+					+ "`levelprog`, `enchanting`, `enchantingprog`, `alchemy`, `alchemyprog`)" + " VALUES("
+					+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 			String update = "UPDATE Mist_PlayerData SET " + "partyname=?,"
 					+ "partyinvite=?," + "woodcutting=?," + "mining=?,"
@@ -450,7 +454,7 @@ public class DbStuff {
 					+ "woodcuttingprog=?," + "miningprog=?,"
 					+ "smeltingprog=?," + "cookingprog=?," + "fishingprog=?,"
 					+ "abilitie=?," + "strength=?," + "dex=?," + "lvl=?,"
-					+ "levelprog=?" + " WHERE useruuid=?";
+					+ "levelprog=?, enchanting=?, enchantingprog=?, alchemy=?, alchemyprog=?" + " WHERE useruuid=?";
 
 			PreparedStatement pst = null;
 			try {
@@ -487,7 +491,11 @@ public class DbStuff {
 					pst.setInt(15, p.getDex());
 					pst.setInt(16, p.getLevel());
 					pst.setInt(17, p.getLevelprog());
-					pst.setString(18, player.toString());
+					pst.setInt(18, p.getEnchanting());
+					pst.setInt(19, p.getEnchantingprog());
+					pst.setInt(20, p.getAlchemy());
+					pst.setInt(21, p.getAlchemyprog());
+					pst.setString(22, player.toString());
 
 					pst.execute();
 				} else {
@@ -521,7 +529,10 @@ public class DbStuff {
 					pst.setInt(16, p.getDex());
 					pst.setInt(17, p.getLevel());
 					pst.setInt(18, p.getLevelprog());
-
+					pst.setInt(19, p.getEnchanting());
+					pst.setInt(20, p.getEnchantingprog());
+					pst.setInt(21, p.getAlchemy());
+					pst.setInt(22, p.getAlchemyprog());
 					pst.execute();
 				}
 
@@ -1385,13 +1396,17 @@ public class DbStuff {
 					p.setSmelting(rs.getInt("smelting"));
 					p.setCooking(rs.getInt("cooking"));
 					p.setFishing(rs.getInt("fishing"));
-
+					p.setEnchanting(rs.getInt("enchanting"));
+					p.setAlchemy(rs.getInt("alchemy"));
+					
 					p.setWoodcuttingprog(rs.getInt("woodcuttingprog"));
 					p.setMiningprog(rs.getInt("miningprog"));
 					p.setSmeltingprog(rs.getInt("smeltingprog"));
 					p.setCookingprog(rs.getInt("cookingprog"));
 					p.setFishingprog(rs.getInt("fishingprog"));
-
+					p.setEnchantingprog(rs.getInt("enchantingprog"));
+					p.setAlchemyprog(rs.getInt("alchemyprog"));
+					
 					p.setAbility(rs.getInt("abilitie"));
 					p.setStrength(rs.getInt("strength"));
 					p.setDex(rs.getInt("dex"));
@@ -1807,7 +1822,7 @@ public class DbStuff {
 
 	public DbStuff(MoY instance) {
 		this.plugin = instance;
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 		this.party = instance.party;
 		this.playerinfo = instance.playerinfo;
 		this.travel = instance.tr;

@@ -25,6 +25,10 @@ public class Playerstats implements Serializable{
 	private int smelting;
 	private int cooking;
 	private int fishing;
+	private int enchanting;
+	private int alchemy;
+	
+
 
 	private int woodcuttingprog;
 	private int miningprog;
@@ -32,6 +36,25 @@ public class Playerstats implements Serializable{
 	private int cookingprog;
 	private int fishingprog;
 	private int levelprog;
+	private int enchantingprog;
+	private int alchemyprog;
+	
+	public int getEnchanting() {
+		return enchanting;
+	}
+
+	public void setEnchanting(int enchanting) {
+		this.enchanting = enchanting;
+	}
+
+	public int getEnchantingprog() {
+		return enchantingprog;
+	}
+
+	public void setEnchantingprog(int echantingprog) {
+		this.enchantingprog = echantingprog;
+	}
+
 	private Set<Recepy> recepies = new HashSet<Recepy>();
 	
 	public Playerstats(UUID playeruuid) {
@@ -46,13 +69,17 @@ public class Playerstats implements Serializable{
 		this.smelting = 1;
 		this.cooking = 1;
 		this.fishing = 1;
-
+		this.enchanting = 1;
+		this.alchemy = 1;
+		
 		this.levelprog = 0;
 		this.woodcuttingprog = 0;
 		this.miningprog = 0;
 		this.smeltingprog = 0;
 		this.cookingprog = 0;
 		this.fishingprog = 0;
+		this.enchantingprog = 0;
+		this.alchemyprog =0;
 		
 		this.activequests = new HashMap<String, Set<Integer>>();
 		this.completedquests = new HashMap<String, Set<Integer>>();
@@ -265,7 +292,21 @@ public class Playerstats implements Serializable{
 		return playeruuid;
 	}
 	
+	public int getAlchemy() {
+		return alchemy;
+	}
 
+	public void setAlchemy(int alchemy) {
+		this.alchemy = alchemy;
+	}
+
+	public int getAlchemyprog() {
+		return alchemyprog;
+	}
+
+	public void setAlchemyprog(int alchemyprog) {
+		this.alchemyprog = alchemyprog;
+	}
 
 
 }

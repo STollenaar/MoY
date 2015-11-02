@@ -1,16 +1,13 @@
 package moy.tollenaar.stephen.Commands;
 
-import java.util.ArrayList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -29,7 +26,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 	private Runic runic;
 	public CommandsPlayerinfo(MoY instance) {
 		this.playerinfo = instance.playerinfo;
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 		this.runic = instance.runic;
 	}
 
@@ -64,15 +61,22 @@ public class CommandsPlayerinfo implements CommandExecutor {
 							} else if (args[0].equalsIgnoreCase("dex")) {
 								p.setDex(newlvl);
 							}else if(args[0].equalsIgnoreCase("enchant")){
+								p.setEnchanting(newlvl);
+							}else if(args[0].equalsIgnoreCase("alchemy")){
+								p.setAlchemy(newlvl);
+							}else if(args[0].equalsIgnoreCase("runic")){
 								ItemStack book = new AlchemyVol1(runic).makeBook();
 								player.getInventory().addItem(book);
 							}
 						} catch (NumberFormatException ex) {
-							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
+							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting/enchant/alchemy/runic> <lvl>.");
 						}
 						return true;
-					} else {
-						player.sendMessage("Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
+					}else if(args[0].equalsIgnoreCase("runic")){
+						ItemStack book = new AlchemyVol1(runic).makeBook();
+						player.getInventory().addItem(book);
+					}else {
+						player.sendMessage("Please use /skill <wood/mining/fishing/cooking/smelting/enchant/alchemy/runic> <lvl>.");
 						return true;
 					}
 				}
@@ -146,6 +150,10 @@ public class CommandsPlayerinfo implements CommandExecutor {
 							xp = 1;
 						} else if (args[0].equalsIgnoreCase("level")) {
 							type = 6;
+						}else if(args[0].equalsIgnoreCase("enchant")){
+							type =7;
+						}else if(args[0].equalsIgnoreCase("alchemy")){
+							type =8;
 						}
 						if (type != 0) {
 							ProgEvent e = new ProgEvent(player.getUniqueId(),

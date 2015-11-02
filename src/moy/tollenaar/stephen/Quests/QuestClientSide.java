@@ -1,5 +1,7 @@
 package moy.tollenaar.stephen.Quests;
 
+import io.netty.handler.codec.ReplayingDecoder;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,18 +9,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.fusesource.jansi.Ansi;
 
+import moy.tollenaar.stephen.CEvents.QuestRewardEvent;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
@@ -26,8 +28,9 @@ import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 public class QuestClientSide {
 	private QuestsServerSide questers;
 	private MoY plugin;
+
 	public QuestClientSide(MoY instance) {
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 		this.plugin = instance;
 	}
 
@@ -316,7 +319,7 @@ public class QuestClientSide {
 				for (String in : npcuuid.toString().split("")) {
 					builder += "§" + in;
 				}
-			
+
 				lore.add(builder);
 				meta.setLore(lore);
 				npcinfo.setItemMeta(meta);
@@ -672,17 +675,8 @@ public class QuestClientSide {
 							}
 							// giving the reward
 							if (reward != null && !reward.contains("unknown")) {
-								System.out.println(Ansi.ansi().fg(
-										Ansi.Color.RED)
-										+ "QUEST COMPLETE"
-										+ Ansi.ansi().fg(Ansi.Color.WHITE));
-
-								for (String in : reward) {
-									String r = in.replace("player",
-											player.getName());
-									Bukkit.dispatchCommand(
-											Bukkit.getConsoleSender(), r);
-								}
+								QuestRewardEvent e = new QuestRewardEvent(player, number, type, npcname, questers);
+								Bukkit.getServer().getPluginManager().callEvent(e);
 								p.deletecompleted(type, i);
 								p.addrewarded(type, number,
 										System.currentTimeMillis());
@@ -697,4 +691,5 @@ public class QuestClientSide {
 		return pass;
 	}
 
+	
 }

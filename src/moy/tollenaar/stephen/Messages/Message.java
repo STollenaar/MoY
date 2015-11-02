@@ -1,4 +1,4 @@
-package moy.tollenaar.stephen.messages;
+package moy.tollenaar.stephen.Messages;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

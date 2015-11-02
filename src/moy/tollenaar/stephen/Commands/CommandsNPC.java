@@ -22,7 +22,7 @@ public class CommandsNPC implements CommandExecutor {
 	private QuestsServerSide questers;
 
 	public CommandsNPC(MoY instance) {
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 	}
 
 	@Override

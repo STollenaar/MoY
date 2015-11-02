@@ -10,10 +10,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import moy.tollenaar.stephen.CEvents.ProgEvent;
+import moy.tollenaar.stephen.Messages.InfoBar;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
-import moy.tollenaar.stephen.messages.InfoBar;
 
 public class FurnaceStorage {
 

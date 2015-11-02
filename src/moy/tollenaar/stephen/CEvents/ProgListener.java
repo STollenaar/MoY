@@ -10,10 +10,10 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
+import moy.tollenaar.stephen.Messages.InfoBar;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
-import moy.tollenaar.stephen.messages.InfoBar;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
@@ -70,6 +70,14 @@ public final class ProgListener implements Listener {
 			case -2:
 				p.setDex(p.getDex()+xp);
 				return;
+			case 7:
+				currentlvl = p.getEnchanting();
+				currentprog = p.getEnchantingprog();
+				break;
+			case 8:
+				currentlvl = p.getAlchemy();
+				currentprog = p.getAlchemyprog();
+				break;
 			default:
 				return;
 			}
@@ -128,6 +136,14 @@ public final class ProgListener implements Listener {
 			case 6:
 				p.setLevel(currentlvl);
 				p.setLevelprog(currentprog);
+				break;
+			case 7:
+				p.setEnchanting(currentlvl);
+				p.setEnchantingprog(currentprog);
+				break;
+			case 8:
+				p.setAlchemy(currentlvl);
+				p.setAlchemyprog(currentprog);
 				break;
 			default:
 				return;

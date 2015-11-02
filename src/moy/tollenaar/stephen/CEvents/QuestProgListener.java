@@ -22,7 +22,7 @@ public class QuestProgListener implements Listener {
 	private QuestsServerSide quest;
 	private MoY plugin;
 	public QuestProgListener(MoY instance) {
-		this.quest = instance.questers;
+		this.quest = instance.qserver;
 		this.plugin = instance;
 	}
 

@@ -10,15 +10,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import moy.tollenaar.stephen.CEvents.EnchantEvent;
 import moy.tollenaar.stephen.CEvents.QuestProcessEvent;
+import moy.tollenaar.stephen.CEvents.QuestProgEvent;
 import moy.tollenaar.stephen.InventoryUtils.InventoryType;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
@@ -30,9 +27,10 @@ public class QuestInvClick implements Listener {
 	private Travel tr;
 	protected QuestsServerSide questers;
 	private MoY plugin;
+
 	public QuestInvClick(MoY instance) {
 		this.tr = instance.tr;
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 		this.plugin = instance;
 	}
 
@@ -41,7 +39,7 @@ public class QuestInvClick implements Listener {
 		Inventory clickinv = event.getClickedInventory();
 		if (event.getCurrentItem() != null
 				&& event.getCurrentItem().getType() != Material.AIR) {
-			
+
 			if (clickinv != null
 					&& (InventoryType.contains(clickinv.getName()))) {
 				UUID npcuuid;
@@ -52,10 +50,11 @@ public class QuestInvClick implements Listener {
 				} catch (NullPointerException | IllegalArgumentException
 						| IndexOutOfBoundsException ex) {
 					// this is the uuid from the main menu
-					npcuuid = UUID.fromString(clickinv.getItem(clickinv.getSize()-1).getItemMeta()
+					npcuuid = UUID.fromString(clickinv
+							.getItem(clickinv.getSize() - 1).getItemMeta()
 							.getLore().get(0));
 				}
-				
+
 				ItemStack item = event.getCurrentItem();
 				String name = item.getItemMeta().getDisplayName();
 				Player player = (Player) event.getWhoClicked();
@@ -67,8 +66,8 @@ public class QuestInvClick implements Listener {
 						questers.allharvest(player,
 								questers.GetIds("harvest", npcuuid), npcuuid);
 					} else if (name.equals("Warp Lists")) {
-						questers.allwarps(player,
-								questers.getWarpId(npcuuid), npcuuid);
+						questers.allwarps(player, questers.getWarpId(npcuuid),
+								npcuuid);
 					} else if (name.equals("Talk to Quest")) {
 						questers.alltalkto(player,
 								questers.GetIds("talkto", npcuuid), npcuuid);
@@ -120,7 +119,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						int number = questers.createnewkill();
 						questers.addKillquest(npcuuid, number);
-						questers.returnkill(number).npcsettingskill(npcuuid, player);
+						questers.returnkill(number).npcsettingskill(npcuuid,
+								player);
 					} else {
 						event.setCancelled(true);
 						questers.returnkill(
@@ -189,8 +189,7 @@ public class QuestInvClick implements Listener {
 				else if (!clickinv.getName().equals("WarpList")) {
 					String type = clickinv.getItem(0).getItemMeta().getLore()
 							.get(1).replace("§", "").trim();
-					
-					
+
 					String questnumber = clickinv.getItem(0).getItemMeta()
 							.getLore().get(2).replace("§", "").trim();
 
@@ -213,10 +212,10 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName().equals("Mob")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						if(type.equals("1")){
-						player.sendMessage("type the monster name");
-						}else{
-						player.sendMessage("type the monster name or type the item id");
+						if (type.equals("1")) {
+							player.sendMessage("type the monster name");
+						} else {
+							player.sendMessage("type the monster name or type the item id");
 						}
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add(type);
@@ -232,14 +231,15 @@ public class QuestInvClick implements Listener {
 					if (item.getItemMeta().getDisplayName().equals("Count")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						if(type.equals("1")){
-						player.sendMessage("type how many monsters you need to kill");
-						}else if(type.equals("2")){
-						player.sendMessage("type how many items you need to collect");
-						}else if(type.equals("7")){
-							if(clickinv.getItem(1).getItemMeta().getDisplayName().equals("Mob")){
+						if (type.equals("1")) {
+							player.sendMessage("type how many monsters you need to kill");
+						} else if (type.equals("2")) {
+							player.sendMessage("type how many items you need to collect");
+						} else if (type.equals("7")) {
+							if (clickinv.getItem(1).getItemMeta()
+									.getDisplayName().equals("Mob")) {
 								player.sendMessage("type how many monsters you need to kill");
-							}else{
+							} else {
 								player.sendMessage("type how many items you need to collect");
 							}
 						}
@@ -309,7 +309,8 @@ public class QuestInvClick implements Listener {
 						temp.add("prereq");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
-					if(item.getItemMeta().getDisplayName().equals("Active Quest")){
+					if (item.getItemMeta().getDisplayName()
+							.equals("Active Quest")) {
 						event.setCancelled(true);
 						player.closeInventory();
 						player.sendMessage("Type true if the quest can be active otherwise type false");
@@ -320,31 +321,40 @@ public class QuestInvClick implements Listener {
 						temp.add("state");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
-					
+
 					if (item.getItemMeta().getDisplayName()
 							.equals("Delete Quest")) {
 						event.setCancelled(true);
 
 						switch (Integer.parseInt(type)) {
 						case 1:
-							questers.RemoveQuest(type, npcuuid, Integer.parseInt(questnumber));
+							questers.RemoveQuest(type, npcuuid,
+									Integer.parseInt(questnumber));
 							questers.removekill(Integer.parseInt(questnumber));
 							questers.allkill(player,
 									questers.GetIds(type, npcuuid), npcuuid);
 							break;
 						case 2:
-							questers.RemoveQuest(type, npcuuid, Integer.parseInt(questnumber));
+							questers.RemoveQuest(type, npcuuid,
+									Integer.parseInt(questnumber));
 							questers.removeharvest(Integer
 									.parseInt(questnumber));
 							questers.allharvest(player,
-									questers.GetIds(type, npcuuid),
-									npcuuid);
+									questers.GetIds(type, npcuuid), npcuuid);
 
 							break;
 						case 3:
-							questers.RemoveQuest(type, npcuuid, Integer.parseInt(questnumber));
+							questers.RemoveQuest(type, npcuuid,
+									Integer.parseInt(questnumber));
 							questers.removetalkto(Integer.parseInt(questnumber));
 							questers.alltalkto(player,
+									questers.GetIds(type, npcuuid), npcuuid);
+							break;
+						case 7:
+							questers.RemoveQuest(type, npcuuid,
+									Integer.parseInt(questnumber));
+							questers.removeevent(Integer.parseInt(questnumber));
+							questers.AllEvents(player,
 									questers.GetIds(type, npcuuid), npcuuid);
 							break;
 						}
@@ -356,10 +366,10 @@ public class QuestInvClick implements Listener {
 							.equals("Item to get")) {
 						event.setCancelled(true);
 						player.closeInventory();
-						if(type.equals("2")){
-						player.sendMessage("type the item id");
-						}else{
-						player.sendMessage("type the item id or type the monster name");
+						if (type.equals("2")) {
+							player.sendMessage("type the item id");
+						} else {
+							player.sendMessage("type the item id or type the monster name");
 						}
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add(type);
@@ -408,7 +418,10 @@ public class QuestInvClick implements Listener {
 					}
 				}
 				if (clickinv.getName().equals("WarpList")) {
-					String questnumber = clickinv.getItem(0).getItemMeta().getLore().get(2).replace("§", "").trim();
+					String questnumber = clickinv.getItem(0).getItemMeta()
+							.getLore().get(2).replace("§", "").trim();
+					String type = clickinv.getItem(0).getItemMeta().getLore()
+							.get(1).replace("§", "").trim();
 					if (item.getItemMeta().getDisplayName().equals("To Main")) {
 						event.setCancelled(true);
 						player.closeInventory();
@@ -419,7 +432,7 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type the new title of this warplists");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
+						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
 						temp.add("title");
@@ -435,8 +448,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						questers.RemoveQuest("warp", npcuuid, -1);
 						player.closeInventory();
-						questers.allwarps(player,
-								questers.getWarpId(npcuuid), npcuuid);
+						questers.allwarps(player, questers.getWarpId(npcuuid),
+								npcuuid);
 					}
 
 					if (item.getItemMeta().getDisplayName()
@@ -446,7 +459,7 @@ public class QuestInvClick implements Listener {
 						player.sendMessage("boat, oxcart or dragoncoach. If this is another type use as first word add. if"
 								+ "it is replacing a type set the line number counting from 0 in the purple texts.");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
+						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
 						temp.add("type");
@@ -458,21 +471,33 @@ public class QuestInvClick implements Listener {
 						player.closeInventory();
 						player.sendMessage("type a number for how much money the ride costs, if free type 0");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
+						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
 						temp.add("cost");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
-					if(item.getItemMeta().getDisplayName().equals("Active Warp")){
+					if (item.getItemMeta().getDisplayName()
+							.equals("Active Warp")) {
 						event.setCancelled(true);
 						player.closeInventory();
 						player.sendMessage("Type true if the warp can be active otherwise type false");
 						ArrayList<String> temp = new ArrayList<String>();
-						temp.add("warplists");
+						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
 						temp.add("state");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+					if(item.getItemMeta().getDisplayName().equals("Override")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("type a number as in <number><s/m/h> for the duration of the ride. Type -1 for auto generation");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(type);
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("bypass");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 				}
@@ -539,7 +564,8 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 					} else if (name.equals("Delete")) {
 						player.closeInventory();
-						tr.removetrip(tr.GetTrip(Integer.parseInt(id)).getType(), Integer.parseInt(id));
+						tr.removetrip(tr.GetTrip(Integer.parseInt(id))
+								.getType(), Integer.parseInt(id));
 						event.setCancelled(true);
 					}
 				} else if (clickinv.getName().equals("Wait Location info")) {
@@ -563,19 +589,22 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 					} else if (name.equals("Delete")) {
 						player.closeInventory();
-						tr.removeharbor(tr.GetHarbor(Integer.parseInt(id)).getType(), Integer.parseInt(id));
+						tr.removeharbor(tr.GetHarbor(Integer.parseInt(id))
+								.getType(), Integer.parseInt(id));
 						event.setCancelled(true);
 					}
 				}
-			}else if(clickinv.getName().equals("AllHarbors")){
-				String number = event.getCurrentItem().getItemMeta()
-						.getLore().get(2).replace("§", "").trim();
-				tr.GetHarbor(Integer.parseInt(number)).information((Player) event.getWhoClicked());
+			} else if (clickinv.getName().equals("AllHarbors")) {
+				String number = event.getCurrentItem().getItemMeta().getLore()
+						.get(2).replace("§", "").trim();
+				tr.GetHarbor(Integer.parseInt(number)).information(
+						(Player) event.getWhoClicked());
 				event.setCancelled(true);
-			}else if(clickinv.getName().equals("AllTrips")){
-				String number = event.getCurrentItem().getItemMeta()
-						.getLore().get(2).replace("§", "").trim();
-				tr.GetTrip(Integer.parseInt(number)).information((Player) event.getWhoClicked());
+			} else if (clickinv.getName().equals("AllTrips")) {
+				String number = event.getCurrentItem().getItemMeta().getLore()
+						.get(2).replace("§", "").trim();
+				tr.GetTrip(Integer.parseInt(number)).information(
+						(Player) event.getWhoClicked());
 				event.setCancelled(true);
 			}
 
@@ -600,8 +629,8 @@ public class QuestInvClick implements Listener {
 						.get(item.getItemMeta().getLore().size() - 1)
 						.replace("§", ""));
 				String quetstype = GetTypeQuest(item.getType());
-				
-				if(quetstype.equals("event")){
+
+				if (quetstype.equals("event")) {
 					String t = item.getItemMeta().getLore().get(0);
 					quetstype = t.replaceAll("§", "").trim();
 				}
@@ -613,39 +642,52 @@ public class QuestInvClick implements Listener {
 				 */
 				if (!quetstype.equals("warp")) {
 					try {
-						String message = ChatColor.BLUE + "[" + ChatColor.BLUE
-								+ plugin.getNPCHandler().getNPCByUUID(npcuuid).getName() + ChatColor.BLUE + "] " + ChatColor.GRAY + getmessage(quetstype, number);
+						String message = ChatColor.BLUE
+								+ "["
+								+ ChatColor.BLUE
+								+ plugin.getNPCHandler().getNPCByUUID(npcuuid)
+										.getName() + ChatColor.BLUE + "] "
+								+ ChatColor.GRAY
+								+ getmessage(quetstype, number);
 						player.sendMessage(message);
-						plugin.speech.removeCache(player.getUniqueId(), quetstype, number);
-						SpeechType.constructSpeech(player, quetstype, number, plugin.getNPCHandler().getNPCByUUID(npcuuid).getName());
+						plugin.speech.removeCache(player.getUniqueId(),
+								quetstype, number);
+						SpeechType.constructSpeech(player, quetstype, number,
+								plugin.getNPCHandler().getNPCByUUID(npcuuid)
+										.getName());
 					} catch (CloneNotSupportedException e) {
 						e.printStackTrace();
 					}
 					player.closeInventory();
-					
+
 				} else {
 					int number2 = Integer.parseInt(item.getItemMeta().getLore()
 							.get(item.getItemMeta().getLore().size() - 2)
 							.replace("§", ""));
 					player.closeInventory();
 					tr.boardcheck(npcuuid, number, player,
-							questers.returnwarp(number2).getStartloc(), item.getItemMeta().getLore().get(1), number + "-" + number2 + "-" +  item.getItemMeta().getLore().get(1));
+							questers.returnwarp(number2).getStartloc(), item
+									.getItemMeta().getLore().get(1), number
+									+ "-" + number2 + "-"
+									+ item.getItemMeta().getLore().get(1));
 				}
 				event.setCancelled(true);
 			}
 		}
 	}
-	
+
 	@EventHandler
-	public void onQuestProcess(QuestProcessEvent event){
-		
-		questers.AddActiveQuest(event.getPlayer(), event.getQuestnumber(), event.getType());
+	public void onQuestProcess(QuestProcessEvent event) {
+
+		questers.AddActiveQuest(event.getPlayer(), event.getQuestnumber(),
+				event.getType());
 		if (!event.getType().equals("talkto")) {
 			if (questers.getProgress(event.getPlayer().getUniqueId()) != null) {
 				if (questers.getProgress(event.getPlayer().getUniqueId()).get(
 						event.getType()) != null) {
 					questers.getProgress(event.getPlayer().getUniqueId())
-							.get(event.getType()).put(event.getQuestnumber(), 0);
+							.get(event.getType())
+							.put(event.getQuestnumber(), 0);
 				} else {
 					HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
 					numberq.put(event.getQuestnumber(), 0);
@@ -653,7 +695,30 @@ public class QuestInvClick implements Listener {
 							event.getType(), numberq);
 				}
 			} else {
-				questers.addProgress(event.getPlayer().getUniqueId(), event.getType(), event.getQuestnumber());
+				questers.addProgress(event.getPlayer().getUniqueId(),
+						event.getType(), event.getQuestnumber());
+			}
+			if (event.getType().equals("harvest")) {
+				for (ItemStack item : event.getPlayer().getInventory()
+						.getContents()) {
+					if (item != null && item.getType() != Material.AIR) {
+						QuestHarvest harvest = questers.returnharvest(event
+								.getQuestnumber());
+						if (harvest.getItemId().split(":")[0].equals(Integer.toString(item
+								.getTypeId()))) {
+							if (harvest.getItemId().split(":").length != 1) {
+								if (!harvest.getItemId().split(":")[1]
+										.equals(Short.toString(item.getDurability()))) {
+									continue;
+								}
+							}
+							QuestProgEvent e = new QuestProgEvent(
+									event.getPlayer(), event.getQuestnumber(),
+									"harvest", item);
+							Bukkit.getPluginManager().callEvent(e);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -670,8 +735,6 @@ public class QuestInvClick implements Listener {
 		}
 	}
 
-
-	
 	private String GetTypeQuest(Material itemtype) {
 		switch (itemtype) {
 		case DIAMOND_SWORD:
@@ -686,6 +749,7 @@ public class QuestInvClick implements Listener {
 			return "warp";
 		}
 	}
+
 	private String getmessage(String type, int number) {
 		switch (type) {
 		case "kill":

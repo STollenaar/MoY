@@ -15,7 +15,7 @@ public class QuestChatEvent{
 	private QuestsServerSide questers;
 	
 	public QuestChatEvent(MoY instance){
-		this.questers = instance.questers;
+		this.questers = instance.qserver;
 	}
 	
 	

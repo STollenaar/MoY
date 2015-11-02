@@ -1,4 +1,4 @@
-package moy.tollenaar.stephen.messages;
+package moy.tollenaar.stephen.Messages;
 
 import java.util.HashMap;
 import java.util.UUID;

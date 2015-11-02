@@ -870,7 +870,7 @@ public class Filewriters {
 
 	public Filewriters(MoY instance) {
 		this.plugin = instance;
-		this.quest = instance.questers;
+		this.quest = instance.qserver;
 		this.playerinfo = instance.playerinfo;
 		filecheck();
 		loadall();

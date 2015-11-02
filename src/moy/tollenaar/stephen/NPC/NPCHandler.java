@@ -28,7 +28,6 @@ import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
 public class NPCHandler implements Listener {
 	private static Map<UUID, NPCEntity> npcs = new HashMap<UUID, NPCEntity>();
-
 	private static Set<UUID> stores = new HashSet<UUID>();
 	
 	private static MoY plugin;
@@ -70,7 +69,7 @@ public class NPCHandler implements Listener {
 		npcs.put(event.getNpc().getUniqueID(), event.getNpc());
 
 		if (event.getReason() == NPCSpawnReason.RESPAWN) {
-			plugin.questers.resetHear(event.getNpc().getUniqueId());
+			plugin.qserver.resetHear(event.getNpc().getUniqueId());
 		}else if(event.getReason() == NPCSpawnReason.SHOP_SPAWN){
 			stores.add(event.getNpc().getUniqueId());
 		}

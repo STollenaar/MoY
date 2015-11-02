@@ -44,9 +44,9 @@ import code.husky.mysql.MySQL;
 
 public class MoY extends JavaPlugin {
 
-	public QuestsServerSide questers;
+	public QuestsServerSide qserver;
 	public Questinteracts qinteract;
-	public QuestParticles qp;
+	public QuestParticles qparticles;
 	public DbStuff database;
 	public Playerinfo playerinfo;
 	public Travel tr;
@@ -54,15 +54,15 @@ public class MoY extends JavaPlugin {
 	public TravelBoatEvent boat;
 	public TravelCartEvent cart;
 	public TravelDragonEvent dragon;
-	public QuestClientSide qqc;
+	public QuestClientSide qclient;
 	public Party party;
 	public Quest q;
 	public MobSpawns mob;
 	public LevelSystems lvl;
 	public Skillimprovement skill;
 	public Filewriters fw;
-	public QuestChat qc;
-	public QuestInvClick qi;
+	public QuestChat qchat;
+	public QuestInvClick qinventory;
 	private List<QuestEvent> stortemp = new ArrayList<QuestEvent>();
 	public SpeechCommand speech;
 	private NPCHandler handler;
@@ -145,7 +145,7 @@ public class MoY extends JavaPlugin {
 		pm.registerEvents(dragon, this);
 		pm.registerEvents(mob, this);
 
-		pm.registerEvents(qc, this);
+		pm.registerEvents(qchat, this);
 		pm.registerEvents(new EnchantingSkill(this), this);
 		pm.registerEvents(new ProgressKill(this), this);
 		pm.registerEvents(new ProgressHarvest(playerinfo), this);
@@ -179,7 +179,7 @@ public class MoY extends JavaPlugin {
 
 		re = new RandomEvents(this);
 
-		questers = new QuestsServerSide(this);
+		qserver = new QuestsServerSide(this);
 
 		fw = new Filewriters(this);
 		for (QuestEvent in : stortemp) {
@@ -192,12 +192,12 @@ public class MoY extends JavaPlugin {
 		dragon = new TravelDragonEvent(this);
 		tr = new Travel(this);
 		
-		qqc = new QuestClientSide(this);
+		qclient = new QuestClientSide(this);
 		qinteract = new Questinteracts(this);
 
-		qc = new QuestChat(this);
-		qi = new QuestInvClick(this);
-		qp = new QuestParticles(this);
+		qchat = new QuestChat(this);
+		qinventory = new QuestInvClick(this);
+		qparticles = new QuestParticles(this);
 
 		mob = new MobSpawns(this);
 	}

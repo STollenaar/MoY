@@ -600,7 +600,7 @@ public class Quest {
 								meta.setDisplayName(talk.getName());
 								ArrayList<String> lore = new ArrayList<String>();
 								NPCHandler handler=  plugin.getNPCHandler();
-								NPC npc = handler.getNPCByUUID(plugin.questers.uniquenpcid
+								NPC npc = handler.getNPCByUUID(plugin.qserver.uniquenpcid
 												.get(talk.getNpcid()));
 								lore.add("Talk to: " + npc.getName());
 								meta.setLore(lore);

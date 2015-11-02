@@ -193,4 +193,15 @@ public class ItemGenerator {
 		
 	}
 
+	public static ItemStack ByPassWarp(String bypassed){
+		ItemStack item = new ItemStack(Material.WATCH);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("Override");
+		ArrayList<String> list  = new ArrayList<String>();
+		list.add(bypassed);
+		meta.setLore(list);
+		item.setItemMeta(meta);
+		return item;
+	}
+	
 }

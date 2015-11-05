@@ -539,10 +539,21 @@ public class QuestChat extends QuestInvClick implements Listener {
 						player.sendMessage("type true or false");
 					}
 					break;
-				case "override":
-					warp.setBypassed(typed);
+				case "overridetime":
+					warp.setBypassedTime(typed);
 					pass = true;
 					break;
+				case "overrideid":
+					try{
+						int newid = Integer.parseInt(typed);
+						warp.setByPassID(newid);
+						pass = true;
+					}catch(NumberFormatException ex){
+						if(typed.equalsIgnoreCase("generate")){
+							warp.generateByPass();
+							pass = true;
+						}
+					}
 				}
 				if (pass) {
 					questers.npcpos.remove(player.getUniqueId());

@@ -37,8 +37,7 @@ public class Filewriters {
 	private MoY plugin;
 	private QuestsServerSide quest;
 	private Playerinfo playerinfo;
-	
-	
+
 	private File dummymessages;
 
 	private File TravelBoatnearmis;
@@ -69,6 +68,8 @@ public class Filewriters {
 
 	private File players;
 
+	private File rewards;
+
 	public void filecheck() {
 		File direct = new File(plugin.getDataFolder(), "messages");
 		if (!direct.exists()) {
@@ -78,6 +79,14 @@ public class Filewriters {
 		quests = new File(plugin.getDataFolder(), "quests");
 		if (!quests.exists()) {
 			quests.mkdir();
+		}
+		rewards = new File(plugin.getDataFolder(), "rewards.txt");
+		if (!rewards.exists()) {
+			try {
+				rewards.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		players = new File(plugin.getDataFolder(), "players");
@@ -245,11 +254,26 @@ public class Filewriters {
 		return utilitiesconfig.getString(line);
 	}
 
-	
-	public void saveplayer(Playerstats p){
+	public List<String> getRewards() {
+		List<String> l = new ArrayList<String>();
+		try {
+			Scanner in = new Scanner(rewards);
+			while (in.hasNextLine()) {
+				l.add(in.nextLine());
+			}
+			in.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		return l;
+	}
+
+	public void saveplayer(Playerstats p) {
 		File f = new File(players, p.getPlayeruuid().toString() + ".dat");
 		try {
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+			ObjectOutputStream out = new ObjectOutputStream(
+					new FileOutputStream(f));
 			out.writeObject(p);
 			out.close();
 		} catch (FileNotFoundException e) {
@@ -258,13 +282,14 @@ public class Filewriters {
 			e.printStackTrace();
 		}
 	}
-	
-	public void saveplayers(){
-		for(UUID player : playerinfo.getplayers()){
+
+	public void saveplayers() {
+		for (UUID player : playerinfo.getplayers()) {
 			Playerstats p = playerinfo.getplayer(player);
 			File f = new File(players, player.toString() + ".dat");
 			try {
-				ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+				ObjectOutputStream out = new ObjectOutputStream(
+						new FileOutputStream(f));
 				out.writeObject(p);
 				out.close();
 			} catch (FileNotFoundException e) {
@@ -274,16 +299,17 @@ public class Filewriters {
 			}
 		}
 	}
-	
-	
-	public boolean loadplayer(UUID playeruuid){
-		for(File file : players.listFiles()){
-			if(file.getName().replace(".dat", "").equals(playeruuid.toString())){
+
+	public boolean loadplayer(UUID playeruuid) {
+		for (File file : players.listFiles()) {
+			if (file.getName().replace(".dat", "")
+					.equals(playeruuid.toString())) {
 				try {
-					ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+					ObjectInputStream in = new ObjectInputStream(
+							new FileInputStream(file));
 					Playerstats p = (Playerstats) in.readObject();
-					if(playerinfo.getplayer(p.getPlayeruuid()) == null){
-					playerinfo.loadplayer(p);
+					if (playerinfo.getplayer(p.getPlayeruuid()) == null) {
+						playerinfo.loadplayer(p);
 					}
 					in.close();
 					return true;
@@ -298,18 +324,19 @@ public class Filewriters {
 		}
 		return false;
 	}
-	
-	public void loadplayers(){
-		for(File file : players.listFiles()){
+
+	public void loadplayers() {
+		for (File file : players.listFiles()) {
 			try {
-				ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+				ObjectInputStream in = new ObjectInputStream(
+						new FileInputStream(file));
 				Playerstats p = (Playerstats) in.readObject();
-				if(playerinfo.getplayer(p.getPlayeruuid()) == null){
-				playerinfo.loadplayer(p);
+				if (playerinfo.getplayer(p.getPlayeruuid()) == null) {
+					playerinfo.loadplayer(p);
 				}
-				for(String type : p.getactivetype()){
-					for(int number : p.getactives(type)){
-						if(!type.equals("talkto")){
+				for (String type : p.getactivetype()) {
+					for (int number : p.getactives(type)) {
+						if (!type.equals("talkto")) {
 							quest.addProgress(p.getPlayeruuid(), type, number);
 						}
 					}
@@ -322,10 +349,10 @@ public class Filewriters {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 	}
-	
+
 	public void AddDesserter(String playeruuid, String message) {
 		File temp = new File(desserter, playeruuid + ".txt");
 		try {
@@ -417,11 +444,12 @@ public class Filewriters {
 		for (File in : furnaces.listFiles()) {
 			loadfurnace(in);
 		}
-		
+
 	}
 
 	public void savefurnace(FurnaceStorage storage) {
-		if(storage.getFurnace().getType() != Material.FURNACE && storage.getFurnace().getType() != Material.BURNING_FURNACE){
+		if (storage.getFurnace().getType() != Material.FURNACE
+				&& storage.getFurnace().getType() != Material.BURNING_FURNACE) {
 			FurnaceStorage.RemoveStorage(storage.getFurnace());
 			return;
 		}
@@ -453,7 +481,8 @@ public class Filewriters {
 		Location l = new Location(Bukkit.getWorld(config.getString("Block.W")),
 				config.getDouble("Block.X"), config.getDouble("Block.Y"),
 				config.getDouble("Block.Z"));
-		if(l.getBlock().getType() != Material.FURNACE && l.getBlock().getType() != Material.BURNING_FURNACE){
+		if (l.getBlock().getType() != Material.FURNACE
+				&& l.getBlock().getType() != Material.BURNING_FURNACE) {
 			file.delete();
 			return;
 		}
@@ -876,7 +905,7 @@ public class Filewriters {
 		loadall();
 		loadquests();
 		loadplayers();
-		
+
 	}
 
 	public void loadquests() {
@@ -948,7 +977,7 @@ public class Filewriters {
 		String itemid = config.getString("Item");
 		String message = config.getString("Message");
 		String state = config.getString("State");
-		if(state == null){
+		if (state == null) {
 			state = "disabled";
 		}
 		quest.loadharvest(id, name, reward, delay, minlvl, message, prereq,
@@ -994,7 +1023,7 @@ public class Filewriters {
 		String monster = config.getString("Monster");
 		String message = config.getString("Message");
 		String state = config.getString("State");
-		if(state == null){
+		if (state == null) {
 			state = "disabled";
 		}
 		quest.loadkill(id, name, reward, delay, minlvl, message, prereq, count,
@@ -1081,7 +1110,7 @@ public class Filewriters {
 		int minlvl = config.getInt("MinLvl");
 		String message = config.getString("Message");
 		String state = config.getString("State");
-		if(state == null){
+		if (state == null) {
 			state = "disabled";
 		}
 		quest.loadtalkto(id, name, person, message, delay, minlvl, prereq,
@@ -1130,7 +1159,7 @@ public class Filewriters {
 		int count = config.getInt("Count");
 		String message = config.getString("Message");
 		String state = config.getString("State");
-		if(state == null){
+		if (state == null) {
 			state = "disabled";
 		}
 		quest.loadevent(id, thing, title, start, end, reward, message, count,

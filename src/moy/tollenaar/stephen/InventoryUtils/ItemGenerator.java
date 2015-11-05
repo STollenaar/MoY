@@ -174,13 +174,13 @@ public class ItemGenerator {
 		return item;
 	}
 
-	public static ItemStack ActiveQuest(String state){
+	public static ItemStack ActiveQuest(String state) {
 		Wool colored;
-			if(state.equals("active")){
-				colored = new Wool(DyeColor.LIME);
-			}else{
-				colored = new Wool(DyeColor.RED);
-			}
+		if (state.equals("active")) {
+			colored = new Wool(DyeColor.LIME);
+		} else {
+			colored = new Wool(DyeColor.RED);
+		}
 		ItemStack item = new ItemStack(colored.toItemStack());
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("Active Quest");
@@ -188,20 +188,24 @@ public class ItemGenerator {
 		lore.add(state);
 		meta.setLore(lore);
 		item.setItemMeta(meta);
-		
+
 		return item;
-		
+
 	}
 
-	public static ItemStack ByPassWarp(String bypassed){
+	public static ItemStack ByPassWarp(String bypassed, boolean isTime) {
 		ItemStack item = new ItemStack(Material.WATCH);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName("Override");
-		ArrayList<String> list  = new ArrayList<String>();
+		if (isTime) {
+			meta.setDisplayName("Override");
+		} else {
+			meta.setDisplayName("OverrideID");
+		}
+		ArrayList<String> list = new ArrayList<String>();
 		list.add(bypassed);
 		meta.setLore(list);
 		item.setItemMeta(meta);
 		return item;
 	}
-	
+
 }

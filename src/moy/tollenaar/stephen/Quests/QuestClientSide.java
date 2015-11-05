@@ -1,6 +1,5 @@
 package moy.tollenaar.stephen.Quests;
 
-import io.netty.handler.codec.ReplayingDecoder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,11 +13,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.fusesource.jansi.Ansi;
 
 import moy.tollenaar.stephen.CEvents.QuestRewardEvent;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
@@ -220,7 +217,7 @@ public class QuestClientSide {
 									ArrayList<String> lore = new ArrayList<String>();
 									int time = plugin.tr.traveltime(npcuuid,
 											kill.getWarpid(), type,
-											w.getStartloc());
+											w.getStartloc(), w.getByPassID());
 									SimpleDateFormat df = new SimpleDateFormat(
 											"mm:ss");
 									Date date = new Date(time * 1000);

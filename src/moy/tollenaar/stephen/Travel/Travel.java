@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -13,12 +12,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 
-
-
-
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -111,7 +104,7 @@ public class Travel implements Listener {
 
 	@SuppressWarnings("deprecation")
 	public void boardcheck(UUID npcuuid, int questnumber, Player player,
-			Location end, String type, String id) {
+			Location end, String type, String id, int destnumber) {
 		double needed = questers.returnwarp(questnumber).getCosts();
 		int seconds = Calendar.getInstance().get(Calendar.SECOND);
 		int minutes = 10; // Calendar.getInstance().get(Calendar.MINUTE);
@@ -187,7 +180,7 @@ public class Travel implements Listener {
 						+ "YTravel" + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
 
-				tempboard(npcuuid, questnumber, player, time, type, end, id);
+				tempboard(npcuuid, questnumber, player, time, type, end, id, destnumber);
 
 			} else {
 				// if last minute board
@@ -197,13 +190,13 @@ public class Travel implements Listener {
 				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
 						+ npc.getName() + ChatColor.DARK_PURPLE + "] "
 						+ ChatColor.AQUA + message);
-				tempboard(npcuuid, questnumber, player, time, type, end, id);
+				tempboard(npcuuid, questnumber, player, time, type, end, id, destnumber);
 			}
 		} else {
 			// checking if enought money
 			try {
 				if (Economy.hasEnough(player.getName(), needed)) {
-					travel(npcuuid, questnumber, player, type, end, id);
+					travel(npcuuid, questnumber, player, type, end, id, destnumber);
 					Economy.subtract(player.getName(), needed);
 				} else {
 					player.sendMessage(ChatColor.DARK_PURPLE + "["
@@ -222,7 +215,7 @@ public class Travel implements Listener {
 
 	public void tempboard(final UUID npcuuid, final int questnumber,
 			final Player player, int time, final String type,
-			final Location end, final String tripid) {
+			final Location end, final String tripid, final int destnumber) {
 		HashSet<UUID> p = new HashSet<UUID>();
 		p.add(player.getUniqueId());
 		if (players.get(tripid) == null) {
@@ -258,7 +251,7 @@ public class Travel implements Listener {
 							waiting.get(type).add(h);
 							groupedwaiting.remove(tripid);
 						}
-						travel(npcuuid, questnumber, player, type, end, tripid);
+						travel(npcuuid, questnumber, player, type, end, tripid, destnumber);
 					}
 				}, time * 20L);
 		schedulerstor.put(player.getUniqueId(), id);
@@ -267,7 +260,7 @@ public class Travel implements Listener {
 
 	public void travel(UUID npcuuid, final int questnumber,
 			final Player player, final String type, final Location end,
-			final String tripid) {
+			final String tripid, int destnumber) {
 		if (groupedtrip.get(tripid) == null) {
 			for (TripLocations trips : trip.get(type)) {
 				groupedtrip.put(tripid, trips);
@@ -286,10 +279,10 @@ public class Travel implements Listener {
 		}
 
 		NPCHandler handler = plugin.getNPCHandler();
-		NPC npc =handler.getNPCByUUID(npcuuid);
+		NPC npc = handler.getNPCByUUID(npcuuid);
 		final Location start = npc.getCurrentloc();
 
-		int time = traveltime(npcuuid, questnumber, type, end);
+		int time = traveltime(npcuuid, questnumber, type, end, destnumber);
 
 		travelevent.put(player.getUniqueId(), chance());
 
@@ -453,19 +446,23 @@ public class Travel implements Listener {
 	}
 
 	public int traveltime(UUID npcuuid, int questnumber, String type,
-			Location end) {
+			Location end, int destnumber) {
 
 		NPCHandler handler = plugin.getNPCHandler();
-		NPC npc =handler.getNPCByUUID(npcuuid);
+		NPC npc = handler.getNPCByUUID(npcuuid);
 		Location start = npc.getCurrentloc();
 
-		if(!questers.returnwarp(questnumber).getBypassed().equals("-1")){
-			int time = getSeconds(questers.returnwarp(questnumber).getBypassed());
-			if(time != -1){
+		if (questers.returnwarp(questnumber).getByPassID() != -1
+				&& questers.returnwarp(destnumber).getByPassID() != -1
+				&& questers.returnwarp(questnumber).getByPassID() == questers
+						.returnwarp(destnumber).getByPassID()) {
+			int time = getSeconds(questers.returnwarp(questnumber)
+					.getBypassedTime());
+			if (time != -1) {
 				return time;
 			}
 		}
-		
+
 		double sx = start.getX();
 		double sy = start.getY();
 		double sz = start.getZ();
@@ -801,16 +798,16 @@ public class Travel implements Listener {
 		ArrayList<ItemStack> t = new ArrayList<ItemStack>();
 		for (String types : waiting.keySet()) {
 			for (HarborWaitLocations in : waiting.get(types)) {
-				ItemStack info = ItemGenerator.InfoQuest(in.getType(), in.getId(),
-						6, null);
+				ItemStack info = ItemGenerator.InfoQuest(in.getType(),
+						in.getId(), 6, null);
 				t.add(info);
 			}
 		}
 
 		for (String types : waitingac.keySet()) {
 			for (HarborWaitLocations in : waitingac.get(types)) {
-				ItemStack info = ItemGenerator.InfoQuest(in.getType(), in.getId(),
-						6, null);
+				ItemStack info = ItemGenerator.InfoQuest(in.getType(),
+						in.getId(), 6, null);
 				t.add(info);
 			}
 		}
@@ -932,25 +929,25 @@ public class Travel implements Listener {
 
 	}
 
-	private int getSeconds(String time){
+	private int getSeconds(String time) {
 		String[] splitted = time.split("");
-		try{
-		int duration = Integer.parseInt(splitted[0].trim());
-		switch (splitted[1]){
-		case "s":
-		case "S":
-			break;
-		case "m":
-		case "M":
-			duration *= 60;
-			break;
-		case "h":
-		case "H":
-			duration *= 60*60;
-			break;
-		}
-		return duration;
-		}catch(NumberFormatException ex){
+		try {
+			int duration = Integer.parseInt(splitted[0].trim());
+			switch (splitted[1]) {
+			case "s":
+			case "S":
+				break;
+			case "m":
+			case "M":
+				duration *= 60;
+				break;
+			case "h":
+			case "H":
+				duration *= 60 * 60;
+				break;
+			}
+			return duration;
+		} catch (NumberFormatException ex) {
 			return -1;
 		}
 	}

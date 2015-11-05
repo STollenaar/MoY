@@ -4,7 +4,6 @@ import net.minecraft.server.v1_8_R3.ContainerEnchantTable;
 import net.minecraft.server.v1_8_R3.EntityPlayer;
 
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

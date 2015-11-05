@@ -18,6 +18,9 @@ import org.bukkit.material.Wool;
 import moy.tollenaar.stephen.InventoryUtils.ItemGenerator;
 
 public class Warps {
+	private static int BY_ID_COUNT = 0;
+	
+	
 	private int warpid;
 
 	private String name;
@@ -30,7 +33,8 @@ public class Warps {
 
 	private String state;
 	
-	private String bypassed;
+	private String byPassTime;
+	private int byPassID;
 	
 	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
 
@@ -103,7 +107,8 @@ public class Warps {
 			temp.setDisplayName("Delete Warp");
 			delete.setItemMeta(temp);
 		}
-		ItemStack override = ItemGenerator.ByPassWarp(getBypassed());
+		ItemStack override = ItemGenerator.ByPassWarp(getBypassedTime(), true);
+		ItemStack overrideid = ItemGenerator.ByPassWarp(Integer.toString(byPassID), false);
 
 		warpinv.addItem(title);
 		warpinv.addItem(transport);
@@ -111,6 +116,7 @@ public class Warps {
 		warpinv.addItem(money);
 		warpinv.addItem(qstate);
 		warpinv.addItem(override);
+		warpinv.addItem(overrideid);
 		warpinv.setItem(warpinv.getSize() - 2, delete);
 		warpinv.setItem(warpinv.getSize() - 1, main);
 		
@@ -133,7 +139,7 @@ public class Warps {
 		this.type = new ArrayList<String>(Arrays.asList("none"));
 		this.costs = 0.0;
 		this.state = "disabled";
-		this.setBypassed("-1");
+		this.setBypassedTime("-1");
 		allwarps.add(this);
 	}
 
@@ -183,12 +189,25 @@ public class Warps {
 		return startloc;
 	}
 
-	public String getBypassed() {
-		return bypassed;
+	public String getBypassedTime() {
+		return byPassTime;
 	}
 
-	public void setBypassed(String bypassed) {
-		this.bypassed = bypassed;
+	public void setBypassedTime(String bypassed) {
+		this.byPassTime = bypassed;
 	}
 
+	public int getByPassID() {
+		return byPassID;
+	}
+
+	public void setByPassID(int byPassID) {
+		this.byPassID = byPassID;
+	}
+
+	public void generateByPass(){
+		this.byPassID = BY_ID_COUNT;
+		BY_ID_COUNT++;
+	}
+	
 }

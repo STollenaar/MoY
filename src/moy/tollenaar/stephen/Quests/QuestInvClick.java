@@ -497,7 +497,18 @@ public class QuestInvClick implements Listener {
 						temp.add(type);
 						temp.add(npcuuid.toString());
 						temp.add(questnumber);
-						temp.add("bypass");
+						temp.add("overridetime");
+						questers.npcpos.put(player.getUniqueId(), temp);
+					}
+					if(item.getItemMeta().getDisplayName().equals("OverrideID")){
+						event.setCancelled(true);
+						player.closeInventory();
+						player.sendMessage("type the number of the bypass id. If this is a new bypass type generate");
+						ArrayList<String> temp = new ArrayList<String>();
+						temp.add(type);
+						temp.add(npcuuid.toString());
+						temp.add(questnumber);
+						temp.add("overrideid");
 						questers.npcpos.put(player.getUniqueId(), temp);
 					}
 				}
@@ -669,13 +680,14 @@ public class QuestInvClick implements Listener {
 							questers.returnwarp(number2).getStartloc(), item
 									.getItemMeta().getLore().get(1), number
 									+ "-" + number2 + "-"
-									+ item.getItemMeta().getLore().get(1));
+									+ item.getItemMeta().getLore().get(1), number2);
 				}
 				event.setCancelled(true);
 			}
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onQuestProcess(QuestProcessEvent event) {
 

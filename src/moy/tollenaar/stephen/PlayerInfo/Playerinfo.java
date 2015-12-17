@@ -1,6 +1,5 @@
 package moy.tollenaar.stephen.PlayerInfo;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -32,7 +32,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -1538,6 +1537,10 @@ public class Playerinfo implements Listener {
 							+ neededlvl(item, item.getEnchantments(),
 									p.getStrength())
 							+ ". Use more ability points on strength to use this weapon.");
+				}
+			}else if(event.getAction() == Action.RIGHT_CLICK_BLOCK && (event.getPlayer().getItemInHand() == null || event.getPlayer().getItemInHand().getType() == Material.AIR)){
+				if(event.getClickedBlock().getType() == Material.BOOKSHELF){
+					Bukkit.getServer().dispatchCommand(player, "library");
 				}
 			}
 		}

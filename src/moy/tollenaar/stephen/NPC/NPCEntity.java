@@ -1,5 +1,7 @@
 package moy.tollenaar.stephen.NPC;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -16,7 +18,6 @@ import org.bukkit.util.Vector;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -42,21 +43,16 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	private final Pathfinder pathfinder;
 	@SuppressWarnings("unused")
 	private NPCPath path;
-	private final String shop;
 	private String skin;
 	private UUID uuid;
 	private boolean spawned;
-	private final int id;
-
-	
-	
-	
+	private List<Integer> speechNodes = new ArrayList<Integer>();
 	public boolean isSpawned() {
 		return spawned;
 	}
 
 	public NPCEntity(World world, Location location, NPCProfile profile,
-			NPCNetworkManager networkManager, MoY plugin, String shop, int id) {
+			NPCNetworkManager networkManager, MoY plugin) {
 		super(((CraftServer) Bukkit.getServer()).getServer(),
 				((CraftWorld) world).getHandle(), profile.getHandle(),
 				new PlayerInteractManager(((CraftWorld) world).getHandle()));
@@ -73,14 +69,11 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		this.pathfinder = new Pathfinder(normal);
 		this.spawned = false;
 		this.plugin = plugin;
-		this.shop = shop;
-		this.id = id;
 		this.playerInteractManager.b(EnumGamemode.CREATIVE);
 	}
 
 	public NPCEntity(World world, Location location, NPCProfile profile,
-			NPCNetworkManager networkManager, MoY plugin,
-			NPCSpawnReason reason, String shop, int id) {
+			NPCNetworkManager networkManager, MoY plugin, NPCSpawnReason reason) {
 		super(((CraftServer) Bukkit.getServer()).getServer(),
 				((CraftWorld) world).getHandle(), profile.getHandle(),
 				new PlayerInteractManager(((CraftWorld) world).getHandle()));
@@ -97,10 +90,8 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		this.pathfinder = new Pathfinder(normal);
 		this.spawned = false;
 		this.plugin = plugin;
-		this.shop = shop;
-		this.id = id;
 		if (reason != NPCSpawnReason.RESPAWN) {
-			spawn(location, reason, this);
+			spawn(location, reason);
 		}
 		this.playerInteractManager.b(EnumGamemode.CREATIVE);
 	}
@@ -182,34 +173,54 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
 	private void sendPacketsToListed(Iterable<? extends Player> recipients,
-			Packet... packets) {
-			for(Player players : recipients){
-				try{
-				EntityPlayer nmsplayer = ((CraftPlayer)players).getHandle();
-				sendPacketsToPlayer(nmsplayer, packets);
-				}catch(ClassCastException ex){
-					continue;
-				}
-			}
+			boolean spawn) {
+		for (Player players : recipients) {
+			playerJoinPacket(players, spawn);
+		}
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void sendPacketsToPlayer(EntityPlayer player, Packet... packets) {
+	private void sendPacketsToPlayer(final EntityPlayer player, boolean spawn,
+			Packet... packets) {
 		if (player != null) {
 			for (Packet p : packets) {
 				if (p == null) {
 					continue;
 				}
 				player.playerConnection.sendPacket(p);
+				if (spawn) {
+					final NPCEntity npc = this;
+					new BukkitRunnable() {
+
+						@Override
+						public void run() {
+							player.playerConnection
+									.sendPacket(new PacketPlayOutPlayerInfo(
+											EnumPlayerInfoAction.REMOVE_PLAYER,
+											npc));
+						}
+					}.runTaskLater(plugin, 10L);
+				}
 			}
 		}
 	}
 
-	public void playerJoinPacket(Player player) {
-		sendPacketsToPlayer(((CraftPlayer)player).getHandle(), new PacketPlayOutPlayerInfo(
-				EnumPlayerInfoAction.ADD_PLAYER, this), new PacketPlayOutNamedEntitySpawn(this), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, this));
+	@SuppressWarnings("rawtypes")
+	public void playerJoinPacket(Player player, boolean spawn) {
+		Packet[] p;
+		if (spawn) {
+			p = new Packet[] {
+					new PacketPlayOutPlayerInfo(
+							EnumPlayerInfoAction.ADD_PLAYER, this),
+					new PacketPlayOutNamedEntitySpawn(this) };
+		} else {
+			p = new Packet[] {
+					new PacketPlayOutPlayerInfo(
+							EnumPlayerInfoAction.REMOVE_PLAYER, this),
+					new PacketPlayOutEntityDestroy(getId()) };
+		}
+		sendPacketsToPlayer(((CraftPlayer) player).getHandle(), spawn, p);
 	}
 
 	public static Entity getHandle(org.bukkit.entity.Entity bukkitEntity) {
@@ -241,56 +252,47 @@ public class NPCEntity extends EntityPlayer implements NPC {
 			prof = NPCProfile.presetProfile(profile, skin);
 		} else {
 			prof = NPCProfile.loadProfile(name, skin, getWorld().getWorld()
-					.getHandle());
+					.getHandle(), plugin);
 		}
 		despawn(NPCSpawnReason.RESPAWN);
-
-		spawn(old, NPCSpawnReason.RESPAWN,
-				new NPCEntity(old.getWorld(), old, prof, plugin.getNetwork(),
-						plugin, NPCSpawnReason.RESPAWN, shop, id));
+		NPCEntity npc = new NPCEntity(old.getWorld(), old, prof,
+				plugin.getNetwork(), plugin, NPCSpawnReason.RESPAWN);
+		npc.spawn(old, NPCSpawnReason.RESPAWN);
 	}
 
 	@Override
 	public void setSkin(String name) {
-		setSkin(NPCProfile.loadSkin(name, getWorld().getWorld().getHandle(),
-				plugin, getName(), getProfile()), name);
+		setSkin(NPCProfile.loadSkin(name, getUniqueId(), plugin), name);
 	}
 
 	@Override
 	public void setSkin(Property prop, String skin) {
-		if(prop != null){
-		getProfile().getProperties().removeAll("textures");
-		getProfile().getProperties().put("textures", prop);
-		Location old = getCurrentloc();
-		despawn(NPCSpawnReason.RESPAWN);
-
-		spawn(old,
-				NPCSpawnReason.RESPAWN,
-				new NPCEntity(old.getWorld(), old, NPCProfile.presetProfile(
-						getProfile(), skin), plugin.getNetwork(), plugin,
-						NPCSpawnReason.RESPAWN, shop, id));
+		if (prop != null) {
+			getProfile().getProperties().removeAll("textures");
+			getProfile().getProperties().put("textures", prop);
+			Location old = getCurrentloc();
+			despawn(NPCSpawnReason.RESPAWN);
+			NPCEntity npc = new NPCEntity(old.getWorld(), old,
+					NPCProfile.presetProfile(getProfile(), skin),
+					plugin.getNetwork(), plugin, NPCSpawnReason.RESPAWN);
+			npc.spawn(old, NPCSpawnReason.RESPAWN);
 		}
-	}
-	
-	
-	@Override
-	public void spawn(Location location, NPCSpawnReason reason, NPCEntity npc) {
-		World world = location.getWorld();
-		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
-				EnumPlayerInfoAction.ADD_PLAYER, npc), new PacketPlayOutNamedEntitySpawn(npc), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, npc));
-		WorldServer worldServer = ((CraftWorld) world).getHandle();
 
-		npc.setPosition(location.getX(), location.getY(),
-				location.getZ());
-		worldServer.addEntity(npc, SpawnReason.CUSTOM);
-		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutPlayerInfo(
-				EnumPlayerInfoAction.ADD_PLAYER, npc), new PacketPlayOutNamedEntitySpawn(npc), new PacketPlayOutPlayerInfo(EnumPlayerInfoAction.REMOVE_PLAYER, npc));
+	}
+
+	@Override
+	public void spawn(Location location, NPCSpawnReason reason) {
+		World world = location.getWorld();
+		WorldServer worldServer = ((CraftWorld) world).getHandle();
+		worldServer.addEntity(this, SpawnReason.CUSTOM);
+		setPosition(location.getX(), location.getY(), location.getZ());
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), true);
 		this.spawned = true;
 		Bukkit.getPluginManager().callEvent(
-				new NPCSpawnEvent(npc, location, reason, shop, id));
-		if(reason != NPCSpawnReason.SHOP_SPAWN){
-		plugin.qserver.resetHear(getUniqueId());
-		}else{
+				new NPCSpawnEvent(this, location, reason));
+		if (reason != NPCSpawnReason.SHOP_SPAWN) {
+			plugin.qserver.resetHear(getUniqueId());
+		} else {
 			plugin.qserver.npchear(getUniqueId());
 		}
 	}
@@ -299,7 +301,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	public void despawn(NPCSpawnReason reason) {
 		this.spawned = false;
 		plugin.qserver.canceltasks(getUniqueId());
-		sendPacketsToListed(Bukkit.getOnlinePlayers(), new PacketPlayOutEntityDestroy(this.getId()));
+		sendPacketsToListed(Bukkit.getOnlinePlayers(), false);
 		if (reason == NPCSpawnReason.DESPAWN) {
 			Bukkit.getPluginManager().callEvent(new NPCDespawnEvent(this));
 		}
@@ -313,7 +315,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		this.spawned = false;
 		NPCEntity npc = this;
 		despawn(NPCSpawnReason.RESPAWN);
-		spawn(respawnloc, NPCSpawnReason.RESPAWN, npc);
+		npc.spawn(respawnloc, NPCSpawnReason.RESPAWN);
 	}
 
 	private static class Move extends BukkitRunnable {
@@ -330,5 +332,24 @@ public class NPCEntity extends EntityPlayer implements NPC {
 			}
 		}
 
+	}
+	public void addNode(int id){
+		this.speechNodes.add(id);
+	}
+	public int getNode(int index){
+		return speechNodes.get(index);
+	}
+	public List<Integer> getNodes(){
+		return speechNodes;
+	}
+	public void removeNodeIndex(int index){
+		speechNodes.remove(index);
+	}
+	public void removeNodeID(int id){
+		for(int i = 0; i < speechNodes.size(); i++){
+			if(speechNodes.get(i) == id){
+				removeNodeIndex(i);
+			}
+		}
 	}
 }

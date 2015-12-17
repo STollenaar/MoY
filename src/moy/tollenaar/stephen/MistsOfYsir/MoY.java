@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import moy.tollenaar.stephen.Books.Library;
 import moy.tollenaar.stephen.CEvents.ProgListener;
 import moy.tollenaar.stephen.CEvents.QuestProgListener;
 import moy.tollenaar.stephen.Commands.CommandsEvent;
@@ -19,6 +20,7 @@ import moy.tollenaar.stephen.MobHandlers.MobSpawns;
 import moy.tollenaar.stephen.MobHandlers.RandomEvents;
 import moy.tollenaar.stephen.NPC.NPCNetworkManager;
 import moy.tollenaar.stephen.NPC.NPCHandler;
+import moy.tollenaar.stephen.NPCSkin.SkinRunner;
 import moy.tollenaar.stephen.PlayerInfo.Party;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.Quests.ProgressHarvest;
@@ -69,7 +71,9 @@ public class MoY extends JavaPlugin {
 	private NPCNetworkManager network;
 	public Runic runic;
 	private FileConfiguration config;
-
+	private Library lib;
+	private SkinRunner skin;
+	
 	@Override
 	public void onEnable() {
 		config = this.getConfig();
@@ -109,7 +113,7 @@ public class MoY extends JavaPlugin {
 
 			config.set("status", false);
 			saveConfig();
-			this.speech = new SpeechCommand();
+			this.speech = new SpeechCommand(this);
 			getCommand("party").setExecutor(new CommandsParty(this));
 			getCommand("skill").setExecutor(new CommandsPlayerinfo(this));
 			getCommand("qnpc").setExecutor(new CommandsNPC(this));
@@ -119,7 +123,9 @@ public class MoY extends JavaPlugin {
 			getCommand("trip").setExecutor(new CommandsEvent(this));
 			getCommand("quest").setExecutor(new CommandsPlayerinfo(this));
 			getCommand("speechtrait").setExecutor(speech);
+			getCommand("library").setExecutor(new CommandsPlayerinfo(this));
 			re.playerevent();
+			handler.onLoadCompletion();
 		}
 	}
 
@@ -160,8 +166,8 @@ public class MoY extends JavaPlugin {
 	
 	public void initVar(){
 
-
 		handler = new NPCHandler(this);
+		skin = new SkinRunner();
 		if (!config.getBoolean("status")) {
 			handler.DublicateKiller();
 			config.set("status", true);
@@ -200,20 +206,26 @@ public class MoY extends JavaPlugin {
 		qparticles = new QuestParticles(this);
 
 		mob = new MobSpawns(this);
+		lib = new Library(this);
 	}
 	
 	
 	
 	@Override
 	public void onDisable() {
+		tr.disableFailSafe();
 		database.saveall();
 		fw.saveall();
 		re.cancelsced();
 		getNPCHandler().onDisableEvent();
 		config.set("status", true);
 		saveConfig();
+		
 	}
-
+	public Library getLib(){
+		return lib;
+	}
+	
 	public void addStorage(QuestEvent event) {
 		stortemp.add(event);
 	}
@@ -221,7 +233,10 @@ public class MoY extends JavaPlugin {
 	public NPCHandler getNPCHandler() {
 		return handler;
 	}
-
+	public SkinRunner getSkinRunner(){
+		return skin;
+	}
+	
 	public NPCNetworkManager getNetwork() {
 		return network;
 	}

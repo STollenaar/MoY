@@ -13,18 +13,27 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
 
 public class HarborWaitLocations {
-	
+	private static int UNIQUE_ID = 0;
 	
 	public HarborWaitLocations(int id){
 		this.id = id;
 		this.type = "none";
 		this.location = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
+		if(UNIQUE_ID < id){
+			UNIQUE_ID = id;
+		}
+		this.setActive(false);
 	}
-	
+	public HarborWaitLocations(){
+		this(UNIQUE_ID);
+		UNIQUE_ID++;
+	}
 	
 	private int id;
 	private String type;
 	private Location location;
+	private boolean active;
+	
 	
 	public void information(Player player){
 		Inventory inv =  Bukkit.createInventory(null, 9, "Wait Location info");
@@ -102,6 +111,12 @@ public class HarborWaitLocations {
 
 	public void setLocation(Location location) {
 		this.location = location;
+	}
+	public boolean isActive() {
+		return active;
+	}
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 
 

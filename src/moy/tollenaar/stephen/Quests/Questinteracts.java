@@ -1,7 +1,10 @@
 package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -12,17 +15,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.fusesource.jansi.Ansi;
 
 import moy.tollenaar.stephen.CEvents.QuestRewardEvent;
 import moy.tollenaar.stephen.Files.Filewriters;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
+import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.NPC.NPCMetadataStore;
 import moy.tollenaar.stephen.NPC.NPCSpawnReason;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+import moy.tollenaar.stephen.Speech.SpeechNode;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 
@@ -30,6 +36,7 @@ public class Questinteracts implements Listener {
 	private Filewriters fw;
 	private MoY plugin;
 	private Playerinfo playerinfo;
+	private Set<UUID> tempStored = new HashSet<UUID>();
 
 	@EventHandler
 	public void onEvent(PlayerInteractEntityEvent event) {
@@ -43,14 +50,14 @@ public class Questinteracts implements Listener {
 				Entity entity = event.getRightClicked();
 				if (entity.hasMetadata("NPC")) {
 					if (entity.getMetadata("NPC").get(0) instanceof NPCMetadataStore
-							&& ((NPCMetadataStore) entity.getMetadata("NPC").get(0)
-									.value()).getReason() == NPCSpawnReason.SHOP_SPAWN) {
+							&& ((NPCMetadataStore) entity.getMetadata("NPC")
+									.get(0).value()).getReason() == NPCSpawnReason.SHOP_SPAWN) {
 						// open shop menu
 						Bukkit.dispatchCommand(player, "shopmenu");
 						return;
 					}
 					NPCHandler handler = plugin.getNPCHandler();
-					NPC npc = handler.getNPCByEntity(entity);
+					NPCEntity npc = handler.getNPCByEntity(entity);
 					if (npc != null) {
 
 						/**
@@ -63,26 +70,26 @@ public class Questinteracts implements Listener {
 									QuestTalkto talk = plugin.qserver
 											.returntalkto(number);
 									if (talk != null) {
-										if (plugin.qserver.uniquenpcid
-												.get(talk.getNpcid()) == npc
+										if (plugin.qserver.uniquenpcid.get(talk
+												.getNpcid()) == npc
 												.getUniqueId()) {
-											for (UUID npcuuid : plugin.qserver
-													.GetKeysSets("talkto")) {
-												if (plugin.qserver.GetIds(
-														"talkto", npcuuid)
-														.contains(number)) {
-													NPC temp = handler
-															.getNPCByUUID(npcuuid);
-													plugin.qserver
-															.AddCompletedQuest(
-																	player,
-																	number,
-																	"talkto",
-																	temp.getName());
-													break;
-												}
-											}
-											break;
+											
+											QuestRewardEvent e = new QuestRewardEvent(
+													player, number, "talkto",
+													npc.getName(),
+													plugin.qserver);
+											Bukkit.getServer()
+													.getPluginManager()
+													.callEvent(e);
+											Playerstats pp = plugin.playerinfo
+													.getplayer(
+															player.getUniqueId());
+											
+													pp.addrewarded(
+															"talkto",
+															number,
+															System.currentTimeMillis());
+													pp.deleteactive("talkto", number);
 										}
 									}
 								}
@@ -126,8 +133,8 @@ public class Questinteracts implements Listener {
 																	"event")
 															.contains(
 																	npc.getUniqueId())) {
-												plugin.qclient.avquest(npc, player,
-														npc.getName());
+												plugin.qclient.avquest(npc,
+														player, npc.getName());
 												dummy = false;
 											}
 										}
@@ -175,11 +182,10 @@ public class Questinteracts implements Listener {
 							} else {
 								if (plugin.qserver.GetKeysSets("kill")
 										.contains(npc.getUniqueId())
-										|| plugin.qserver.GetKeysSets(
-												"harvest").contains(
-												npc.getUniqueId())
 										|| plugin.qserver
-												.GetKeysSets("talkto")
+												.GetKeysSets("harvest")
+												.contains(npc.getUniqueId())
+										|| plugin.qserver.GetKeysSets("talkto")
 												.contains(npc.getUniqueId())
 										|| plugin.qserver.GetKeysSets("warp")
 												.contains(npc.getUniqueId())
@@ -201,12 +207,21 @@ public class Questinteracts implements Listener {
 											.contains(npc.getUniqueId())
 									|| plugin.qserver.GetKeysSets("event")
 											.contains(npc.getUniqueId())) {
-								plugin.qclient.avquest(npc, player, npc.getName());
+								plugin.qclient.avquest(npc, player,
+										npc.getName());
 								dummy = false;
 							}
 						}
 						if (dummy) {
+							if(npc.getNodes().size() == 0){
 							dummymessage(player, npc);
+							}else{
+								List<String> temp = new ArrayList<String>();
+								temp.add(npc.getUniqueID().toString());
+								player.setMetadata("Speech", new FixedMetadataValue(plugin, temp));
+								SpeechNode n = SpeechNode.getNode(npc.getNode(0));
+								n.constructNode(player);
+							}
 						}
 					}
 				}
@@ -215,28 +230,32 @@ public class Questinteracts implements Listener {
 	}
 
 	protected void dummymessage(Player player, NPC npc) {
-		ArrayList<String> message = fw.dummymessage();
-		Random r = new Random();
-		int index = r.nextInt(message.size() - 1);
-		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
-				+ npc.getName() + ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
-				+ message.get(index));
+		if (!tempStored.contains(player.getUniqueId())) {
+			ArrayList<String> message = fw.dummymessage();
+			Random r = new Random();
+			int index = r.nextInt(message.size() - 1);
+			player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
+					+ npc.getName() + ChatColor.DARK_PURPLE + "] "
+					+ ChatColor.AQUA + message.get(index));
+		} else {
+			tempStored.remove(player.getUniqueId());
+		}
 
 	}
-	
+
 	@EventHandler
-	public void onReward(QuestRewardEvent event){
-		String message = ChatColor.DARK_PURPLE +"[" + ChatColor.GOLD + event.getNpcname() + ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA + "Enjoy your reward.";
+	public void onReward(QuestRewardEvent event) {
+		String message = ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
+				+ event.getNpcname() + ChatColor.DARK_PURPLE + "] "
+				+ ChatColor.AQUA + "Enjoy your reward.";
 		event.getPlayer().sendMessage(message);
-		System.out.println(Ansi.ansi().fg(
-				Ansi.Color.RED)
-				+ "QUEST COMPLETE"
+		System.out.println(Ansi.ansi().fg(Ansi.Color.RED) + "QUEST COMPLETE"
 				+ Ansi.ansi().fg(Ansi.Color.WHITE));
-		for(String in : event.getReward()){
-			System.out.println(in);
+		for (String in : event.getReward()) {
 			in = in.replace("player", event.getPlayer().getName());
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), in.trim());
 		}
+		tempStored.add(event.getPlayer().getUniqueId());
 	}
 
 	public Questinteracts(MoY instance) {

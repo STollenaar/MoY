@@ -38,6 +38,8 @@ public class Playerstats implements Serializable{
 	private int levelprog;
 	private int enchantingprog;
 	private int alchemyprog;
+	private Set<String> readedBooks;
+	
 	
 	public int getEnchanting() {
 		return enchanting;
@@ -84,12 +86,26 @@ public class Playerstats implements Serializable{
 		this.activequests = new HashMap<String, Set<Integer>>();
 		this.completedquests = new HashMap<String, Set<Integer>>();
 		this.rewardedlist = new HashMap<String, HashMap<Integer, Long>>();
+		this.readedBooks = new HashSet<>();
 	}
 	
 	private HashMap<String, Set<Integer>> activequests;
 	private HashMap<String, Set<Integer>> completedquests;
 	private HashMap<String, HashMap<Integer, Long>> rewardedlist;
 	
+	
+	public void addBook(String name){
+		readedBooks.add(name);
+	}
+	public Set<String> getBooks(){
+		return readedBooks;
+	}
+	public boolean hasRed(String name){
+		if(readedBooks.contains(name)){
+			return true;
+		}
+		return false;
+	}
 	
 	public void addactive(String type, int number){
 		if(activequests.get(type) != null){

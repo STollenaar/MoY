@@ -2,13 +2,12 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -27,14 +26,9 @@ public class QuestParticles {
 
 	public static void collectplayers(Location loc, UUID npcuuid) {
 		double radiussq = Math.pow(40, 2);
-		Collection<? extends Player> ptemp = plugin.getServer()
-				.getOnlinePlayers();
-		Iterator<? extends Player> players = ptemp.iterator();
 		ArrayList<Player> allclosep = new ArrayList<Player>();
-		if (ptemp.size() >= 1) {
-
-			while (players.hasNext()) {
-				Player player = players.next();
+		if (Bukkit.getOnlinePlayers().size() >= 1) {
+			for(Player player : Bukkit.getOnlinePlayers()){
 				if (player.getWorld().getName()
 						.equals(loc.getWorld().getName())) {
 					if (player.getLocation().distanceSquared(loc) <= radiussq) {
@@ -79,20 +73,22 @@ public class QuestParticles {
 	}
 
 	private static boolean tocompletetalk(UUID npcuuid, Player player) {
-		boolean checks = false;
 		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
 		if (p.getactivetype() != null) {
 			if (p.getactives("talkto") != null) {
 				for (Integer i : p.getactives("talkto")) {
 					QuestTalkto talk = q.returntalkto(i);
+					if(talk == null){
+						p.deleteactive("talkto", i);
+						continue;
+					}
 					if (plugin.qserver.uniquenpcid.get(talk.getNpcid()) == npcuuid) {
-						checks = true;
-						break;
+						return true;
 					}
 				}
 			}
 		}
-		return checks;
+		return false;
 	}
 
 	private static boolean completedq(UUID npcuuid, Player player) {
@@ -116,23 +112,42 @@ public class QuestParticles {
 	}
 
 	private static boolean aviablew(UUID npcuuid) {
-		boolean checks = false;
 		if (plugin.qserver.getWarpId(npcuuid) != -1) {
 			Warps warp = plugin.qserver.returnwarp(plugin.qserver.getWarpId(npcuuid));
+			if(warp == null){
+				plugin.qserver.removewarp(plugin.qserver.getWarpId(npcuuid));
+				return false;
+			}
 			if(warp.getState().equals("active")){
-			checks = true;
+				for(String type : warp.getType()){
+					for(Warps w : Warps.TypeReturned(type)){
+						if(w.getState().equals("active") && warp.getWarpid() != w.getWarpid()){
+							if (warp.getByPassID().size() != 0) {
+								if (warp.isOverrideOnly()) {
+									if (!plugin.tr
+											.containsID(warp.getByPassID(),
+													w.getByPassID())) {
+										continue;
+									}else{
+										return true;
+									}
+								}
+							}else{
+								return true;
+							}
+						}
+					}
+				}
 			}
 		}
-		return checks;
+		return false;
 	}
 
 	private static boolean aviableq(UUID npcuuid, Player player) {
-		boolean checks = false;
 		if (plugin.qserver.GetIds("kill", npcuuid) != null) {
 			for (Integer in : plugin.qserver.GetIds("kill", npcuuid)) {
 				if (check(npcuuid, player, in, "kill")) {
-					checks = true;
-					break;
+					return true;
 				}
 			}
 		}
@@ -140,8 +155,7 @@ public class QuestParticles {
 		if (plugin.qserver.GetIds("harvest", npcuuid) != null) {
 			for (Integer in : plugin.qserver.GetIds("harvest", npcuuid)) {
 				if (check(npcuuid, player, in, "harvest")) {
-					checks = true;
-					break;
+					return true;
 				}
 			}
 		}
@@ -149,18 +163,16 @@ public class QuestParticles {
 		if (plugin.qserver.GetIds("talkto", npcuuid) != null) {
 			for (Integer in : plugin.qserver.GetIds("talkto", npcuuid)) {
 				if (check(npcuuid, player, in, "talkto")) {
-					checks = true;
-					break;
+					return true;
 				}
 			}
 		}
 
-		return checks;
+		return false;
 	}
 
 	private static boolean check(UUID npcuuid, Player player, int questnumber,
 			String type) {
-		boolean check = true;
 		Playerstats p = q.playerinfo.getplayer(player.getUniqueId());
 		switch (type) {
 		case "kill":
@@ -176,27 +188,27 @@ public class QuestParticles {
 								if (!p.getrewardednumber(preq[0].trim())
 										.contains(
 												Integer.parseInt(preq[1].trim()))) {
-									check = false;
+									return false;
 								}
 							} else {
-								check = false;
+								return false;
 							}
 						} else {
-							check = false;
+							return false;
 						}
 					}
 
 					if (p.getactivetype() != null) {
 						if (p.getactives(type) != null) {
 							if (p.getactives(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
 					if (p.getcompletedtype() != null) {
 						if (p.getcompleted(type) != null) {
 							if (p.getcompleted(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
@@ -215,20 +227,21 @@ public class QuestParticles {
 										p.deleterewarded(type, questnumber);
 										q.playerinfo.saveplayerdata(p);
 									} else {
-										check = false;
+										return false;
 									}
 								} else {
-									check = false;
+									return false;
 								}
 							}
 						}
 					}
 				}else{
-					check = false;
+					return false;
 				}
 			} else {
-				check = false;
 				q.removekill(questnumber);
+				return false;
+				
 			}
 			break;
 		case "harvest":
@@ -244,26 +257,26 @@ public class QuestParticles {
 								if (!p.getrewardednumber(preq[0].trim())
 										.contains(
 												Integer.parseInt(preq[1].trim()))) {
-									check = false;
+									return false;
 								}
 							} else {
-								check = false;
+								return false;
 							}
 						} else {
-							check = false;
+							return false;
 						}
 					}
 					if (p.getactivetype() != null) {
 						if (p.getactives(type) != null) {
 							if (p.getactives(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
 					if (p.getcompletedtype() != null) {
 						if (p.getcompleted(type) != null) {
 							if (p.getcompleted(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
@@ -281,20 +294,21 @@ public class QuestParticles {
 										p.deleterewarded(type, questnumber);
 										q.playerinfo.saveplayerdata(p);
 									} else {
-										check = false;
+										return false;
 									}
 								} else {
-									check = false;
+									return false;
 								}
 							}
 						}
 					}
 				}else{
-					check = false;
+					return false;
 				}
 			} else {
-				check = false;
 				q.removeharvest(questnumber);
+				return false;
+			
 			}
 			break;
 		case "talkto":
@@ -309,26 +323,26 @@ public class QuestParticles {
 								if (!p.getrewardednumber(preq[0].trim())
 										.contains(
 												Integer.parseInt(preq[1].trim()))) {
-									check = false;
+									return false;
 								}
 							} else {
-								check = false;
+								return false;
 							}
 						} else {
-							check = false;
+							return false;
 						}
 					}
 					if (p.getactivetype() != null) {
 						if (p.getactives(type) != null) {
 							if (p.getactives(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
 					if (p.getcompletedtype() != null) {
 						if (p.getcompleted(type) != null) {
 							if (p.getcompleted(type).contains(questnumber)) {
-								check = false;
+								return false;
 							}
 						}
 					}
@@ -346,25 +360,26 @@ public class QuestParticles {
 										p.deleterewarded(type, questnumber);
 										q.playerinfo.saveplayerdata(p);
 									} else {
-										check = false;
+										return false;
 									}
 								} else {
-									check = false;
+									return false;
 								}
 							}
 						}
 					}
 					break;
 				}else{
-					check = false;
+					return false;
 				}
 			} else {
-				check = false;
 				q.removetalkto(questnumber);
+				return false;
+				
 			}
 		}
 
-		return check;
+		return true;
 	}
 
 	private static long parseDateDiff(String time, boolean future,

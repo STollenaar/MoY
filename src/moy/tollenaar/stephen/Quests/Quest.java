@@ -3,6 +3,7 @@ package moy.tollenaar.stephen.Quests;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -12,6 +13,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+
+
+
 
 
 
@@ -34,6 +39,8 @@ import moy.tollenaar.stephen.NPC.NPC;
 import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+import moy.tollenaar.stephen.Speech.SpeechNode;
+import moy.tollenaar.stephen.Speech.SpeechTrait;
 
 public class Quest {
 
@@ -267,7 +274,7 @@ public class Quest {
 	}
 
 	public void loadwarps(int number, String name, Location start,
-			double costs, String type, String state) {
+			double costs, String type, String state, String overrideTime, boolean overrideOnly, Set<Integer> overrideID) {
 		Warps warp = new Warps(number, start);
 		warp.setCosts(costs);
 		warp.setName(name);
@@ -278,6 +285,11 @@ public class Quest {
 		}
 
 		warp.setState(state);
+		for(int in : overrideID){
+			warp.addByPassID(in);
+		}
+		warp.setBypassedTime(overrideTime);
+		warp.setOverrideOnly(overrideOnly);
 		warplist.put(number, warp);
 	}
 
@@ -1057,5 +1069,202 @@ public class Quest {
 		}
 
 		return c.getTimeInMillis();
+	}
+	
+	public void QuestSpeech(Player player, int type, int number) {
+		int rows = getQuestNodes(type, number).size();
+		if (rows % 9 == 0) {
+			rows++;
+		}
+		while (rows % 9 != 0) {
+			rows++;
+		}
+		if (rows == 0) {
+			rows = 9;
+		}
+		Inventory inv = Bukkit.createInventory(null, rows, "AllNodes Quest");
+		for (int ids : getQuestNodes(type, number)) {
+			ItemStack item = new ItemStack(Material.BOOK);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName("SpeechNode");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(ids))));
+			item.setItemMeta(meta);
+			inv.addItem(item);
+		}
+		ItemStack create = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		{
+			ItemMeta meta = create.getItemMeta();
+			meta.setDisplayName("Create Node");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer.toString(type), Integer.toString(number))));
+			create.setItemMeta(meta);
+			inv.setItem(inv.getSize() - 1, create);
+		}
+		player.openInventory(inv);
+	}
+
+	public void QuestNode(Player player, int node, int type, int number) {
+		SpeechNode n = SpeechNode.getNode(node);
+		int rows = 1;
+		if (rows % 9 == 0) {
+			rows++;
+		}
+		while (rows % 9 != 0) {
+			rows++;
+		}
+		if (rows == 1) {
+			rows = 9;
+		}
+		rows += 9;
+		Inventory inv = Bukkit.createInventory(null, rows, "SpeechNodes Quest");
+
+		ItemStack response = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = response.getItemMeta();
+			meta.setDisplayName("Quest Response");
+			meta.setLore(new ArrayList<String>(Arrays.asList(n.getResponse())));
+			response.setItemMeta(meta);
+		}
+		inv.addItem(response);
+		for (int id : n.getTraits()) {
+			ItemStack item = new ItemStack(Material.BOOK);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName("SpeechTrait");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(id))));
+			item.setItemMeta(meta);
+			inv.addItem(item);
+		}
+		ItemStack trait = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		{
+			ItemMeta meta = trait.getItemMeta();
+			meta.setDisplayName("Add Trait");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer.toString(type), Integer.toString(number))));
+			trait.setItemMeta(meta);
+		}
+		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		{
+			ItemMeta meta = delete.getItemMeta();
+			meta.setDisplayName("Delete");
+			meta.setLore(new ArrayList<String>(Arrays.asList(player.getUniqueId().toString(), Integer.toString(node), Integer.toString(type), Integer.toString(number))));
+			delete.setItemMeta(meta);
+		}
+
+		inv.setItem(inv.getSize() - 8, trait);
+		inv.setItem(inv.getSize() - 1, delete);
+		player.openInventory(inv);
+
+	}
+
+	public void QuestTrait(Player player, int trait, int node, int type, int number) {
+		SpeechTrait t = SpeechTrait.getSpeech(trait);
+		Inventory inv = Bukkit.createInventory(null, 9, "SpeechTrait Quest");
+		ItemStack info = new ItemStack(Material.BOOK);
+		{
+			ItemMeta meta = info.getItemMeta();
+			meta.setDisplayName("Info");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(trait))));
+			info.setItemMeta(meta);
+		}
+		ItemStack message = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = message.getItemMeta();
+			meta.setDisplayName("Message");
+			meta.setLore(new ArrayList<String>(Arrays.asList(t.getMessage())));
+			message.setItemMeta(meta);
+		}
+		ItemStack depth = new ItemStack(Material.COMPASS);
+		{
+			ItemMeta meta = depth.getItemMeta();
+			meta.setDisplayName("Depth");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer.toString(t
+					.getDepth()))));
+			depth.setItemMeta(meta);
+		}
+		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		{
+			ItemMeta meta = delete.getItemMeta();
+			meta.setDisplayName("Delete");
+			meta.setLore(new ArrayList<String>(Arrays.asList(player.getUniqueId().toString(), Integer.toString(node), Integer.toString(trait), Integer.toString(type), Integer.toString(number))));
+			delete.setItemMeta(meta);
+		}
+
+		inv.addItem(info);
+		inv.addItem(message);
+		inv.addItem(depth);
+		inv.setItem(8, delete);
+		player.openInventory(inv);
+	}
+	
+	protected Set<Integer> getQuestNodes(int type, int number){
+		switch(type){
+		case 1:
+			return returnkill(number).getNodes();
+		case 2:
+			return returnharvest(number).getNodes();
+		case 3:
+			return returntalkto(number).getNodes();
+		case 7:
+			return returneventquest(number).getNodes();
+		default:
+			return null;
+		}
+	}
+	protected SpeechNode getStart(int type, int number){
+		switch(type){
+		case 1:
+			for(int n : returnkill(number).getNodes()){
+				return SpeechNode.getNode(n);
+			}
+		case 2:
+			for(int n : returnharvest(number).getNodes()){
+				return SpeechNode.getNode(n);
+			}
+		case 3:
+			for(int n : returntalkto(number).getNodes()){
+				return SpeechNode.getNode(n);
+			}
+		case 7:
+			for(int n : returneventquest(number).getNodes()){
+				return SpeechNode.getNode(n);
+			}
+		default:
+			return null;
+		}
+	}
+	
+	protected void deleteSpeechNode(int type, int number, int node){
+		switch(type){
+		case 1:
+			returnkill(number).getNodes().remove(node);
+			break;
+		case 2:
+			returnharvest(number).getNodes().remove(node);
+			break;
+		case 3:
+			returntalkto(number).getNodes().remove(node);
+			break;
+		case 7:
+			returneventquest(number).getNodes().remove(node);
+			break;
+		}
+	}
+	
+	protected void AddNode(int type, int number, int node){
+		switch(type){
+		case 1:
+			returnkill(number).AddNode(node);
+			break;
+		case 2:
+			returnharvest(number).AddNode(node);
+			break;
+		case 3:
+			returntalkto(number).AddNode(node);
+			break;
+		case 7:
+			returneventquest(number).AddNode(node);
+			break;
+		}
 	}
 }

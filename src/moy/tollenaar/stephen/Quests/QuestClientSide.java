@@ -1,9 +1,6 @@
 package moy.tollenaar.stephen.Quests;
 
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +32,6 @@ public class QuestClientSide {
 
 	// private Main plugin;
 
-	@SuppressWarnings("deprecation")
 	public void avquest(NPC npc, Player player, String npcname) {
 		UUID npcuuid = npc.getUniqueId();
 		int rowcount = 0;
@@ -204,48 +200,7 @@ public class QuestClientSide {
 			}
 		}
 		if (questers.getWarpId(npcuuid) != -1) {
-			// for (Integer i : questers.warplists.get(npcuuid)) {
-			int i = questers.getWarpId(npcuuid);
-			Warps kill = questers.returnwarp(i);
-			if (kill != null) {
-				if (kill.getState().equals("active")) {
-					for (String type : kill.getType()) {
-						for (Warps w : Warps.TypeReturned(type)) {
-							if (w.getWarpid() != kill.getWarpid()) {
-								ItemStack title = new ItemStack(Material.BOAT);
-								{
-									ArrayList<String> lore = new ArrayList<String>();
-									int time = plugin.tr.traveltime(npcuuid,
-											kill.getWarpid(), type,
-											w.getStartloc(), w.getByPassID());
-									SimpleDateFormat df = new SimpleDateFormat(
-											"mm:ss");
-									Date date = new Date(time * 1000);
-									date.setHours(date.getHours() - 9);
-									date.setMinutes(date.getMinutes() - 30);
-									lore.add("Duration: " + df.format(date));
-									lore.add(type);
-									lore.add("§"
-											+ Integer.toString(w.getWarpid()));
-									lore.add("§"
-											+ Integer.toString(kill.getWarpid()));
-
-									ItemMeta meta = title.getItemMeta();
-									meta.setLore(lore);
-									meta.setDisplayName(kill.getName() + " - "
-											+ w.getName());
-									title.setItemMeta(meta);
-								}
-
-								inv.addItem(title);
-							}
-						}
-					}
-				}
-			} else {
-				questers.removewarp(i);
-			}
-
+			warpAdder(npcuuid, inv);
 		}
 		if (questers.GetIds("event", npcuuid) != null) {
 			for (int i : questers.GetIds("event", npcuuid)) {
@@ -294,9 +249,10 @@ public class QuestClientSide {
 			for (ItemStack items : inv.getContents()) {
 				newinv.addItem(items);
 			}
-			ItemStack npcinfo = new ItemStack(Material.BEDROCK);
+			ItemStack npcinfo = new ItemStack(Material.COMPASS);
 			{
 				ItemMeta meta = npcinfo.getItemMeta();
+				meta.setDisplayName("Exit Menu");
 				ArrayList<String> lore = new ArrayList<String>();
 				String builder = "";
 				for (String in : npcuuid.toString().split("")) {
@@ -308,9 +264,10 @@ public class QuestClientSide {
 				newinv.setItem(newinv.getSize() - 1, npcinfo);
 			}
 		} else {
-			ItemStack npcinfo = new ItemStack(Material.BEDROCK);
+			ItemStack npcinfo = new ItemStack(Material.COMPASS);
 			{
 				ItemMeta meta = npcinfo.getItemMeta();
+				meta.setDisplayName("Exit Menu");
 				ArrayList<String> lore = new ArrayList<String>();
 				String builder = "";
 				for (String in : npcuuid.toString().split("")) {
@@ -336,6 +293,72 @@ public class QuestClientSide {
 			questers.plugin.qinteract.dummymessage(player, npc);
 		}
 		tempav.clear();
+	}
+
+	private void warpAdder(UUID npcuuid, Inventory inv) {
+		int i = questers.getWarpId(npcuuid);
+		Warps kill = questers.returnwarp(i);
+		if (kill != null) {
+			if (kill.getState().equals("active")) {
+				for (String type : kill.getType()) {
+					for (Warps w : Warps.TypeReturned(type)) {
+						if (w.getWarpid() != kill.getWarpid()) {
+							ItemStack title = new ItemStack(Material.BOAT);
+							int time = plugin.tr.traveltime(npcuuid,
+									kill.getWarpid(), type, w.getStartloc(),
+									w.getWarpid());
+							if (kill.getByPassID().size() != 0) {
+								if (kill.isOverrideOnly()) {
+									if (!plugin.tr
+											.containsID(kill.getByPassID(),
+													w.getByPassID())) {
+										continue;
+									}
+								}
+							}
+							ArrayList<String> lore = new ArrayList<String>();
+							String m  = "";
+							int hours = time/360;
+							String habr = "hour";
+							if(hours > 1){
+								habr = "hours";
+							}
+							int minutes = time/60;
+							String mabr = "minute";
+							if(minutes > 1){
+								mabr = "minutes";
+							}
+							int seconds = time - hours*360- minutes*60;
+							String sabr = "second";
+							if(seconds > 1 || seconds == 0){
+								sabr = "seconds";
+							}
+							if(hours != 0){
+								m += hours + " " + habr + " ";
+							}
+							if(minutes != 0){
+								m += minutes + " " + mabr + " ";
+							}
+							m += seconds + " " + sabr;
+							lore.add("Duration: " + m);
+							lore.add(type);
+							lore.add("§" + Integer.toString(w.getWarpid()));
+							lore.add("§" + Integer.toString(kill.getWarpid()));
+
+							ItemMeta meta = title.getItemMeta();
+							meta.setLore(lore);
+							meta.setDisplayName(kill.getName() + " - "
+									+ w.getName());
+							title.setItemMeta(meta);
+
+							inv.addItem(title);
+						}
+					}
+				}
+			}
+		} else {
+			questers.removewarp(i);
+		}
 	}
 
 	public boolean check(String type, int number, Player player,
@@ -672,12 +695,15 @@ public class QuestClientSide {
 							}
 							// giving the reward
 							if (reward != null && !reward.contains("unknown")) {
-								QuestRewardEvent e = new QuestRewardEvent(player, number, type, npcname, questers);
-								Bukkit.getServer().getPluginManager().callEvent(e);
+								QuestRewardEvent e = new QuestRewardEvent(
+										player, number, type, npcname, questers);
+								Bukkit.getServer().getPluginManager()
+										.callEvent(e);
 								p.deletecompleted(type, i);
 								p.addrewarded(type, number,
 										System.currentTimeMillis());
 								questers.playerinfo.saveplayerdata(p);
+								pass = true;
 								return pass;
 							}
 						}
@@ -688,5 +714,4 @@ public class QuestClientSide {
 		return pass;
 	}
 
-	
 }

@@ -2,8 +2,14 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+
+
+
 
 
 
@@ -18,6 +24,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
 
 import moy.tollenaar.stephen.InventoryUtils.ItemGenerator;
+import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
 public class QuestTalkto {
 	private int questnumber;
@@ -32,7 +39,7 @@ public class QuestTalkto {
 	private String message;
 	
 	private int minlvl;
-	
+	private Set<Integer> nodes;
 	private String prereq;
 	private String state;
 	public QuestTalkto(int number){
@@ -45,16 +52,18 @@ public class QuestTalkto {
 		this.minlvl = 0;
 		this.prereq = "none=0";
 		this.state = "disbled";
+		this.nodes = new HashSet<>();
 	}
 	
-	public void npcsettingstalkto(UUID npcuuid, Player player) {
+	public void npcsettingstalkto(UUID npcuuid, Player player, MoY plugin) {
 
 		Inventory talktoques = Bukkit.createInventory(null, 18, "TalktoQuest");
 
 		// title
 		ItemStack title = ItemGenerator.InfoQuest(name, questnumber, 3, npcuuid.toString());
 		// person
-		ItemStack person = ItemGenerator.PersonQuest(npcid);
+		
+		ItemStack person = ItemGenerator.PersonQuest(npcid, plugin.getNPCHandler().getNPCByUUID(plugin.qserver.uniquenpcid.get(npcid)).getName());
 		// reward
 		ItemStack rewardi =ItemGenerator.RewardQuest(reward);
 		// min lvl
@@ -67,7 +76,8 @@ public class QuestTalkto {
 		ItemStack prereqi =ItemGenerator.PrereqQuest(prereq);
 		//queststate
 		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
-		
+		//speech
+				ItemStack speech = ItemGenerator.SpeechTrait(3, questnumber);
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
 		ItemStack delete = new ItemStack(wool.toItemStack());
@@ -94,6 +104,7 @@ public class QuestTalkto {
 		talktoques.addItem(repeat);
 		talktoques.addItem(messagei);
 		talktoques.addItem(prereqi);
+		talktoques.addItem(speech);
 		talktoques.addItem(qstate);
 		talktoques.setItem(talktoques.getSize() - 2, delete);
 		talktoques.setItem(talktoques.getSize() - 1, main);
@@ -169,6 +180,14 @@ public class QuestTalkto {
 
 	public int getQuestnumber() {
 		return questnumber;
+	}
+
+	public Set<Integer> getNodes() {
+		return nodes;
+	}
+
+	public void AddNode(int node) {
+		this.nodes.add(node);
 	}
 	
 	

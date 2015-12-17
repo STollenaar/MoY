@@ -11,9 +11,7 @@ public class NPCSpawnEvent extends Event implements Cancellable{
 	private final NPCSpawnReason reason;
 	private NPCEntity npc;
 	private Location spawnlocation;
-	private final int id;
 	
-	private final String shop;
 	
 	public NPCEntity getNpc() {
 		return npc;
@@ -23,17 +21,12 @@ public class NPCSpawnEvent extends Event implements Cancellable{
 		return spawnlocation;
 	}
 
-	public NPCSpawnEvent(NPCEntity npc, Location loc, NPCSpawnReason reason, String shop, int id){
+	public NPCSpawnEvent(NPCEntity npc, Location loc, NPCSpawnReason reason){
 		this.npc = npc;
 		this.spawnlocation = loc;
 		this.reason = reason;
-		this.shop = shop;
-		this.id = id;
 	}
 	
-	public NPCSpawnEvent(NPCEntity npc, Location loc, NPCSpawnReason reason, String shop){
-		this(npc, loc, reason, shop, -1);
-	}
 	
 	public boolean isCancelled() {
 		return canceled;
@@ -56,12 +49,5 @@ public class NPCSpawnEvent extends Event implements Cancellable{
 		return reason;
 	}
 
-	public String getShop() {
-		return shop;
-	}
-
-	public int getId() {
-		return id;
-	}
 
 }

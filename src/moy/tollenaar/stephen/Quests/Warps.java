@@ -2,7 +2,9 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -34,7 +36,8 @@ public class Warps {
 	private String state;
 	
 	private String byPassTime;
-	private int byPassID;
+	private Set<Integer> byPassID;
+	private boolean overrideonly;
 	
 	public static ArrayList<Warps> allwarps = new ArrayList<Warps>();
 
@@ -108,7 +111,8 @@ public class Warps {
 			delete.setItemMeta(temp);
 		}
 		ItemStack override = ItemGenerator.ByPassWarp(getBypassedTime(), true);
-		ItemStack overrideid = ItemGenerator.ByPassWarp(Integer.toString(byPassID), false);
+		ItemStack overrideOnly = ItemGenerator.ByPassWarp(Boolean.toString(overrideonly), false);
+		ItemStack overrideid = ItemGenerator.ByPassWarpID(byPassID);
 
 		warpinv.addItem(title);
 		warpinv.addItem(transport);
@@ -116,6 +120,7 @@ public class Warps {
 		warpinv.addItem(money);
 		warpinv.addItem(qstate);
 		warpinv.addItem(override);
+		warpinv.addItem(overrideOnly);
 		warpinv.addItem(overrideid);
 		warpinv.setItem(warpinv.getSize() - 2, delete);
 		warpinv.setItem(warpinv.getSize() - 1, main);
@@ -123,6 +128,8 @@ public class Warps {
 		player.openInventory(warpinv);
 
 	}
+	
+	
 
 	public String getState() {
 		return state;
@@ -141,8 +148,12 @@ public class Warps {
 		this.state = "disabled";
 		this.setBypassedTime("-1");
 		allwarps.add(this);
+		this.byPassID = new HashSet<Integer>();
 	}
-
+	public void deleteOverRideId(int id){
+		this.byPassID.remove(id);
+	}
+	
 	public double getCosts() {
 		return costs;
 	}
@@ -197,17 +208,23 @@ public class Warps {
 		this.byPassTime = bypassed;
 	}
 
-	public int getByPassID() {
+	public Set<Integer> getByPassID() {
 		return byPassID;
 	}
 
-	public void setByPassID(int byPassID) {
-		this.byPassID = byPassID;
+	public void addByPassID(int byPassID) {
+		this.byPassID.add(byPassID);
 	}
 
 	public void generateByPass(){
-		this.byPassID = BY_ID_COUNT;
+		this.byPassID.add(BY_ID_COUNT);
 		BY_ID_COUNT++;
+	}
+	public boolean isOverrideOnly(){
+		return overrideonly;
+	}
+	public void setOverrideOnly(boolean override){
+		this.overrideonly  = override;
 	}
 	
 }

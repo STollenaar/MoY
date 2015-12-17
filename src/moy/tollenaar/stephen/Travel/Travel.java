@@ -1,29 +1,24 @@
 package moy.tollenaar.stephen.Travel;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
-
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import moy.tollenaar.stephen.Files.Filewriters;
 import moy.tollenaar.stephen.InventoryUtils.ItemGenerator;
@@ -35,7 +30,6 @@ import moy.tollenaar.stephen.Quests.QuestsServerSide;
 import com.earth2me.essentials.api.Economy;
 import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
-import com.google.common.collect.Lists;
 
 public class Travel implements Listener {
 	private TravelBoatEvent boat;
@@ -45,404 +39,350 @@ public class Travel implements Listener {
 	private Filewriters fw;
 	private QuestsServerSide questers;
 
-	// no db
-	private HashMap<UUID, Boolean> travelevent = new HashMap<UUID, Boolean>(); // boolean
-																				// if
-																				// event
-																				// would
-																				// happen
-	public static HashMap<UUID, Integer> schedulerstor = new HashMap<UUID, Integer>(); // integer
-																						// for
-																						// the
-																						// travel
-																						// scheduler
-																						// to
-																						// prevent
-																						// null
-																						// pointers
-
-	public static HashMap<String, Set<UUID>> players = new HashMap<String, Set<UUID>>(); // player
-																							// with
-																							// their
-																							// trip
-																							// id
-
-	private HashMap<String, HarborWaitLocations> groupedwaiting = new HashMap<String, HarborWaitLocations>(); // harborlocations
-																												// in
-																												// use
-																												// with
-																												// their
-																												// trip
-																												// id.
-	private HashMap<String, TripLocations> groupedtrip = new HashMap<String, TripLocations>(); // triplocations
-																								// in
-																								// use
-																								// with
-																								// their
-																								// trip
-																								// id
-
-	private HashMap<String, Set<HarborWaitLocations>> waiting = new HashMap<String, Set<HarborWaitLocations>>(); // harborlocations
-																													// free
-																													// to
-																													// use
-																													// with
-																													// type
-	private HashMap<String, Set<TripLocations>> trip = new HashMap<String, Set<TripLocations>>(); // triploctions
-																									// free
-																									// to
-																									// use
-																									// with
-																									// type
-
-	private HashMap<String, Set<HarborWaitLocations>> waitingac = new HashMap<String, Set<HarborWaitLocations>>(); // harborlocations
-																													// in
-																													// use
-	private HashMap<String, Set<TripLocations>> tripac = new HashMap<String, Set<TripLocations>>(); // triplocations
-																									// in
-																									// use
-
+	private static HashMap<Integer, TripLocations> trip = new HashMap<Integer, TripLocations>();
+	private static HashMap<Integer, HarborWaitLocations> waiting = new HashMap<Integer, HarborWaitLocations>();
+	private static HashMap<String, UUID> tempID = new HashMap<String, UUID>();
+	private static HashMap<UUID, String> tripType = new HashMap<UUID, String>();
+	
+	private static HashMap<UUID, HarborWaitLocations> ACTIVE_HARBOR = new HashMap<>();
+	private static HashMap<UUID, TripLocations> ACTIVE_TRIP = new HashMap<>();
+	private static HashMap<UUID, Set<UUID>> players = new HashMap<>();
+	private static HashMap<UUID, Location> START_LOC = new HashMap<>();
+	
+	private static HashMap<UUID, Set<Integer>> TRIP_SCHEDULE = new HashMap<>();
+	
 	@SuppressWarnings("deprecation")
 	public void boardcheck(UUID npcuuid, int questnumber, Player player,
-			Location end, String type, String id, int destnumber) {
-		double needed = questers.returnwarp(questnumber).getCosts();
-		int seconds = Calendar.getInstance().get(Calendar.SECOND);
-		int minutes = 10; // Calendar.getInstance().get(Calendar.MINUTE);
-		int nearest = ((minutes + 5) / 10) * 10 % 60;
-
+			String type, String id) {
 		NPCHandler handler = plugin.getNPCHandler();
 		NPC npc = handler.getNPCByUUID(npcuuid);
-
-		if (!type.equals("dragoncoach")) {
-			// time checking for next trip
-			int next;
-			if (nearest == 0 && minutes >= 55) {
-				next = 60 - minutes;
-			} else {
-				next = nearest - minutes;
+		Location end = null;
+		int endid = Integer.parseInt(id.split("-")[1]);
+		for(UUID npcs : questers.GetKeysSets("warp")){
+			if(questers.getWarpId(npcs) == endid){
+				end = handler.getNPCByUUID(npcuuid).getCurrentloc();
 			}
-			if (next < 0) {
-				next = -next;
-			}
-			int next2 = 10 - next;
-			seconds = 60 - seconds;
-			int time = next * 60 + seconds;
-			if (nearest < minutes && (nearest != 0 && minutes <= 55)) {
-				if (next2 > 5) {
-					next2 = next - 5;
-					if (next2 < 0) {
-						next2 = -next2;
-					}
-				}
-				String min;
-				if (next2 > 1 || waiting.get(type) == null
-						|| trip.get(type) == null || waiting.get(type) == null) {
-					// just left
-					min = "minutes.";
-					String message;
-					if (type.equals("boat")) {
-						message = boatmassmiss();
-					} else {
-						message = oxcartmassmiss();
-					}
-
-					player.sendMessage(ChatColor.DARK_PURPLE + "["
-							+ ChatColor.GOLD + npc.getName()
-							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
-							+ message + next2 + " " + min);
-				} else {
-					// almost able to board
-					min = "minute.";
-					String message;
-					if (type.equals("boat")) {
-						message = boatalmostthere();
-					} else {
-						message = oxcartalmostthere();
-					}
-					player.sendMessage(ChatColor.DARK_PURPLE + "["
-							+ ChatColor.GOLD + npc.getName()
-							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
-							+ message);
-				}
-
-			} else if (next != 0) {
-				// enough time to board
-				String min;
-				if (next > 1) {
-					min = "minutes";
-				} else {
-					min = "minute";
-				}
-				String message = fw.GetUtilityLine("Boarding");
-				message = message.replace("%type%", type).replace("%min%", min)
-						.replace("%sec%", Integer.toString(seconds));
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
-						+ "YTravel" + ChatColor.DARK_PURPLE + "] "
-						+ ChatColor.AQUA + message);
-
-				tempboard(npcuuid, questnumber, player, time, type, end, id, destnumber);
-
-			} else {
-				// if last minute board
-				String message = fw.GetUtilityLine("AlmostLeaving");
-				message = message.replace("%type%", type).replace("%time%",
-						Integer.toString(seconds) + " seconds");
-				player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
-						+ npc.getName() + ChatColor.DARK_PURPLE + "] "
-						+ ChatColor.AQUA + message);
-				tempboard(npcuuid, questnumber, player, time, type, end, id, destnumber);
-			}
-		} else {
+		}
+		if(type.equals("dragoncoach")){
 			// checking if enought money
+			double needed = questers.returnwarp(questnumber).getCosts();
 			try {
 				if (Economy.hasEnough(player.getName(), needed)) {
-					travel(npcuuid, questnumber, player, type, end, id, destnumber);
+					waitBoard(0, player, id, type, npcuuid, end);
 					Economy.subtract(player.getName(), needed);
+					return;
 				} else {
 					player.sendMessage(ChatColor.DARK_PURPLE + "["
 							+ ChatColor.GOLD + npc.getName()
 							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
 							+ fw.GetUtilityLine("DragonNotEnoughMoney"));
+					return;
 				}
 			} catch (UserDoesNotExistException e) {
 				e.printStackTrace();
 			} catch (NoLoanPermittedException e) {
 				e.printStackTrace();
 			}
+			return;
 		}
+		boolean canTravel = false;
+		int seconds = Calendar.getInstance().get(Calendar.SECOND);
+		int minutes =  Calendar.getInstance().get(Calendar.MINUTE);
+		
 
-	}
-
-	public void tempboard(final UUID npcuuid, final int questnumber,
-			final Player player, int time, final String type,
-			final Location end, final String tripid, final int destnumber) {
-		HashSet<UUID> p = new HashSet<UUID>();
-		p.add(player.getUniqueId());
-		if (players.get(tripid) == null) {
-			for (HarborWaitLocations harbor : waiting.get(type)) {
-				players.put(tripid, p);
-				groupedwaiting.put(tripid, harbor);
-				player.teleport(harbor.getLocation());
-
-				waiting.get(type).remove(harbor);
-				if (waitingac.get(type) != null) {
-					waitingac.get(type).add(harbor);
-				} else {
-					Set<HarborWaitLocations> h = new HashSet<HarborWaitLocations>();
-					h.add(harbor);
-					waitingac.put(type, h);
+		String message = ChatColor.DARK_PURPLE + "["
+				+ ChatColor.GOLD + npc.getName()
+				+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA;
+		int next;
+		if (minutes % 10 == 0) {
+			next = 0;
+			if(seconds < 60){
+				canTravel = true;
+				message = fw.GetUtilityLine("AlmostLeaving");
+				message = message.replace("%type%", type).replace("%time%",
+						Integer.toString(seconds) + " seconds");
+			}else{
+				if(type.equals("boat")){
+					message += boatmassmiss();
+				}else{
+					message += oxcartmassmiss();
 				}
-				break;
+				//to late
 			}
-
-		} else if (groupedtrip.get(tripid) != null) {
-
+			
 		} else {
-			players.get(tripid).add(player.getUniqueId());
-			player.teleport(groupedwaiting.get(tripid).getLocation());
-		}
-		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-				new Runnable() {
-					@Override
-					public void run() {
-						if (groupedwaiting.get(tripid) != null) {
-							HarborWaitLocations h = groupedwaiting.get(tripid);
-							waitingac.get(type).remove(h);
-							waiting.get(type).add(h);
-							groupedwaiting.remove(tripid);
-						}
-						travel(npcuuid, questnumber, player, type, end, tripid, destnumber);
-					}
-				}, time * 20L);
-		schedulerstor.put(player.getUniqueId(), id);
-
-	}
-
-	public void travel(UUID npcuuid, final int questnumber,
-			final Player player, final String type, final Location end,
-			final String tripid, int destnumber) {
-		if (groupedtrip.get(tripid) == null) {
-			for (TripLocations trips : trip.get(type)) {
-				groupedtrip.put(tripid, trips);
-				trip.get(type).remove(trips);
-				if (tripac.get(type) != null) {
-					tripac.get(type).add(trips);
-				} else {
-					HashSet<TripLocations> t = new HashSet<TripLocations>();
-					t.add(trips);
-					tripac.put(type, t);
-				}
-				break;
+			next = (60 - minutes) % 10;
+			String min;
+			if(next/60 > 1 || next/60 == 0){
+				min = "minutes";
+			}else{
+				min = "minute";
 			}
-		} else {
-			player.teleport(groupedtrip.get(tripid).getLocation());
-		}
-
-		NPCHandler handler = plugin.getNPCHandler();
-		NPC npc = handler.getNPCByUUID(npcuuid);
-		final Location start = npc.getCurrentloc();
-
-		int time = traveltime(npcuuid, questnumber, type, end, destnumber);
-
-		travelevent.put(player.getUniqueId(), chance());
-
-		player.teleport(start);
-		String message;
-		if (type.equals("boat")) {
-			message = boatleaving();
-		} else if (type.equals("oxcart")) {
-			message = oxcartleaving();
-		} else if (type.equals("dragoncoach")) {
-			message = dragoncartleavgin();
-		} else {
-			message = " not yet";
-		}
-		String mestemp;
-		if (travelevent.get(player.getUniqueId()) == false) {
-			mestemp = " You have arrived at your destination.";
-		} else {
-			mestemp = "EVENT";
-		}
-		int timetemp = 0;
-		if (mestemp.equals("EVENT")) {
-			timetemp = time;
-			time = 10;
-		}
-		final int time2 = timetemp;
-		final String endmessage = mestemp;
-
-		player.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
-				+ "YTravel" + ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA
-				+ message);
-
-		int id = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin,
-				new Runnable() {
-					@Override
-					public void run() {
-						if (groupedtrip.get(tripid) != null) {
-							TripLocations trips = groupedtrip.get(tripid);
-							groupedtrip.remove(tripid);
-							tripac.get(type).remove(trips);
-							trip.get(type).add(trips);
-						}
-
-						if (!endmessage.equals("EVENT")) {
-							player.teleport(end);
-							player.sendMessage(ChatColor.DARK_PURPLE + "["
-									+ ChatColor.GOLD + "YTravel"
-									+ ChatColor.DARK_PURPLE + "] "
-									+ ChatColor.AQUA
-									+ fw.GetUtilityLine("TravelArrive"));
-							schedulerstor.remove(player.getUniqueId());
-							players.get(tripid).remove(player.getUniqueId());
-						} else {
-							if (type.equals("boat")) {
-								player.sendMessage(ChatColor.DARK_PURPLE + "["
-										+ ChatColor.GOLD + "YTravel"
-										+ ChatColor.DARK_PURPLE + "] "
-										+ ChatColor.AQUA
-										+ fw.GetUtilityLine("TravelEvent"));
-								boat.eventint(player, start, end, time2, tripid);
-							}
-							if (type.equals("oxcart")) {
-								player.sendMessage(ChatColor.DARK_PURPLE + "["
-										+ ChatColor.GOLD + "YTravel"
-										+ ChatColor.DARK_PURPLE + "] "
-										+ ChatColor.AQUA
-										+ fw.GetUtilityLine("TavelEvent"));
-								cart.eventint(player, start, end, time2, tripid);
-							}
-							if (type.equals("dragoncoach")) {
-								player.sendMessage(ChatColor.DARK_PURPLE + "["
-										+ ChatColor.GOLD + "YTravel"
-										+ ChatColor.DARK_PURPLE + "] "
-										+ ChatColor.AQUA
-										+ fw.GetUtilityLine("TravelEvent"));
-								dragon.eventint(player, start, end, time2,
-										tripid);
-
-							}
-						}
-					}
-				}, time * 20L);
-		schedulerstor.put(player.getUniqueId(), id);
-
-	}
-
-	@EventHandler(priority = EventPriority.HIGH)
-	public void onplayerleave(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		UUID playeruuid = player.getUniqueId();
-		if (schedulerstor.containsKey(playeruuid)) {
-			Bukkit.getScheduler().cancelTask(schedulerstor.get(playeruuid));
-			schedulerstor.remove(playeruuid);
-			if (travelevent.containsKey(playeruuid) == true) {
-				travelevent.remove(playeruuid);
+		if(next <= 5){
+		
+			message += fw.GetUtilityLine("Boarding");
+			message = message.replace("%type%", type).replace("%time%", Integer.toString(next/60)).replace("%min%", min)
+					.replace("%sec%", Integer.toString(60-seconds));
+			canTravel = true;
+		}else if(next <= 7){
+			if(type.equals("boat")){
+				message += boatalmostthere();
+			}else{
+				message += oxcartalmostthere();
 			}
-			String tripid = null;
-			for (String in : players.keySet()) {
-				if (players.get(in).contains(playeruuid)) {
-					tripid = in;
+			
+		}else{
+			if(type.equals("boat")){
+				message += boatmassmiss();
+			}else{
+				message += oxcartmassmiss();
+			}
+			message += next + " " + min;
+		}
+		}
+		if(canTravel){	
+		int left = next * 60 + (60 - seconds); //gives the time for when it departures.. so give this time to the new method
+		if(tempID.get(id) != null){
+			player.setMetadata("Trip", new FixedMetadataValue(plugin, tempID.get(id)));
+		}else{
+			UUID generate = UUID.randomUUID();
+			TripLocations t = pullTrip(type);
+			HarborWaitLocations h = pullHarbor(type);
+			if(t == null || h == null){
+				switch(type){
+				case "boat":
+					player.sendMessage(ChatColor.DARK_PURPLE + "["
+							+ ChatColor.GOLD + npc.getName()
+							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA + "O no. Looks like the ship needs to head to the shipyard. Come back in a few hours.");
+					break;
+				case "oxcart":
+					player.sendMessage(ChatColor.DARK_PURPLE + "["
+							+ ChatColor.GOLD + npc.getName()
+							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA + "O dear. The oxes are exhausted. They need rest now. Come back in a few hours.");
+					break;
+				case "dragoncoach":
+					player.sendMessage(ChatColor.DARK_PURPLE + "["
+							+ ChatColor.GOLD + npc.getName()
+							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA + "Do you see that leash. It needs to be repaired. Come back in a few hours.");
+					break;
+				default:
+					player.sendMessage(ChatColor.DARK_PURPLE + "["
+							+ ChatColor.GOLD + npc.getName()
+							+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA + "What are you looking at? There is nothing here. All the vechicles are gone.");
 					break;
 				}
+				return;
 			}
-			String[] splitted = tripid.split("-");
-			int n = Integer.parseInt(splitted[0].trim());
-			Location startloc = questers.returnwarp(n).getStartloc();
-			player.getLocation().setX(startloc.getX());
-			player.getLocation().setY(startloc.getY());
-			player.getLocation().setZ(startloc.getZ());
-			player.getLocation().setWorld(startloc.getWorld());
-			String type = splitted[2].trim();
-			String message;
-			switch (type) {
-			case "boat":
-				message = boatleavemessage();
-				plugin.boat.playeratevent.remove(player.getUniqueId());
-				break;
-			case "oxcart":
-				message = oxcartleavemessage();
-				plugin.cart.playeratevent.remove(player.getUniqueId());
-				break;
-			case "dragoncoach":
-				message = dragoncartleave();
-				plugin.dragon.playeratevent.remove(player.getUniqueId());
-				break;
-			default:
-				message = "you passed out.";
-				break;
+			h.setActive(true);
+			t.setActive(true);
+			ACTIVE_HARBOR.put(generate, h);
+			ACTIVE_TRIP.put(generate, t);
+			tripType.put(generate, type);
+			if(players.get(generate) != null){
+				players.get(generate).add(player.getUniqueId());
+			}else{
+				Set<UUID> temp = new HashSet<UUID>();
+				temp.add(player.getUniqueId());
+				players.put(generate, temp);
 			}
-			fw.AddDesserter(player.getUniqueId().toString(), message);
+			START_LOC.put(generate, npc.getCurrentloc());
+			player.setMetadata("Trip", new FixedMetadataValue(plugin, generate));
+		}
+		player.sendMessage(message);;
+		waitBoard(left, player, id, type, npcuuid, end);
+		}else{
+			player.sendMessage(message);
 		}
 	}
 
+	private void waitBoard(int timTillDeparture, final Player pl, final String id, final String type,final UUID npcuuid,final Location end){
+		final UUID uuid = UUID.fromString(pl.getMetadata("Trip").get(0).asString());
+	
+		//insert message?
+		HarborWaitLocations h = ACTIVE_HARBOR.get(uuid);
+		pl.teleport(h.getLocation());
+		int schedule = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+			
+			@Override
+			public void run() {
+				Location start = questers.returnwarp(questers.getWarpId(npcuuid)).getStartloc();
+				ACTIVE_HARBOR.get(uuid).setActive(false);
+				ACTIVE_HARBOR.remove(uuid);
+				String message = ChatColor.DARK_PURPLE + "["
+						+ ChatColor.GOLD + "YTravel"
+						+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA;
+				switch(type){
+				case "boat":
+					message += boatleaving();
+					break;
+				case "oxcart":
+					message += oxcartleaving();
+					break;
+				case "dragoncoach":
+					message += dragoncartleavgin();
+					break;
+				}
+				pl.sendMessage(message);
+				travel(npcuuid, pl, id, end, type, start);
+			}
+		}, timTillDeparture*20L);
+		if(TRIP_SCHEDULE.get(uuid) != null){
+			TRIP_SCHEDULE.get(uuid).add(schedule);
+		}else{
+			Set<Integer> temp = new HashSet<Integer>();
+			temp.add(schedule);
+			TRIP_SCHEDULE.put(uuid, temp);
+		}
+		
+		
+	}
+	private void travel(UUID npcuuid, final Player player, final String id, final Location end, final String type, final Location start){
+		final UUID uuid = UUID.fromString(player.getMetadata("Trip").get(0).asString());
+		TRIP_SCHEDULE.remove(uuid);
+		ACTIVE_TRIP.get(uuid).setActive(false);
+		ACTIVE_TRIP.remove(uuid);
+		int time = traveltime(npcuuid, Integer.parseInt(id.split("-")[0]), type, end, Integer.parseInt(id.split("-")[1]));
+		boolean canEvent = true;
+		boolean isEvent = chance();
+		for(UUID pl : players.get(uuid)){
+			if(plugin.playerinfo.getplayer(pl).getLevel() < 20){
+				canEvent = false;
+				break;
+			}
+		}
+		final int time2 = time;
+		if(canEvent && eventAviable(type)){
+			if(isEvent){
+				time = 10;
+			}
+		}else if(isEvent){
+			isEvent = false;
+		}
+		final boolean event = isEvent;
+		
+		int schedule = Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable(){
+			public void run(){
+				
+				if(!event){
+				player.removeMetadata("Trip", plugin);
+				player.teleport(end);
+				players.remove(uuid);
+				player.sendMessage(ChatColor.DARK_PURPLE + "["
+						+ ChatColor.GOLD + "YTravel"
+						+ ChatColor.DARK_PURPLE + "] "
+						+ ChatColor.AQUA
+						+ fw.GetUtilityLine("TravelArrive"));
+				ACTIVE_TRIP.get(uuid).setActive(false);
+				ACTIVE_TRIP.remove(uuid);
+				tripType.remove(uuid);
+				START_LOC.remove(uuid);
+				}else{
+					if (type.equals("boat")) {
+						player.sendMessage(ChatColor.DARK_PURPLE + "["
+								+ ChatColor.GOLD + "YTravel"
+								+ ChatColor.DARK_PURPLE + "] "
+								+ ChatColor.AQUA
+								+ fw.GetUtilityLine("TravelEvent"));
+						boat.eventint(player, start, end, time2, id);
+					}
+					if (type.equals("oxcart")) {
+						player.sendMessage(ChatColor.DARK_PURPLE + "["
+								+ ChatColor.GOLD + "YTravel"
+								+ ChatColor.DARK_PURPLE + "] "
+								+ ChatColor.AQUA
+								+ fw.GetUtilityLine("TavelEvent"));
+						cart.eventint(player, start, end, time2, id);
+					}
+					if (type.equals("dragoncoach")) {
+						player.sendMessage(ChatColor.DARK_PURPLE + "["
+								+ ChatColor.GOLD + "YTravel"
+								+ ChatColor.DARK_PURPLE + "] "
+								+ ChatColor.AQUA
+								+ fw.GetUtilityLine("TravelEvent"));
+						dragon.eventint(player, start, end, time2,
+								id);
+
+					}
+				}
+			}
+		}, time*20L);
+		if(TRIP_SCHEDULE.get(uuid) != null){
+			TRIP_SCHEDULE.get(uuid).add(schedule);
+		}else{
+			Set<Integer> temp = new HashSet<Integer>();
+			temp.add(schedule);
+			TRIP_SCHEDULE.put(uuid, temp);
+		}
+	}
+	
+	
+	private boolean eventAviable(String type){
+		switch(type){
+		case "boat":
+			return false;
+		case "oxcart":
+			return false;
+		case "dragoncaoch":
+			return false;
+		default:
+			return false;
+		}
+	}
+	
+	
+	private TripLocations pullTrip(String type){
+		for(int id : trip.keySet()){
+			TripLocations t = trip.get(id);
+			if(t.getType().equals(type) && !t.isActive()){
+				return t;
+			}
+		}
+		return null;
+	}
+	private HarborWaitLocations pullHarbor(String type){
+		for(int id : waiting.keySet()){
+			HarborWaitLocations h = waiting.get(id);
+			if(h.getType().equals(type) && !h.isActive()){
+				return h;
+			}
+		}
+		return null;
+	}
+	
 	@EventHandler
 	public void onplayerjoind(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		if (Bukkit.getServer().getPluginManager().getPlugin("MistsOfYsir") != null) {
-			File direct = new File(Bukkit.getServer().getPluginManager()
-					.getPlugin("MistsOfYsir").getDataFolder(), "desserters");
-			if (direct.exists()) {
-				for (File content : direct.listFiles()) {
-					if (content.getName().replace(".txt", "")
-							.equals(player.getUniqueId().toString())) {
-						Scanner reader;
-						try {
-							reader = new Scanner(content);
-							player.sendMessage(ChatColor.DARK_PURPLE + "["
-									+ ChatColor.GOLD + "YTravel"
-									+ ChatColor.DARK_PURPLE + "] "
-									+ ChatColor.AQUA + reader.nextLine());
-							reader.close();
-							content.delete();
-							break;
-						} catch (FileNotFoundException e) {
-							e.printStackTrace();
-						}
-					}
+		if(player.hasMetadata("Desserter")){
+			String type = player.getMetadata("Desserter").get(0).asString();
+			String message = ChatColor.DARK_PURPLE + "["
+					+ ChatColor.GOLD + "YTravel"
+					+ ChatColor.DARK_PURPLE + "] " + ChatColor.AQUA;
+			switch(type){
+			case "boat":
+				message += boatleavemessage();
+				break;
+			case "oxcart":
+				message += oxcartleavemessage();
+				break;
+			case "dragoncoach":
+				message += dragoncartleave();
+				break;
+			}
+			player.sendMessage(message);
+			player.removeMetadata("Desserter", plugin);
+		}
+	}
+
+	public boolean containsID(Set<Integer> first, Set<Integer> last) {
+		for (int in1 : first) {
+			for (int in2 : last) {
+				if (in2 == in1) {
+					return true;
 				}
 			}
 		}
+
+		return false;
 	}
 
 	public int traveltime(UUID npcuuid, int questnumber, String type,
@@ -452,12 +392,13 @@ public class Travel implements Listener {
 		NPC npc = handler.getNPCByUUID(npcuuid);
 		Location start = npc.getCurrentloc();
 
-		if (questers.returnwarp(questnumber).getByPassID() != -1
-				&& questers.returnwarp(destnumber).getByPassID() != -1
-				&& questers.returnwarp(questnumber).getByPassID() == questers
-						.returnwarp(destnumber).getByPassID()) {
+		if (questers.returnwarp(questnumber).getByPassID().size() != 0
+				&& questers.returnwarp(destnumber).getByPassID().size() != 0
+				&& containsID(questers.returnwarp(questnumber).getByPassID(),
+						questers.returnwarp(destnumber).getByPassID())) {
 			int time = getSeconds(questers.returnwarp(questnumber)
 					.getBypassedTime());
+			System.out.println(time);
 			if (time != -1) {
 				return time;
 			}
@@ -509,6 +450,15 @@ public class Travel implements Listener {
 		return timeint;
 	}
 
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event){
+		if(event.getPlayer().hasMetadata("Trip")){
+			UUID trip = UUID.fromString(event.getPlayer().getMetadata("Trip").get(0).asString());
+			players.get(trip).remove(trip);
+			event.getPlayer().setMetadata("Desserter", new FixedMetadataValue(plugin, tripType.get(trip)));
+		}
+	}
+	
 	public boolean chance() {
 		Random r = new Random();
 		int k = r.nextInt(100);
@@ -520,7 +470,7 @@ public class Travel implements Listener {
 	}
 
 	// random messages
-	public String boatmassmiss() {
+	private String boatmassmiss() {
 		ArrayList<String> messages = fw.TravelBoatmiss();
 
 		Random r = new Random();
@@ -528,7 +478,7 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String boatalmostthere() {
+	private String boatalmostthere() {
 		ArrayList<String> messages = fw.Travelboatnearmiss();
 
 		Random r = new Random();
@@ -536,7 +486,7 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String boatleaving() {
+	private String boatleaving() {
 		ArrayList<String> messages = fw.TravelBoatLeaving();
 
 		Random r = new Random();
@@ -544,7 +494,7 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String oxcartmassmiss() {
+	private String oxcartmassmiss() {
 		ArrayList<String> messages = fw.TravelCartmis();
 
 		Random r = new Random();
@@ -552,7 +502,7 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String oxcartalmostthere() {
+	private String oxcartalmostthere() {
 		ArrayList<String> messages = fw.Travelcartnearmiss();
 
 		Random r = new Random();
@@ -560,7 +510,7 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String oxcartleaving() {
+	private String oxcartleaving() {
 		ArrayList<String> messages = fw.TravelCartLeaving();
 
 		Random r = new Random();
@@ -568,44 +518,31 @@ public class Travel implements Listener {
 		return messages.get(index);
 	}
 
-	public String dragoncartleavgin() {
-		ArrayList<String> message = new ArrayList<String>();
-		message.add("With one giant pull you're in the air and on your way.");
-		message.add("The Dragon roars as he begins moving the coach.");
-		message.add("You begin climbing so high that the air is thinner than you immagined.");
-		message.add("You begin sitting confortly while the dragon moves to his take off place.");
-		message.add("Pray that the dragon won't fly upside down.");
-		message.add("While climbing you look down. You see everything becomes smaller and smaller.");
+	private String dragoncartleavgin() {
+		ArrayList<String> message = fw.TravelDragonLeaving();
 		Random r = new Random();
 		int inex = r.nextInt(message.size() - 1);
 		return message.get(inex);
 	}
 
-	public String boatleavemessage() {
+	private String boatleavemessage() {
 		ArrayList<String> message = fw.TravelBoatLogout();
 		Random r = new Random();
 		int index = r.nextInt(message.size() - 1);
 		return message.get(index);
 	}
 
-	public String oxcartleavemessage() {
+	private String oxcartleavemessage() {
 		ArrayList<String> messages = fw.TravelCartLogout();
 		Random r = new Random();
 		int index = r.nextInt(messages.size() - 1);
 		return messages.get(index);
 	}
 
-	public String dragoncartleave() {
-		ArrayList<String> messages = new ArrayList<String>();
-		messages.add("You fell a sleep and the dragon flew you back.");
-		messages.add("You fell out of the coach. Luckily a tree saved your life and you crawled back to the start.");
-		messages.add("Your coach has crashed. A strange hairy creature brought you back to this city.");
-		messages.add("I don't know what happened but somehow you turned up back here!");
-		messages.add("A major dragon fight caused you to end up here again.");
-		messages.add("Due to the stormy weather your dragon decided to return back here.");
-
+	private String dragoncartleave() {
+		ArrayList<String> messages = fw.TravelDragonLogout();
 		Random r = new Random();
-		int index = r.nextInt(messages.size() - 1);
+		int index = r.nextInt(messages.size()-1);
 		return messages.get(index);
 	}
 
@@ -622,196 +559,63 @@ public class Travel implements Listener {
 		HarborWaitLocations h = new HarborWaitLocations(id);
 		h.setLocation(loc);
 		h.setType(type);
-		if (waiting.get(type) != null) {
-			waiting.get(type).add(h);
-		} else {
-			Set<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
-			t.add(h);
-			waiting.put(type, t);
-		}
+		waiting.put(id, h);
 	}
 
 	public void loadtrip(int id, String type, Location loc) {
 		TripLocations t = new TripLocations(id);
 		t.setLocation(loc);
 		t.setType(type);
-		if (trip.get(type) != null) {
-			trip.get(type).add(t);
-		} else {
-			Set<TripLocations> tr = new HashSet<TripLocations>();
-			tr.add(t);
-			trip.put(type, tr);
-		}
+		trip.put(id, t);
 	}
 
-	public void removetrip(String type, int number) {
-		for (TripLocations t : trip.get(type)) {
-			if (t.getId() == number) {
-				trip.get(type).remove(t);
-				plugin.database.deletetrip(number);
-				break;
-			}
-		}
+	public void removetrip(int number) {
+		trip.remove(number);
+		plugin.database.deletetrip(number);
 	}
 
-	public void removeharbor(String type, int number) {
-		for (HarborWaitLocations h : waiting.get(type)) {
-			if (h.getId() == number) {
-				waiting.get(type).remove(h);
-				plugin.database.deleteharbor(number);
-				break;
-			}
-		}
+	public void removeharbor( int number) {
+			waiting.remove(number);
+			plugin.database.deleteharbor(number);
 	}
 
 	public int createnewtrip() {
-		int i = 0;
-		String type = "none";
-		ArrayList<TripLocations> t;
-		if (trip.get(type) != null) {
-			t = Lists.newArrayList(trip.get(type).iterator());
-		} else {
-			t = new ArrayList<TripLocations>();
-		}
-		if (t.size() != 0) {
-			for (; i <= t.size(); i++) {
-				if (t.get(i) == null) {
-					break;
-				}
-			}
-		}
-		TripLocations tr = new TripLocations(i);
-		if (trip.get(type) != null) {
-			trip.get(type).add(tr);
-		} else {
-			trip.put(type, new HashSet<TripLocations>(Arrays.asList(tr)));
-		}
-		return i;
+		TripLocations tr = new TripLocations();
+		trip.put(tr.getId(), tr);
+		return tr.getId();
 	}
 
 	public int createnewharbor() {
-		int i = 0;
-		String type = "none";
-		ArrayList<HarborWaitLocations> t;
-		if (waiting.get(type) != null) {
-			t = Lists.newArrayList(waiting.get(type).iterator());
-		} else {
-			t = new ArrayList<HarborWaitLocations>();
-		}
-		if (t.size() != 0) {
-			for (; i <= t.size(); i++) {
-				if (t.get(i) == null) {
-					break;
-				}
-			}
-		}
-		HarborWaitLocations tr = new HarborWaitLocations(i);
-		if (waiting.get(type) != null) {
-			waiting.get(type).add(tr);
-		} else {
-			waiting.put(type,
-					new HashSet<HarborWaitLocations>(Arrays.asList(tr)));
-		}
-		return i;
+		HarborWaitLocations tr = new HarborWaitLocations();
+		waiting.put(tr.getId(), tr);
+		return tr.getId();
 	}
 
 	public TripLocations GetTrip(int number) {
-		for (String in : trip.keySet()) {
-			for (TripLocations i : trip.get(in)) {
-				if (i.getId() == number) {
-					return i;
-				}
-			}
-		}
-
-		for (String in : tripac.keySet()) {
-			for (TripLocations i : tripac.get(in)) {
-				if (i.getId() == number) {
-					return i;
-				}
-			}
-		}
-		return null;
+		return trip.get(number);
 	}
 
 	public HarborWaitLocations GetHarbor(int number) {
-		for (String in : waiting.keySet()) {
-			for (HarborWaitLocations i : waiting.get(in)) {
-				if (i.getId() == number) {
-					return i;
-				}
-			}
-		}
-
-		for (String in : waitingac.keySet()) {
-			for (HarborWaitLocations i : waitingac.get(in)) {
-				if (i.getId() == number) {
-					return i;
-				}
-			}
-		}
-		return null;
+		return waiting.get(number);
 	}
 
-	protected static void RemoveTrip(String tripid, UUID player) {
-		if (players.get(tripid) != null) {
-			players.get(tripid).remove(player);
-			if (players.get(tripid).size() == 0) {
-				players.remove(tripid);
-			}
-		}
-	}
 
 	public Set<Integer> AllTrips() {
-		HashSet<Integer> t = new HashSet<Integer>();
-		for (String in : trip.keySet()) {
-			for (TripLocations tr : trip.get(in)) {
-				t.add(tr.getId());
-			}
-		}
-
-		for (String in : tripac.keySet()) {
-			for (TripLocations tr : tripac.get(in)) {
-				t.add(tr.getId());
-			}
-		}
-		return t;
+		return trip.keySet();
 	}
 
 	public Set<Integer> AllHarbors() {
-		HashSet<Integer> t = new HashSet<Integer>();
-		for (String in : waiting.keySet()) {
-			for (HarborWaitLocations tr : waiting.get(in)) {
-				t.add(tr.getId());
-			}
-		}
-
-		for (String in : waitingac.keySet()) {
-			for (HarborWaitLocations tr : waitingac.get(in)) {
-				t.add(tr.getId());
-			}
-		}
-		return t;
+		return waiting.keySet();
 	}
 
 	public void EditHarbors(Player player) {
 		ArrayList<ItemStack> t = new ArrayList<ItemStack>();
-		for (String types : waiting.keySet()) {
-			for (HarborWaitLocations in : waiting.get(types)) {
+		for (int types : waiting.keySet()) {
+				HarborWaitLocations in = waiting.get(types);
 				ItemStack info = ItemGenerator.InfoQuest(in.getType(),
 						in.getId(), 6, null);
 				t.add(info);
-			}
 		}
-
-		for (String types : waitingac.keySet()) {
-			for (HarborWaitLocations in : waitingac.get(types)) {
-				ItemStack info = ItemGenerator.InfoQuest(in.getType(),
-						in.getId(), 6, null);
-				t.add(info);
-			}
-		}
-
 		int rowcount = 0;
 		if (t != null) {
 			rowcount = t.size();
@@ -835,21 +639,13 @@ public class Travel implements Listener {
 
 	public void EditTrips(Player player) {
 		ArrayList<ItemStack> t = new ArrayList<ItemStack>();
-		for (String types : trip.keySet()) {
-			for (TripLocations in : trip.get(types)) {
-				ItemStack info = ItemGenerator.InfoQuest("trip", in.getId(), 6,
+		for (int types : trip.keySet()) {
+			TripLocations in = trip.get(types);
+			ItemStack info = ItemGenerator.InfoQuest("trip", in.getId(), 6,
 						null);
 				t.add(info);
-			}
 		}
 
-		for (String types : tripac.keySet()) {
-			for (TripLocations in : tripac.get(types)) {
-				ItemStack info = ItemGenerator.InfoQuest("trip", in.getId(), 6,
-						null);
-				t.add(info);
-			}
-		}
 
 		int rowcount = 0;
 		if (t != null) {
@@ -872,65 +668,9 @@ public class Travel implements Listener {
 
 	}
 
-	public void TypeSwitchHarbor(HarborWaitLocations h, String old,
-			String type, int id) {
-		if (waiting.get(old) != null
-				&& Lists.newArrayList(waiting.get(old).iterator()).get(id) != null) {
-			waiting.get(old).remove(h);
-			if (waiting.get(type) != null) {
-				waiting.get(type).add(h);
-			} else {
-				HashSet<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
-				t.add(h);
-				waiting.put(type, t);
-			}
-			return;
-		}
-		if (waitingac.get(old) != null
-				&& Lists.newArrayList(waitingac.get(old).iterator()).get(id) != null) {
-			waitingac.get(old).remove(h);
-			if (waiting.get(type) != null) {
-				waiting.get(type).add(h);
-			} else {
-				HashSet<HarborWaitLocations> t = new HashSet<HarborWaitLocations>();
-				t.add(h);
-				waiting.put(type, t);
-			}
-			return;
-		}
-
-	}
-
-	public void TypeSwitchTrip(TripLocations h, String old, String type, int id) {
-		if (trip.get(old) != null
-				&& Lists.newArrayList(trip.get(old).iterator()).get(id) != null) {
-			trip.get(old).remove(h);
-			if (trip.get(type) != null) {
-				trip.get(type).add(h);
-			} else {
-				HashSet<TripLocations> t = new HashSet<TripLocations>();
-				t.add(h);
-				trip.put(type, t);
-			}
-			return;
-		}
-		if (tripac.get(old) != null
-				&& Lists.newArrayList(tripac.get(old).iterator()).get(id) != null) {
-			tripac.get(old).remove(h);
-			if (trip.get(type) != null) {
-				trip.get(type).add(h);
-			} else {
-				HashSet<TripLocations> t = new HashSet<TripLocations>();
-				t.add(h);
-				trip.put(type, t);
-			}
-			return;
-		}
-
-	}
 
 	private int getSeconds(String time) {
-		String[] splitted = time.split("");
+		String[] splitted = time.split("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 		try {
 			int duration = Integer.parseInt(splitted[0].trim());
 			switch (splitted[1]) {
@@ -949,6 +689,18 @@ public class Travel implements Listener {
 			return duration;
 		} catch (NumberFormatException ex) {
 			return -1;
+		}
+	}
+	public void disableFailSafe(){
+		for(UUID in : players.keySet()){
+			for(UUID player : players.get(in)){
+				Bukkit.getPlayer(player).teleport(START_LOC.get(in));
+			}
+			for(int schedulers : TRIP_SCHEDULE.get(in)){
+				Bukkit.getScheduler().cancelTask(schedulers);
+			}
+			ACTIVE_HARBOR.get(in).setActive(false);
+			ACTIVE_TRIP.get(in).setActive(false);
 		}
 	}
 }

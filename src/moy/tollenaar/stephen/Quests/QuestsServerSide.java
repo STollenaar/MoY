@@ -1,6 +1,7 @@
 package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +27,8 @@ import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.NPC.NPCProfile;
 import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.NPC.NPCSpawnReason;
+import moy.tollenaar.stephen.Speech.SpeechNode;
+import moy.tollenaar.stephen.Speech.SpeechTrait;
 
 public class QuestsServerSide extends Quest {
 
@@ -86,9 +89,7 @@ public class QuestsServerSide extends Quest {
 
 	public void resetHear(UUID npcuuid) {
 		if (activenpc.get(npcuuid) == null) {
-			if (facelooker.get(npcuuid) != null) {
-				npchear(npcuuid);
-			}
+			npchear(npcuuid);
 		} else {
 			runpoints(npcuuid);
 		}
@@ -98,7 +99,6 @@ public class QuestsServerSide extends Quest {
 	public void npchear(final UUID npcuuid) {
 		NPCHandler handler = plugin.getNPCHandler();
 		final NPC npc = handler.getNPCByUUID(npcuuid);
-
 		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,
 				new Runnable() {
 					int tickdelay = 0;
@@ -109,29 +109,25 @@ public class QuestsServerSide extends Quest {
 						if (npc != null) {
 							Location location = npc.getCurrentloc();
 							double radiusSquared = 10 * 10;
-
 							ArrayList<Location> allclosep = new ArrayList<Location>();
 							if (Bukkit.getOnlinePlayers().size() >= 1) {
 								Location closest = null;
 
 								for (Player player : Bukkit.getOnlinePlayers()) {
-									if (!player.hasMetadata("NPC")) {
-										if (player
-												.getWorld()
-												.getName()
-												.equals(location.getWorld()
-														.getName())) {
-											if (closest == null) {
-												closest = player.getLocation();
-											}
+									if (player
+											.getWorld()
+											.getName()
+											.equals(location.getWorld()
+													.getName())) {
+										if (closest == null) {
+											closest = player.getLocation();
+										}
 
-											if (player.getLocation()
-													.distanceSquared(location) <= radiusSquared) {
+										if (player.getLocation()
+												.distanceSquared(location) <= radiusSquared) {
 
-												allclosep.add(player
-														.getLocation());
+											allclosep.add(player.getLocation());
 
-											}
 										}
 									}
 								}
@@ -225,28 +221,30 @@ public class QuestsServerSide extends Quest {
 
 	public void spawnNpc(Location location, String name, int uniqueid,
 			String skin) {
-			NPCEntity npc = new NPCEntity(location.getWorld(), location,
-					NPCProfile.loadProfile(name, skin,
-							((CraftWorld) location.getWorld()).getHandle()),
-					plugin.getNetwork(), plugin, null, -1);
+		NPCEntity npc = new NPCEntity(
+				location.getWorld(),
+				location,
+				NPCProfile.loadProfile(name, skin,
+						((CraftWorld) location.getWorld()).getHandle(), plugin),
+				plugin.getNetwork(), plugin);
 
-			UUID npcuuid = npc.getUniqueId();
+		UUID npcuuid = npc.getUniqueId();
 
-			spawnlocation.put(npcuuid, location);
-			npclocation.put(npcuuid, location);
-			if (uniqueid != -1) {
-				uniquenpcid.put(uniqueid, npcuuid);
-			} else {
-				int id = 0;
-				while (uniquenpcid.containsKey(id)) {
-					id++;
-				}
-				uniquenpcid.put(id, npcuuid);
+		spawnlocation.put(npcuuid, location);
+		npclocation.put(npcuuid, location);
+		if (uniqueid != -1) {
+			uniquenpcid.put(uniqueid, npcuuid);
+		} else {
+			int id = 0;
+			while (uniquenpcid.containsKey(id)) {
+				id++;
 			}
-			if (!npc.isSpawned()) {
-				npc.spawn(location, NPCSpawnReason.NORMAL_SPAWN, npc);
-			}
-			npchear(npcuuid);
+			uniquenpcid.put(id, npcuuid);
+		}
+		if (!npc.isSpawned()) {
+			npc.spawn(location, NPCSpawnReason.NORMAL_SPAWN);
+		}
+		npchear(npcuuid);
 
 	}
 
@@ -449,6 +447,12 @@ public class QuestsServerSide extends Quest {
 			temp.setDisplayName("Event Quest");
 			event.setItemMeta(temp);
 		}
+		ItemStack speech = new ItemStack(Material.PAPER);
+		{
+			ItemMeta temp = speech.getItemMeta();
+			temp.setDisplayName("SpeechTrait");
+			speech.setItemMeta(temp);
+		}
 
 		String temp = "Main settings";
 		Inventory myinventory = Bukkit.createInventory(null, 18, temp);
@@ -461,6 +465,7 @@ public class QuestsServerSide extends Quest {
 		myinventory.addItem(warplists);
 		myinventory.addItem(talktoquest);
 		myinventory.addItem(event);
+		myinventory.addItem(speech);
 		myinventory.setItem(myinventory.getSize() - 1, delete);
 		player.openInventory(myinventory);
 	}
@@ -585,5 +590,136 @@ public class QuestsServerSide extends Quest {
 		default:
 			return null;
 		}
+	}
+
+	public void npcSpeech(UUID npcuuid, Player player) {
+		NPCEntity npc = plugin.getNPCHandler().getNPCByUUID(npcuuid);
+		int rows = npc.getNodes().size();
+		if (rows % 9 == 0) {
+			rows++;
+		}
+		while (rows % 9 != 0) {
+			rows++;
+		}
+		if (rows == 0) {
+			rows = 9;
+		}
+		Inventory inv = Bukkit.createInventory(null, rows, "AllNodes NPC");
+		for (int ids : npc.getNodes()) {
+			ItemStack item = new ItemStack(Material.BOOK);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName("SpeechNode");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(ids))));
+			item.setItemMeta(meta);
+			inv.addItem(item);
+		}
+		ItemStack create = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		{
+			ItemMeta meta = create.getItemMeta();
+			meta.setDisplayName("Create Node");
+			meta.setLore(new ArrayList<String>(
+					Arrays.asList(npcuuid.toString())));
+			create.setItemMeta(meta);
+			inv.setItem(inv.getSize() - 1, create);
+		}
+		player.openInventory(inv);
+	}
+
+	public void npcNode(UUID npcuuid, Player player, int node) {
+		SpeechNode n = SpeechNode.getNode(node);
+		int rows = 1;
+		if (rows % 9 == 0) {
+			rows++;
+		}
+		while (rows % 9 != 0) {
+			rows++;
+		}
+		if (rows == 1) {
+			rows = 9;
+		}
+		rows += 9;
+		Inventory inv = Bukkit.createInventory(null, rows, "SpeechNodes NPC");
+
+		ItemStack response = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = response.getItemMeta();
+			meta.setDisplayName("NPC Response");
+			meta.setLore(new ArrayList<String>(Arrays.asList(n.getResponse())));
+			response.setItemMeta(meta);
+		}
+		inv.addItem(response);
+		for (int id : n.getTraits()) {
+			ItemStack item = new ItemStack(Material.BOOK);
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName("SpeechTrait");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(id))));
+			item.setItemMeta(meta);
+			inv.addItem(item);
+		}
+		ItemStack trait = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		{
+			ItemMeta meta = trait.getItemMeta();
+			meta.setDisplayName("Add Trait");
+			meta.setLore(new ArrayList<String>(Arrays.asList(
+					npcuuid.toString())));
+			trait.setItemMeta(meta);
+		}
+		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		{
+			ItemMeta meta = delete.getItemMeta();
+			meta.setDisplayName("Delete");
+			meta.setLore(new ArrayList<String>(
+					Arrays.asList(npcuuid.toString(), Integer.toString(node))));
+			delete.setItemMeta(meta);
+		}
+
+		inv.setItem(inv.getSize() - 8, trait);
+		inv.setItem(inv.getSize() - 1, delete);
+		player.openInventory(inv);
+
+	}
+
+	public void npcTrait(UUID npcuuid, Player player, int trait, int node) {
+		SpeechTrait t = SpeechTrait.getSpeech(trait);
+		Inventory inv = Bukkit.createInventory(null, 9, "SpeechTrait NPC");
+		ItemStack info = new ItemStack(Material.BOOK);
+		{
+			ItemMeta meta = info.getItemMeta();
+			meta.setDisplayName("Info");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer
+					.toString(trait))));
+			info.setItemMeta(meta);
+		}
+		ItemStack message = new ItemStack(Material.PAPER);
+		{
+			ItemMeta meta = message.getItemMeta();
+			meta.setDisplayName("Message");
+			meta.setLore(new ArrayList<String>(Arrays.asList(t.getMessage())));
+			message.setItemMeta(meta);
+		}
+		ItemStack depth = new ItemStack(Material.COMPASS);
+		{
+			ItemMeta meta = depth.getItemMeta();
+			meta.setDisplayName("Depth");
+			meta.setLore(new ArrayList<String>(Arrays.asList(Integer.toString(t
+					.getDepth()))));
+			depth.setItemMeta(meta);
+		}
+		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		{
+			ItemMeta meta = delete.getItemMeta();
+			meta.setDisplayName("Delete");
+			meta.setLore(new ArrayList<String>(
+					Arrays.asList(npcuuid.toString(), Integer.toString(node), Integer.toString(trait))));
+			delete.setItemMeta(meta);
+		}
+
+		inv.addItem(info);
+		inv.addItem(message);
+		inv.addItem(depth);
+		inv.setItem(8, delete);
+		player.openInventory(inv);
 	}
 }

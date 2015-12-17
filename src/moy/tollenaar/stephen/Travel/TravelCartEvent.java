@@ -110,8 +110,6 @@ import moy.tollenaar.stephen.MistsOfYsir.MoY;
 							onplayer.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YTravel" + ChatColor.DARK_PURPLE + "]" + 
 									ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
 							playeratevent.remove(uuid);
-							Travel.schedulerstor.remove(uuid);
-							Travel.RemoveTrip(tripid, uuid);
 						}
 						}
 				}
@@ -147,8 +145,6 @@ import moy.tollenaar.stephen.MistsOfYsir.MoY;
 								onplayer.teleport(end);
 								onplayer.sendMessage(ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD + "YTravel" + ChatColor.DARK_PURPLE + "]" + 
 										ChatColor.AQUA + " After all this trouble we have finally arived at your destination.");
-								Travel.schedulerstor.remove(uuid);
-								Travel.RemoveTrip(tripid, uuid);
 							}
 							}
 					}

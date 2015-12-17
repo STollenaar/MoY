@@ -190,8 +190,8 @@ public class RandomEvents implements Listener {
 					List<Integer> idlist = (List<Integer>) plugin.getConfig().getList("randomeventrewardid");
 					
 					Location loc = player.getLocation().toVector().add(player.getLocation().getDirection().multiply(3)).toLocation(player.getWorld());
-					final NPCEntity npc = new NPCEntity(loc.getWorld(), loc, new NPCProfile("Antee"), plugin.getNetwork(), plugin, "normal", -1);
-					npc.spawn(loc, NPCSpawnReason.NORMAL_SPAWN, npc);
+					final NPCEntity npc = new NPCEntity(loc.getWorld(), loc, new NPCProfile("Antee"), plugin.getNetwork(), plugin);
+					npc.spawn(loc, NPCSpawnReason.NORMAL_SPAWN);
 					loc.setY(loc.getY() + 1);
 					final Location loc2 = loc;
 					npc.lookatEntity(player);

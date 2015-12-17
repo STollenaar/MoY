@@ -16,15 +16,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.fusesource.jansi.Ansi;
 
 import moy.tollenaar.stephen.NPC.NPC;
 import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.NPC.NPCMetadataStore;
-import moy.tollenaar.stephen.NPC.NPCProfile;
-import moy.tollenaar.stephen.NPC.NPCSpawnReason;
 import moy.tollenaar.stephen.PlayerInfo.Party;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
@@ -84,8 +81,10 @@ public class DbStuff {
 							+ "strength INTEGER NOT NULL, "
 							+ "dex INTEGER NOT NULL, "
 							+ "lvl INTEGER NOT NULL, "
+							
 
-							+ "levelprog INTEGER NOT NULL);");
+							+ "levelprog INTEGER NOT NULL,"
+							+ "libray TEXT);");
 
 			// party database table
 			statement
@@ -102,8 +101,7 @@ public class DbStuff {
 					+ "spawnlocationx INTEGER NOT NULL, "
 					+ "spawnlocationy INTEGER NOT NULL, "
 					+ "spawnlocationz INTEGER NOT NULL, "
-					+ "spawnworld VARCHAR(45) NOT NULL, "
-					+ "walking VARCHAR(6) NOT NULL, " + "killquests TEXT, "
+					+ "spawnworld VARCHAR(45) NOT NULL, " + "killquests TEXT, "
 					+ "harvestquests TEXT, " + "talktoquests TEXT, "
 					+ "warps INTEGER, eventquests TEXT);");
 
@@ -148,7 +146,8 @@ public class DbStuff {
 							+ "title TEXT NOT NULL, "
 							+ "startloc TEXT NOT NULL, "
 							+ "type VARCHAR(45) NOT NULL, state VARCHAR(45) NOT NULL,  "
-							+ "costs DOUBLE);");
+							+ "costs DOUBLE, "
+							+ "overrideTime VARCHAR(10) NOT NULL, overrideOnly TINYINT(1) NOT NULL, overrideID TEXT);");
 
 			// event boat
 			statement
@@ -439,22 +438,47 @@ public class DbStuff {
 
 			String test = "SELECT `strength` FROM `Mist_PlayerData` WHERE `useruuid` LIKE ?;";
 
-			String insert = "INSERT INTO Mist_PlayerData (" + "`useruuid`, "
-					+ "`partyname`, " + "`partyinvite`," + "`woodcutting`, "
-					+ "`mining`, " + "`smelting`, " + "`cooking`, "
-					+ "`fishing`, " + "`woodcuttingprog`," + "`miningprog`,"
-					+ "`smeltingprog`," + "`cookingprog`," + "`fishingprog`,"
-					+ "`abilitie`," + "`strength`," + "`dex`," + "`lvl`,"
-					+ "`levelprog`, `enchanting`, `enchantingprog`, `alchemy`, `alchemyprog`)" + " VALUES("
-					+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+			String insert = "INSERT INTO Mist_PlayerData ("
+					+ "`useruuid`, "
+					+ "`partyname`, "
+					+ "`partyinvite`,"
+					+ "`woodcutting`, "
+					+ "`mining`, "
+					+ "`smelting`, "
+					+ "`cooking`, "
+					+ "`fishing`, "
+					+ "`woodcuttingprog`,"
+					+ "`miningprog`,"
+					+ "`smeltingprog`,"
+					+ "`cookingprog`,"
+					+ "`fishingprog`,"
+					+ "`abilitie`,"
+					+ "`strength`,"
+					+ "`dex`,"
+					+ "`lvl`,"
+					+ "`levelprog`, `enchanting`, `enchantingprog`, `alchemy`, `alchemyprog`, `library`)"
+					+ " VALUES("
+					+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
-			String update = "UPDATE Mist_PlayerData SET " + "partyname=?,"
-					+ "partyinvite=?," + "woodcutting=?," + "mining=?,"
-					+ "smelting=?," + "cooking=?," + "fishing=?,"
-					+ "woodcuttingprog=?," + "miningprog=?,"
-					+ "smeltingprog=?," + "cookingprog=?," + "fishingprog=?,"
-					+ "abilitie=?," + "strength=?," + "dex=?," + "lvl=?,"
-					+ "levelprog=?, enchanting=?, enchantingprog=?, alchemy=?, alchemyprog=?" + " WHERE useruuid=?";
+			String update = "UPDATE Mist_PlayerData SET "
+					+ "partyname=?,"
+					+ "partyinvite=?,"
+					+ "woodcutting=?,"
+					+ "mining=?,"
+					+ "smelting=?,"
+					+ "cooking=?,"
+					+ "fishing=?,"
+					+ "woodcuttingprog=?,"
+					+ "miningprog=?,"
+					+ "smeltingprog=?,"
+					+ "cookingprog=?,"
+					+ "fishingprog=?,"
+					+ "abilitie=?,"
+					+ "strength=?,"
+					+ "dex=?,"
+					+ "lvl=?,"
+					+ "levelprog=?, enchanting=?, enchantingprog=?, alchemy=?, alchemyprog=?, library=?"
+					+ " WHERE useruuid=?";
 
 			PreparedStatement pst = null;
 			try {
@@ -495,7 +519,14 @@ public class DbStuff {
 					pst.setInt(19, p.getEnchantingprog());
 					pst.setInt(20, p.getAlchemy());
 					pst.setInt(21, p.getAlchemyprog());
-					pst.setString(22, player.toString());
+					String lib = "";
+					if(p.getBooks() != null && p.getBooks().size() != 0){
+						for(String in : p.getBooks()){
+							lib += in + "-";
+						}
+					}
+					pst.setString(22, lib);
+					pst.setString(23, player.toString());
 
 					pst.execute();
 				} else {
@@ -533,6 +564,13 @@ public class DbStuff {
 					pst.setInt(20, p.getEnchantingprog());
 					pst.setInt(21, p.getAlchemy());
 					pst.setInt(22, p.getAlchemyprog());
+					String lib = "";
+					if(p.getBooks() != null && p.getBooks().size() != 0){
+						for(String in : p.getBooks()){
+							lib += in + "-";
+						}
+					}
+					pst.setString(23, lib);
 					pst.execute();
 				}
 
@@ -617,13 +655,17 @@ public class DbStuff {
 	}
 
 	public void savewarp() {
-		String insert = "INSERT INTO Mist_Warp (" + "`id`," + "`title`,"
-				+ "`startloc`," + "`type`," + "`costs`, `state`) VALUES"
-				+ "(?,?,?,?,?,?);";
+		String insert = "INSERT INTO Mist_Warp ("
+				+ "`id`,"
+				+ "`title`,"
+				+ "`startloc`,"
+				+ "`type`,"
+				+ "`costs`, `state`, `overrideTime`, `overrideOnly`, `overrideID`) VALUES"
+				+ "(?,?,?,?,?,?,?,?,?);";
 
 		String update = "UPDATE Mist_Warp SET"
 				+ "`title`=?, `startloc`=?, `type`=?,"
-				+ "`costs`=?, `state`=? WHERE `id`=?;";
+				+ "`costs`=?, `state`=?, `overrideTime`=?, `overrideOnly`=?, `overrideID`=? WHERE `id`=?;";
 
 		String test = "SELECT * FROM Mist_Warp WHERE `id`=?;";
 		for (int warps : questers.AllWarpId()) {
@@ -650,6 +692,17 @@ public class DbStuff {
 					pst.setString(4, build);
 					pst.setDouble(5, warp.getCosts());
 					pst.setString(6, warp.getState());
+					pst.setString(7, warp.getBypassedTime());
+					int o = 0;
+					if (warp.isOverrideOnly()) {
+						o = 1;
+					}
+					pst.setInt(8, o);
+					String ids = "";
+					for (int in : warp.getByPassID()) {
+						ids += in + "-";
+					}
+					pst.setString(9, ids);
 					pst.execute();
 				} else {
 					pst.close();
@@ -667,7 +720,18 @@ public class DbStuff {
 					pst.setString(3, build);
 					pst.setDouble(4, warp.getCosts());
 					pst.setString(5, warp.getState());
-					pst.setInt(6, warp.getWarpid());
+					pst.setString(6, warp.getBypassedTime());
+					int o = 0;
+					if (warp.isOverrideOnly()) {
+						o = 1;
+					}
+					pst.setInt(7, o);
+					String ids = "";
+					for (int in : warp.getByPassID()) {
+						ids += in + "-";
+					}
+					pst.setString(8, ids);
+					pst.setInt(9, warp.getWarpid());
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -890,20 +954,18 @@ public class DbStuff {
 				+ "`spawnlocationx`,"
 				+ "`spawnlocationy`,"
 				+ "`spawnlocationz`, "
-				+ "`walking`,"
 				+ "`killquests`,"
 				+ "`harvestquests`,"
 				+ "`talktoquests`,"
 				+ "`warps`, "
 				+ "`spawnworld`, `npcskinname`, `eventquests` ,`active`) VALUES ("
-				+ "?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+				+ "?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
 		String update = "UPDATE Mist_NPCData SET"
 				+ "`npcname`=?,"
 				+ "`spawnlocationx`=?,"
 				+ "`spawnlocationy`=?,"
 				+ "`spawnlocationz`=?,"
-				+ "`walking`=?,"
 				+ "`killquests`=?,"
 				+ "`harvestquests`=?,"
 				+ "`talktoquests`=?,"
@@ -987,19 +1049,14 @@ public class DbStuff {
 					pst.setInt(3, x);
 					pst.setInt(4, y);
 					pst.setInt(5, z);
-					if (questers.activenpc.get(npcuuid) != null) {
-						pst.setString(6, "true");
-					} else {
-						pst.setString(6, "false");
-					}
-					pst.setString(7, killquestids);
-					pst.setString(8, harvestquestids);
-					pst.setString(9, talktoquestids);
-					pst.setString(10, warpids);
-					pst.setString(11, world);
-					pst.setString(12, pc.getSkinName());
-					pst.setString(13, eventquestids);
-					pst.setInt(14, active);
+					pst.setString(6, killquestids);
+					pst.setString(7, harvestquestids);
+					pst.setString(8, talktoquestids);
+					pst.setString(9, warpids);
+					pst.setString(10, world);
+					pst.setString(11, pc.getSkinName());
+					pst.setString(12, eventquestids);
+					pst.setInt(13, active);
 					pst.execute();
 				} else {
 					pst.close();
@@ -1009,20 +1066,15 @@ public class DbStuff {
 					pst.setInt(2, x);
 					pst.setInt(3, y);
 					pst.setInt(4, z);
-					if (questers.activenpc.get(npcuuid) != null) {
-						pst.setString(5, "true");
-					} else {
-						pst.setString(5, "false");
-					}
-					pst.setString(6, killquestids);
-					pst.setString(7, harvestquestids);
-					pst.setString(8, talktoquestids);
-					pst.setString(9, warpids);
-					pst.setString(10, world);
-					pst.setString(11, pc.getSkinName());
-					pst.setString(12, eventquestids);
-					pst.setInt(13, active);
-					pst.setInt(14, npcid);
+					pst.setString(5, killquestids);
+					pst.setString(6, harvestquestids);
+					pst.setString(7, talktoquestids);
+					pst.setString(8, warpids);
+					pst.setString(9, world);
+					pst.setString(10, pc.getSkinName());
+					pst.setString(11, eventquestids);
+					pst.setInt(12, active);
+					pst.setInt(13, npcid);
 					pst.execute();
 				}
 			} catch (SQLException e) {
@@ -1221,46 +1273,23 @@ public class DbStuff {
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));
 	}
 
-	public void loadshops() {
-		String load = "SELECT * FROM Mist_Shop;";
-		PreparedStatement pst = null;
-		try {
-			pst = con.prepareStatement(load);
-			ResultSet rs = pst.executeQuery();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String name = rs.getString("name");
-				String shop = rs.getString("shopname");
-				World world = Bukkit.getWorld(rs.getString("world"));
-				int x = rs.getInt("x");
-				int y = rs.getInt("y");
-				int z = rs.getInt("z");
-				Location loc = new Location(world, x, y, z);
-				NPCEntity npc = new NPCEntity(world, loc,
-						NPCProfile.loadProfile(name, name,
-								((CraftWorld) world).getHandle()),
-						plugin.getNetwork(), plugin, shop, id);
-				npc.spawn(loc, NPCSpawnReason.SHOP_SPAWN, npc);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		} finally {
-			try {
-				if (pst != null) {
-					pst.close();
-				}
-			} catch (SQLException ex) {
-				System.out.println(ex.getStackTrace());
-			}
-		}
-	}
+	/**
+	 * public void loadshops() { String load = "SELECT * FROM Mist_Shop;";
+	 * PreparedStatement pst = null; try { pst = con.prepareStatement(load);
+	 * ResultSet rs = pst.executeQuery(); while (rs.next()) { int id =
+	 * rs.getInt("id"); String name = rs.getString("name"); String shop =
+	 * rs.getString("shopname"); World world =
+	 * Bukkit.getWorld(rs.getString("world")); int x = rs.getInt("x"); int y =
+	 * rs.getInt("y"); int z = rs.getInt("z"); Location loc = new
+	 * Location(world, x, y, z); NPCEntity npc = new NPCEntity(world, loc,
+	 * NPCProfile.loadProfile(name, name, ((CraftWorld) world).getHandle(),
+	 * plugin), plugin.getNetwork(), plugin); npc.spawn(loc,
+	 * NPCSpawnReason.SHOP_SPAWN); } } catch (SQLException e) {
+	 * e.printStackTrace(); try { if (pst != null) { pst.close(); } } catch
+	 * (SQLException ex) { System.out.println(ex.getStackTrace()); } } finally {
+	 * try { if (pst != null) { pst.close(); } } catch (SQLException ex) {
+	 * System.out.println(ex.getStackTrace()); } } }
+	 **/
 
 	public void loadharbors() {
 		String loading = "SELECT * FROM Mist_Harbors;";
@@ -1398,7 +1427,7 @@ public class DbStuff {
 					p.setFishing(rs.getInt("fishing"));
 					p.setEnchanting(rs.getInt("enchanting"));
 					p.setAlchemy(rs.getInt("alchemy"));
-					
+
 					p.setWoodcuttingprog(rs.getInt("woodcuttingprog"));
 					p.setMiningprog(rs.getInt("miningprog"));
 					p.setSmeltingprog(rs.getInt("smeltingprog"));
@@ -1406,12 +1435,18 @@ public class DbStuff {
 					p.setFishingprog(rs.getInt("fishingprog"));
 					p.setEnchantingprog(rs.getInt("enchantingprog"));
 					p.setAlchemyprog(rs.getInt("alchemyprog"));
-					
+
 					p.setAbility(rs.getInt("abilitie"));
 					p.setStrength(rs.getInt("strength"));
 					p.setDex(rs.getInt("dex"));
 					p.setLevel(rs.getInt("lvl"));
 					p.setLevelprog(rs.getInt("levelprog"));
+					if(rs.getString("library") != null || !rs.getString("library").equals("")){
+						String[] books = rs.getString("library").split("-");
+						for(String in : books){
+							p.addBook(in);
+						}
+					}
 					playerinfo.saveplayerdata(p);
 				}
 			}
@@ -1560,7 +1595,20 @@ public class DbStuff {
 				double costs = rs.getDouble("costs");
 				String type = rs.getString("type");
 				String state = rs.getString("state");
-				questers.loadwarps(number, title, startloc, costs, type, state);
+				String overrideTime = rs.getString("overrideTime");
+				boolean overrideOnly = false;
+				if (rs.getInt("overrideOnly") == 1) {
+					overrideOnly = true;
+				}
+				Set<Integer> overrideID = new HashSet<Integer>();
+				if (!rs.getString("overrideID").equals("")) {
+					for (String in : rs.getString("overrideID").split("-")) {
+						overrideID.add(Integer.parseInt(in));
+					}
+				}
+
+				questers.loadwarps(number, title, startloc, costs, type, state,
+						overrideTime, overrideOnly, overrideID);
 
 			}
 		} catch (SQLException e) {
@@ -1600,6 +1648,10 @@ public class DbStuff {
 				for (UUID tu : questers.GetKeysSets("talkto")) {
 					for (Integer qn : questers.GetIds("talkto", tu)) {
 						QuestTalkto talk = questers.returntalkto(qn);
+						if (talk == null) {
+							questers.GetIds("talkto", tu).remove(qn);
+							continue;
+						}
 						if (talk.getNpcid() == rs.getInt("npcid")) {
 							questers.targetnpcs.put(npc, qn);
 							break;
@@ -1752,7 +1804,7 @@ public class DbStuff {
 		loadwood();
 		loadharbors();
 		loadtrips();
-		loadshops();
+		// loadshops();
 		plugin.getLogger().info(
 				Ansi.ansi().fg(Ansi.Color.GREEN) + "LOADING COMPLETE"
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));

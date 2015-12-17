@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
-import moy.tollenaar.stephen.Files.Filewriters;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
 public class RewardsFormatter {
@@ -19,7 +18,7 @@ public class RewardsFormatter {
 		this.rewardcommands = instance.fw.getRewards();
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unused" })
 	private String getRewardNamed(String reward) {
 		String[] splitted = reward.split(" ");
 		String builder = "";

@@ -1,14 +1,19 @@
-package moy.tollenaar.stephen.Quests;
+package moy.tollenaar.stephen.Speech;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import lib.fanciful.main.FancyMessage;
+import moy.tollenaar.stephen.Commands.SpeechCommand;
 
 public enum SpeechType {
 	ACCEPT("I will help %npcname%. ", "accept", "/speechtrait accept "), DECLINE(
 			"Sorry %npcname%. I'll look into it another time.", "decline",
-			"/speechtrait decline ");
+			"/speechtrait decline "), NODE("none", "node", "/speechtrait node");
 
 	private final String message;
 
@@ -55,7 +60,7 @@ public enum SpeechType {
 	 * @throws CloneNotSupportedException
 	 */
 	public static void constructSpeech(Player player, String questtype,
-			int questid, String npcname) throws CloneNotSupportedException {
+			int questid, String npcname, UUID npcuuid) throws CloneNotSupportedException {
 		FancyMessage accept = new FancyMessage(ACCEPT.getMessage().replace(
 				"%npcname%", npcname));
 		accept.color(ChatColor.AQUA);
@@ -70,10 +75,26 @@ public enum SpeechType {
 		decline.formattedTooltip(new FancyMessage(
 				"You will decline the given request.").color(ChatColor.RED));
 		decline.command(DECLINE.getCommand() + " " + player.getName() + " "
-				+ questtype + " " + questid + " " + npcname);
-
+				+ questtype + " " + questid + " " + npcuuid.toString());
+		SpeechCommand.addCache(player.getUniqueId(), questid);
 		accept.send(player);
 		decline.send(player);
-
+	
+	}
+	@SuppressWarnings("unchecked")
+	protected static void depthSpeech(Player player, List<String> command, List<String> message, int node){
+		List<FancyMessage> cases = new ArrayList<>();
+		for(int i =0; i < command.size(); i++){
+			FancyMessage temp =new FancyMessage(message.get(i));
+			temp.color(ChatColor.GRAY);
+			String cmd = command.get(i);
+			cmd = cmd.replace("%player%", player.getName());
+			temp.command(cmd);
+			cases.add(temp);
+		}
+		SpeechCommand.addCache(player.getUniqueId(), node);
+		for(FancyMessage in : cases){
+			in.send(player);
+		}
 	}
 }

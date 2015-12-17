@@ -1,8 +1,9 @@
-package moy.tollenaar.stephen.InventoryUtils;
+ package moy.tollenaar.stephen.InventoryUtils;
 
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -77,12 +78,24 @@ public class ItemGenerator {
 			return item;
 		}
 	}
+	
+	public static ItemStack SpeechTrait(int type, int number){
+		ItemStack item = new ItemStack(Material.PAPER);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName("SpeechTrait");
+		List<String> lore = new ArrayList<String>();
+		lore.add(Integer.toString(type));
+		lore.add(Integer.toString(number));
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+		return item;
+	}
 
-	public static ItemStack PersonQuest(int id) {
+	public static ItemStack PersonQuest(int id, String name) {
 		ItemStack item = new ItemStack(Material.SKULL_ITEM);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> info = new ArrayList<String>();
-		info.add(Integer.toString(id));
+		info.add(name + " (" + Integer.toString(id) + ")");
 		meta.setDisplayName("Person");
 		meta.setLore(info);
 		item.setItemMeta(meta);
@@ -199,11 +212,24 @@ public class ItemGenerator {
 		if (isTime) {
 			meta.setDisplayName("Override");
 		} else {
-			meta.setDisplayName("OverrideID");
+			meta.setDisplayName("OverRideOnly");
 		}
 		ArrayList<String> list = new ArrayList<String>();
 		list.add(bypassed);
 		meta.setLore(list);
+		item.setItemMeta(meta);
+		return item;
+	}
+	
+	public static ItemStack ByPassWarpID(Set<Integer> ids){
+		ItemStack item = new ItemStack(Material.WATCH);
+		ItemMeta meta = item.getItemMeta();
+		ArrayList<String> lore = new ArrayList<String>();
+		for(Integer in : ids){
+			lore.add(Integer.toString(in));
+		}
+		meta.setLore(lore);
+		meta.setDisplayName("OverrideID");
 		item.setItemMeta(meta);
 		return item;
 	}

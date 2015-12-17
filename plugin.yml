@@ -32,4 +32,7 @@ commands:
              usage: /<command>
      speechtrait:
              description: needed for quests
+             usage: /<command>
+     library:
+             description: shows the readed books
              usage: /<command>			 

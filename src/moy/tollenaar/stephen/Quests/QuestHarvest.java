@@ -2,7 +2,9 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -36,7 +38,7 @@ public class QuestHarvest {
 	private String itemid;
 	
 	private String state;
-
+	private Set<Integer> nodes;
 	public void qinventory(Player player, UUID npcuuid) {
 
 		Inventory harvestques = Bukkit
@@ -63,7 +65,8 @@ public class QuestHarvest {
 		ItemStack prereqi = ItemGenerator.PrereqQuest(prereq);
 		//queststate
 		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
-		
+		//speech
+				ItemStack speech = ItemGenerator.SpeechTrait(2, questnumber);
 		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
@@ -91,6 +94,7 @@ public class QuestHarvest {
 		harvestques.addItem(repeat);
 		harvestques.addItem(messagei);
 		harvestques.addItem(prereqi);
+		harvestques.addItem(speech);
 		harvestques.addItem(qstate);
 		harvestques.setItem(harvestques.getSize() - 2, delete);
 		harvestques.setItem(harvestques.getSize() - 1, main);
@@ -118,6 +122,7 @@ public class QuestHarvest {
 		this.message = "message";
 		this.reward = new ArrayList<String>(Arrays.asList("unknown"));
 		this.state = "disabled";
+		this.nodes = new HashSet<Integer>();
 	}
 
 	public int getQuestnumber() {
@@ -190,6 +195,14 @@ public class QuestHarvest {
 	
 	public void setReward(List<String> reward){
 		this.reward = reward;
+	}
+
+	public Set<Integer> getNodes() {
+		return nodes;
+	}
+
+	public void AddNode(int node) {
+		this.nodes.add(node);
 	}
 
 }

@@ -2,7 +2,9 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -26,7 +28,7 @@ public class QuestEvent {
 	private int minlvl;
 	private String message;
 	private String repeat;
-	
+	private Set<Integer> nodes;
 	private String type;
 	private String state;
 	public QuestEvent(int number){
@@ -41,6 +43,7 @@ public class QuestEvent {
 		this.repeat = "-1";
 		this.type = "0";
 		this.state = "disabled";
+		this.nodes = new HashSet<>();
 	}
 
 	public int getNumber() {
@@ -62,6 +65,8 @@ public class QuestEvent {
 		ItemStack start = ItemGenerator.DateQuest(startdate, true);
 		ItemStack end = ItemGenerator.DateQuest(enddate, false);
 		ItemStack rep = ItemGenerator.RepeatQuest(getRepeat());
+		//speech
+				ItemStack speech = ItemGenerator.SpeechTrait(7, number);
 		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
 		
 		inv.addItem(info);
@@ -73,6 +78,7 @@ public class QuestEvent {
 		inv.addItem(rew);
 		inv.addItem(mes);
 		inv.addItem(rep);
+		inv.addItem(speech);
 		inv.addItem(qstate);
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
@@ -191,6 +197,14 @@ public class QuestEvent {
 	}
 	public void setReward(String reward) {
 		this.reward.add(reward);
+	}
+
+	public Set<Integer> getNodes() {
+		return nodes;
+	}
+
+	public void AddNode(int node) {
+		this.nodes.add(node);
 	}
 	
 }

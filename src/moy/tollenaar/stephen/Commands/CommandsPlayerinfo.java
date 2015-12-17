@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
 import moy.tollenaar.stephen.Books.AlchemyVol1;
+import moy.tollenaar.stephen.Books.Library;
 import moy.tollenaar.stephen.CEvents.ProgEvent;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
@@ -24,10 +25,12 @@ public class CommandsPlayerinfo implements CommandExecutor {
 	private Playerinfo playerinfo;
 	private QuestsServerSide questers;
 	private Runic runic;
+	private Library lib;
 	public CommandsPlayerinfo(MoY instance) {
 		this.playerinfo = instance.playerinfo;
 		this.questers = instance.qserver;
 		this.runic = instance.runic;
+		this.lib = instance.getLib();
 	}
 
 	@Override
@@ -121,6 +124,9 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				}
 
 				return true;
+			}else if(cmd.getName().equalsIgnoreCase("library")){
+				lib.makeLibrary(player);
+				return true;
 			}
 
 		} else {
@@ -162,7 +168,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 						}
 						playerinfo.saveplayerdata(p);
 					} catch (NumberFormatException ex) {
-						sender.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting> <lvl>.");
+						sender.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting/enchant/alchemy/level> <lvl> <player>.");
 					}
 					return true;
 				}

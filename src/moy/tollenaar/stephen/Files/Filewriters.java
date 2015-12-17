@@ -24,6 +24,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
+import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 import moy.tollenaar.stephen.Quests.QuestEvent;
@@ -32,6 +33,8 @@ import moy.tollenaar.stephen.Quests.QuestKill;
 import moy.tollenaar.stephen.Quests.QuestTalkto;
 import moy.tollenaar.stephen.Quests.QuestsServerSide;
 import moy.tollenaar.stephen.SkillsStuff.FurnaceStorage;
+import moy.tollenaar.stephen.Speech.SpeechNode;
+import moy.tollenaar.stephen.Speech.SpeechTrait;
 
 public class Filewriters {
 	private MoY plugin;
@@ -70,10 +73,22 @@ public class Filewriters {
 
 	private File rewards;
 
+	private File library;
+
+	private File speechTraits;
+
 	public void filecheck() {
 		File direct = new File(plugin.getDataFolder(), "messages");
 		if (!direct.exists()) {
 			direct.mkdir();
+		}
+		library = new File(plugin.getDataFolder(), "library");
+		if (!library.exists()) {
+			library.mkdir();
+		}
+		speechTraits = new File(plugin.getDataFolder(), "speechTraits");
+		if (!speechTraits.exists()) {
+			speechTraits.mkdir();
 		}
 
 		quests = new File(plugin.getDataFolder(), "quests");
@@ -297,6 +312,81 @@ public class Filewriters {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private int getUniqueID(UUID npcuuid) {
+		for (int key : quest.uniquenpcid.keySet()) {
+			if (quest.uniquenpcid.get(key).equals(npcuuid)) {
+				return key;
+			}
+		}
+		throw new NullPointerException("NPC IS NON EXISTING");
+	}
+
+	public void saveTraits(UUID npcuuid) {
+		NPCEntity npc = plugin.getNPCHandler().getNPCByUUID(npcuuid);
+		int id = getUniqueID(npcuuid);
+		File file = new File(speechTraits, Integer.toString(id) + ".yml");
+		if (!file.exists() && npc.getNodes().size() > 0) {
+			try {
+				file.createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else if (file.exists() & npc.getNodes().size() == 0) {
+			file.delete();
+			return;
+		}
+		if (npc.getNodes().size() > 0) {
+			FileConfiguration config = YamlConfiguration
+					.loadConfiguration(file);
+			if (npc.getNodes().size() > 0) {
+				for (int node : npc.getNodes()) {
+					SpeechNode n = SpeechNode.getNode(node);
+					String path = Integer.toString(node);
+					config.set(path + ".Response", n.getResponse());
+					config.set(path + ".ID", n.getId());
+					for (int traits : n.getTraits()) {
+						SpeechTrait t = SpeechTrait.getSpeech(traits);
+						String traitpath = path;
+						traitpath += ".SpeechTrait." + traits;
+						config.set(traitpath + ".Message", t.getMessage());
+						config.set(traitpath + ".Depth", t.getDepth());
+					}
+				}
+				try {
+					config.save(file);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public void loadTraits(UUID npcuuid) {
+		int id = getUniqueID(npcuuid);
+		File file = new File(speechTraits, Integer.toString(id) + ".yml");
+		if (file.exists()) {
+			FileConfiguration config = YamlConfiguration
+					.loadConfiguration(file);
+			for (String in : config.getKeys(false)) {
+				int node = Integer.parseInt(in);
+				SpeechNode n = new SpeechNode(node, plugin);
+				n.setResponse(config.getString(in + ".Response"));
+				for (String traits : config.getConfigurationSection(
+						in + ".SpeechTrait").getKeys(false)) {
+					int trait = Integer.parseInt(traits);
+					SpeechTrait t = new SpeechTrait(trait);
+					t.setDepth(config.getInt(in + ".SpeechTrait." + traits
+							+ ".Depth"));
+					t.setMessage(config.getString(in + ".SpeechTrait." + traits
+							+ ".Message"));
+					n.addTrait(t);
+				}
+				plugin.getNPCHandler().getNPCByUUID(npcuuid).addNode(n.getId());
+			}
+
 		}
 	}
 
@@ -958,6 +1048,19 @@ public class Filewriters {
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
 		config.set("State", h.getState());
+		if(h.getNodes().size() > 0){
+			for(int n : h.getNodes()){
+				SpeechNode node = SpeechNode.getNode(n);
+				config.set("SpeechNode." + n + ".Response", node.getResponse());
+				config.set("SpeechNode." + n + ".ID", node.getId());
+				for(int t : node.getTraits()){
+					SpeechTrait trait = SpeechTrait.getSpeech(t);
+					String path = "SpeechNode." + n + ".SpeechTrait." + t;
+					config.set(path + ".Message", trait.getMessage());
+					config.set(path + ".Depth", trait.getDepth());
+				}
+			}
+		}
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -982,6 +1085,27 @@ public class Filewriters {
 		}
 		quest.loadharvest(id, name, reward, delay, minlvl, message, prereq,
 				count, itemid, state);
+		QuestHarvest h = quest.returnharvest(id);
+		try{
+			for (String in : config.getConfigurationSection("SpeechNode").getKeys(false)) {
+				int node = Integer.parseInt(in);
+				h.AddNode(node);
+				SpeechNode n = new SpeechNode(node, plugin);
+				n.setResponse(config.getString("SpeechNode." +in + ".Response"));
+				for (String traits : config.getConfigurationSection("SpeechNode." +
+						in + ".SpeechTrait").getKeys(false)) {
+					int trait = Integer.parseInt(traits);
+					SpeechTrait t = new SpeechTrait(id, 2, trait);
+					t.setDepth(config.getInt("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Depth"));
+					t.setMessage(config.getString("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Message"));
+					n.addTrait(t);
+				}
+			}
+		}catch(NullPointerException ex){
+			return;
+		}
 	}
 
 	public void SaveKill(QuestKill h) {
@@ -1004,6 +1128,19 @@ public class Filewriters {
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
 		config.set("State", h.getState());
+		if(h.getNodes().size() > 0){
+			for(int n : h.getNodes()){
+				SpeechNode node = SpeechNode.getNode(n);
+				config.set("SpeechNode." + n + ".Response", node.getResponse());
+				config.set("SpeechNode." + n + ".ID", node.getId());
+				for(int t : node.getTraits()){
+					SpeechTrait trait = SpeechTrait.getSpeech(t);
+					String path = "SpeechNode." + n + ".SpeechTrait." + t;
+					config.set(path + ".Message", trait.getMessage());
+					config.set(path + ".Depth", trait.getDepth());
+				}
+			}
+		}
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -1028,6 +1165,27 @@ public class Filewriters {
 		}
 		quest.loadkill(id, name, reward, delay, minlvl, message, prereq, count,
 				monster, state);
+		QuestKill h = quest.returnkill(id);
+		try{
+			for (String in : config.getConfigurationSection("SpeechNode").getKeys(false)) {
+				int node = Integer.parseInt(in);
+				h.AddNode(node);
+				SpeechNode n = new SpeechNode(node, plugin);
+				n.setResponse(config.getString("SpeechNode." +in + ".Response"));
+				for (String traits : config.getConfigurationSection("SpeechNode." +
+						in + ".SpeechTrait").getKeys(false)) {
+					int trait = Integer.parseInt(traits);
+					SpeechTrait t = new SpeechTrait(id, 1, trait);
+					t.setDepth(config.getInt("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Depth"));
+					t.setMessage(config.getString("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Message"));
+					n.addTrait(t);
+				}
+			}
+		}catch(NullPointerException ex){
+			return;
+		}
 	}
 
 	public void deletequest(String type, int id) {
@@ -1092,6 +1250,19 @@ public class Filewriters {
 		config.set("Prereq", h.getPrereq());
 		config.set("Delay", h.getDelay());
 		config.set("State", h.getState());
+		if(h.getNodes().size() > 0){
+			for(int n : h.getNodes()){
+				SpeechNode node = SpeechNode.getNode(n);
+				config.set("SpeechNode." + n + ".Response", node.getResponse());
+				config.set("SpeechNode." + n + ".ID", node.getId());
+				for(int t : node.getTraits()){
+					SpeechTrait trait = SpeechTrait.getSpeech(t);
+					String path = "SpeechNode." + n + ".SpeechTrait." + t;
+					config.set(path + ".Message", trait.getMessage());
+					config.set(path + ".Depth", trait.getDepth());
+				}
+			}
+		}
 		try {
 			config.save(f);
 		} catch (IOException e) {
@@ -1115,6 +1286,27 @@ public class Filewriters {
 		}
 		quest.loadtalkto(id, name, person, message, delay, minlvl, prereq,
 				reward, state);
+		QuestTalkto h = quest.returntalkto(id);
+		try{
+			for (String in : config.getConfigurationSection("SpeechNode").getKeys(false)) {
+				int node = Integer.parseInt(in);
+				h.AddNode(node);
+				SpeechNode n = new SpeechNode(node, plugin);
+				n.setResponse(config.getString("SpeechNode." +in + ".Response"));
+				for (String traits : config.getConfigurationSection("SpeechNode." +
+						in + ".SpeechTrait").getKeys(false)) {
+					int trait = Integer.parseInt(traits);
+					SpeechTrait t = new SpeechTrait(id, 3, trait);
+					t.setDepth(config.getInt("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Depth"));
+					t.setMessage(config.getString("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Message"));
+					n.addTrait(t);
+				}
+			}
+		}catch(NullPointerException ex){
+			return;
+		}
 	}
 
 	public void SaveEvent(QuestEvent e) {
@@ -1138,6 +1330,20 @@ public class Filewriters {
 		config.set("Count", e.getCount());
 		config.set("Message", e.getMessage());
 		config.set("State", e.getState());
+		if(e.getNodes().size() > 0){
+			for(int n : e.getNodes()){
+				SpeechNode node = SpeechNode.getNode(n);
+				config.set("SpeechNode." + n + ".Response", node.getResponse());
+				config.set("SpeechNode." + n + ".ID", node.getId());
+				for(int t : node.getTraits()){
+					SpeechTrait trait = SpeechTrait.getSpeech(t);
+					String path = "SpeechNode." + n + ".SpeechTrait." + t;
+					config.set(path + ".Message", trait.getMessage());
+					config.set(path + ".Depth", trait.getDepth());
+				}
+			}
+		}
+		
 		try {
 			config.save(f);
 		} catch (IOException e1) {
@@ -1164,6 +1370,30 @@ public class Filewriters {
 		}
 		quest.loadevent(id, thing, title, start, end, reward, message, count,
 				repeat, minlvl, state);
+		QuestEvent h = quest.returneventquest(id);
+		try{
+			for (String in : config.getConfigurationSection("SpeechNode").getKeys(false)) {
+				int node = Integer.parseInt(in);
+				h.AddNode(node);
+				SpeechNode n = new SpeechNode(node, plugin);
+				n.setResponse(config.getString("SpeechNode." +in + ".Response"));
+				for (String traits : config.getConfigurationSection("SpeechNode." +
+						in + ".SpeechTrait").getKeys(false)) {
+					int trait = Integer.parseInt(traits);
+					SpeechTrait t = new SpeechTrait(id, 7, trait);
+					t.setDepth(config.getInt("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Depth"));
+					t.setMessage(config.getString("SpeechNode." +in + ".SpeechTrait." + traits
+							+ ".Message"));
+					n.addTrait(t);
+				}
+			}
+		}catch(NullPointerException ex){
+			return;
+		}
 	}
 
+	public File[] getLibrary() {
+		return library.listFiles();
+	}
 }

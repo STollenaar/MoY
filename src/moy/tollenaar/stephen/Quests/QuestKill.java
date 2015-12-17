@@ -2,8 +2,12 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+
 
 
 
@@ -39,6 +43,8 @@ public class QuestKill {
 	private String monster;
 
 	private String state;
+	private Set<Integer> nodes;
+	
 	public void npcsettingskill(UUID npcuuid, Player player) {
 
 		Inventory killquest = Bukkit.createInventory(null, 18, "KillQuest");
@@ -62,6 +68,8 @@ public class QuestKill {
 		ItemStack prereqi = ItemGenerator.PrereqQuest(prereq);
 		//queststate
 		ItemStack qstate=  ItemGenerator.ActiveQuest(state);
+		//speech
+		ItemStack speech = ItemGenerator.SpeechTrait(1, questnumber);
 		
 		// delete
 		Wool wool = new Wool(DyeColor.RED);
@@ -89,6 +97,7 @@ public class QuestKill {
 		killquest.addItem(repeat);
 		killquest.addItem(messagei);
 		killquest.addItem(prereqi);
+		killquest.addItem(speech);
 		killquest.addItem(qstate);
 		killquest.setItem(killquest.getSize() - 2, delete);
 		killquest.setItem(killquest.getSize() - 1, main);
@@ -117,6 +126,7 @@ public class QuestKill {
 		this.prereq = "none=0";
 		this.monster = "zombie";
 		this.state = "disabled";
+		this.nodes = new HashSet<>();
 	}
 
 	public int getQuestnumber() {
@@ -189,6 +199,16 @@ public class QuestKill {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+
+	public Set<Integer> getNodes() {
+		return nodes;
+	}
+
+
+	public void AddNode(int node) {
+		this.nodes.add(node);
 	}
 
 }

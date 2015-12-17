@@ -42,8 +42,12 @@ public interface NPC {
 	 */
 	public boolean pathFinder(Location loc, double speed, double range);
 	
-	
-	
+	/**
+	 * 
+	 * @param player
+	 * @param spawn. true if npc is spawning
+	 */
+	public void playerJoinPacket(Player player, boolean spawn);
 	/**
 	 * get current location
 	 * @return
@@ -111,7 +115,7 @@ public interface NPC {
 	/**
 	 * spawn the npc
 	 */
-	public void spawn(Location loc, NPCSpawnReason reason, NPCEntity npc);
+	public void spawn(Location loc, NPCSpawnReason reason);
 	
 	/**
 	 * respawn the npc

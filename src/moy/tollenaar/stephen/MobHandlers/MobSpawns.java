@@ -502,7 +502,6 @@ public class MobSpawns implements Listener {
 				slime = (Slime) event.getDamager();
 				pass = true;
 			}
-			
 			if (pass == true) {
 				Playerstats p = playerinfo.getplayer(((Player) event.getEntity()).getUniqueId());
 				if (monster instanceof CaveSpider) {
@@ -514,16 +513,21 @@ public class MobSpawns implements Listener {
 					}
 				} else if (monster instanceof Spider
 						|| slime != null) {
-					if(!monster.hasMetadata("protect")){
+					
+					if((monster != null && !monster.hasMetadata("protect")) || (slime != null && !slime.hasMetadata("protect"))){
 					slimspiderdamage((Player) event.getEntity(), (int) Math.ceil((p.getLevel()+.0)/10));
 					}else{
+						if(monster != null){
 					slimspiderdamage((Player) event.getEntity(), ((int[])monster.getMetadata("protect").get(0).value())[0]);
+						}else{
+							slimspiderdamage((Player) event.getEntity(), ((int[])slime.getMetadata("protect").get(0).value())[0]);
+						}
 					}
 				} else if (cube != null) {
-					if(!monster.hasMetadata("protect")){
+					if(!cube.hasMetadata("protect")){
 					magmacubedamage((Player) event.getEntity(), (int) Math.ceil((p.getLevel()+.0)/10));
 					}else{
-					magmacubedamage((Player) event.getEntity(), ((int[])monster.getMetadata("protect").get(0).value())[0]);
+					magmacubedamage((Player) event.getEntity(), ((int[])cube.getMetadata("protect").get(0).value())[0]);
 					}
 				} else if (ghast != null) {
 					ghastdamage((Player) event.getEntity());

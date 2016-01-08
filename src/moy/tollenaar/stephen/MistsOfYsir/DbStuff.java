@@ -81,10 +81,8 @@ public class DbStuff {
 							+ "strength INTEGER NOT NULL, "
 							+ "dex INTEGER NOT NULL, "
 							+ "lvl INTEGER NOT NULL, "
-							
 
-							+ "levelprog INTEGER NOT NULL,"
-							+ "libray TEXT);");
+							+ "levelprog INTEGER NOT NULL," + "libray TEXT);");
 
 			// party database table
 			statement
@@ -111,7 +109,7 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY, "
 							+ "killquests TEXT, "
 							+ "harvestquests TEXT, "
-							+ "talktoquests TEXT," + "eventquest TEXT);");
+							+ "talktoquests TEXT," + "eventquests TEXT);");
 
 			// quest ready to recieve award
 			statement
@@ -119,7 +117,7 @@ public class DbStuff {
 							+ "useruuid VARCHAR(45) PRIMARY KEY,"
 							+ "killquests TEXT,"
 							+ "harvestquests TEXT,"
-							+ "talktoquests TEXT," + "eventquest TEXT);");
+							+ "talktoquests TEXT," + "eventquests TEXT);");
 
 			// quest completed kill
 			statement
@@ -130,6 +128,12 @@ public class DbStuff {
 			// quest completed harvest
 			statement
 					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_QuestCompleteHarvest ("
+							+ "useruuid VARCHAR(45) PRIMARY KEY, "
+							+ "questnumber TEXT, " + "timereward TEXT);");
+			
+			// quest completed event
+			statement
+					.executeUpdate("CREATE TABLE IF NOT EXISTS Mist_QuestCompleteEvent ("
 							+ "useruuid VARCHAR(45) PRIMARY KEY, "
 							+ "questnumber TEXT, " + "timereward TEXT);");
 
@@ -430,6 +434,240 @@ public class DbStuff {
 		}
 	}
 
+	public void savecompleted() {
+		String test = "SELECT * FROM Mist_QuestRewardable WHERE `useruuid` like ?;";
+		String insert = "INSERT INTO Mist_QuestRewardable (`useruuid`, `killquests`, `harvestquests`, `talktoquests`, `eventquests`) VALUES (?,?,?,?,?);";
+		String update = "UPDATE Mist_QuestRewardable SET killquests=?, harvestquests=?, talktoquests=?, eventquests=? WHERE useruuid=?;";
+		for (UUID player : playerinfo.getplayers()) {
+			Playerstats p = playerinfo.getplayer(player);
+			PreparedStatement pst = null;
+			try {
+				pst = con.prepareStatement(test);
+				pst.setString(1, player.toString());
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					pst.close();
+					pst = con.prepareStatement(update);
+					String kill = "";
+					String harvest = "";
+					String talkto = "";
+					String event = "";
+					for (String type : p.getcompletedtype()) {
+						switch (type) {
+						case "kill":
+							for (int numbers : p.getcompleted(type)) {
+								kill += numbers + "_";
+							}
+							break;
+						case "harvest":
+							for (int numbers : p.getcompleted(type)) {
+								harvest += numbers + "_";
+							}
+							break;
+						case "talkto":
+							for (int numbers : p.getcompleted(type)) {
+								talkto += numbers + "_";
+							}
+							break;
+						case "event":
+						case "eventharvest":
+						case "eventkill":
+							for (int numbers : p.getcompleted(type)) {
+								event += numbers + "_";
+							}
+							break;
+						}
+					}
+					pst.setString(1, kill);
+					pst.setString(2, harvest);
+					pst.setString(3, talkto);
+					pst.setString(4, event);
+					pst.setString(5, player.toString());
+					pst.execute();
+
+				} else {
+					pst.close();
+					pst = con.prepareStatement(insert);
+					String kill = "";
+					String harvest = "";
+					String talkto = "";
+					String event = "";
+					for (String type : p.getcompletedtype()) {
+						switch (type) {
+						case "kill":
+							for (int numbers : p.getcompleted(type)) {
+								kill += numbers + "_";
+							}
+							break;
+						case "harvest":
+							for (int numbers : p.getcompleted(type)) {
+								harvest += numbers + "_";
+							}
+							break;
+						case "talkto":
+							for (int numbers : p.getcompleted(type)) {
+								talkto += numbers + "_";
+							}
+							break;
+						case "event":
+						case "eventharvest":
+						case "eventkill":
+							for (int numbers : p.getcompleted(type)) {
+								event += numbers + "_";
+							}
+							break;
+						}
+					}
+					pst.setString(2, kill);
+					pst.setString(3, harvest);
+					pst.setString(4, talkto);
+					pst.setString(5, event);
+					pst.setString(1, player.toString());
+					pst.execute();
+				}
+			} catch (SQLException e) {
+				this.plugin.getLogger().severe(e.getMessage());
+				plugin.getLogger().info(
+						"There was a error during the savings of the data to the database: "
+								+ e.getMessage());
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+
+			finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+		}
+	}
+
+	public void saveactivequest() {
+		String test = "SELECT * FROM Mist_QuestActive WHERE `useruuid` like ?;";
+		String insert = "INSERT INTO Mist_QuestActive (`useruuid`, `killquests`, `harvestquests`, `talktoquests`, `eventquests`) VALUES (?,?,?,?,?);";
+		String update = "UPDATE Mist_QuestActive SET killquests=?, harvestquests=?, talktoquests=?, eventquests=? WHERE useruuid=?;";
+		for (UUID player : playerinfo.getplayers()) {
+			Playerstats p = playerinfo.getplayer(player);
+			PreparedStatement pst = null;
+			try {
+				pst = con.prepareStatement(test);
+				pst.setString(1, player.toString());
+				ResultSet rs = pst.executeQuery();
+				if (rs.next()) {
+					pst.close();
+					pst = con.prepareStatement(update);
+					String kill = "";
+					String harvest = "";
+					String talkto = "";
+					String event = "";
+					for (String type : p.getactivetype()) {
+						switch (type) {
+						case "kill":
+							for (int numbers : p.getactives(type)) {
+								kill += numbers + "-" + questers.getProgress(player).get(type).get(numbers) +  "_";
+							}
+							break;
+						case "harvest":
+							for (int numbers : p.getactives(type)) {
+								harvest += numbers + "-" + questers.getProgress(player).get(type).get(numbers) +  "_";
+							}
+							break;
+						case "talkto":
+							for (int numbers : p.getactives(type)) {
+								talkto += numbers + "_";
+							}
+							break;
+						case "event":
+						case "eventharvest":
+						case "eventkill":
+							for (int numbers : p.getactives(type)) {
+								event += numbers + "_";
+							}
+							break;
+						}
+					}
+					pst.setString(1, kill);
+					pst.setString(2, harvest);
+					pst.setString(3, talkto);
+					pst.setString(4, event);
+					pst.setString(5, player.toString());
+					pst.execute();
+
+				} else {
+					pst.close();
+					pst = con.prepareStatement(insert);
+					String kill = "";
+					String harvest = "";
+					String talkto = "";
+					String event = "";
+					for (String type : p.getactivetype()) {
+						switch (type) {
+						case "kill":
+							for (int numbers : p.getactives(type)) {
+								kill += numbers + "_";
+							}
+							break;
+						case "harvest":
+							for (int numbers : p.getactives(type)) {
+								harvest += numbers + "_";
+							}
+							break;
+						case "talkto":
+							for (int numbers : p.getactives(type)) {
+								talkto += numbers + "_";
+							}
+							break;
+						case "event":
+						case "eventharvest":
+						case "eventkill":
+							for (int numbers : p.getactives(type)) {
+								event += numbers + "-" +questers.getProgress(player).get(type).get(numbers) +  "_";
+							}
+							break;
+						}
+					}
+					pst.setString(2, kill);
+					pst.setString(3, harvest);
+					pst.setString(4, talkto);
+					pst.setString(5, event);
+					pst.setString(1, player.toString());
+					pst.execute();
+				}
+			} catch (SQLException e) {
+				this.plugin.getLogger().severe(e.getMessage());
+				plugin.getLogger().info(
+						"There was a error during the savings of the data to the database: "
+								+ e.getMessage());
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+
+			finally {
+				try {
+					if (pst != null) {
+						pst.close();
+					}
+				} catch (SQLException ex) {
+					System.out.println(ex.getStackTrace());
+				}
+			}
+		}
+	}
+
 	public void saveplayerdata() {
 		ArrayList<UUID> players = new ArrayList<UUID>();
 		players.addAll(playerinfo.getplayers());
@@ -520,8 +758,8 @@ public class DbStuff {
 					pst.setInt(20, p.getAlchemy());
 					pst.setInt(21, p.getAlchemyprog());
 					String lib = "";
-					if(p.getBooks() != null && p.getBooks().size() != 0){
-						for(String in : p.getBooks()){
+					if (p.getBooks() != null && p.getBooks().size() != 0) {
+						for (String in : p.getBooks()) {
 							lib += in + "-";
 						}
 					}
@@ -565,8 +803,8 @@ public class DbStuff {
 					pst.setInt(21, p.getAlchemy());
 					pst.setInt(22, p.getAlchemyprog());
 					String lib = "";
-					if(p.getBooks() != null && p.getBooks().size() != 0){
-						for(String in : p.getBooks()){
+					if (p.getBooks() != null && p.getBooks().size() != 0) {
+						for (String in : p.getBooks()) {
 							lib += in + "-";
 						}
 					}
@@ -1250,6 +1488,96 @@ public class DbStuff {
 		}
 	}
 
+	public void saverewarded() {
+		for (UUID player : playerinfo.getplayers()) {
+			Playerstats p = playerinfo.getplayer(player);
+			for (String type : p.getrewardedtype()) {
+				String test = "SELECT * FROM Mist_QuestComplete%type% WHERE useruuid=?;";
+				String update = "UPDATE Mist_QuestComplete%type% SET timereward=?, questnumber=? WHERE useruuid=?;";
+				String insert = "INSERT INTO Mist_QuestComplete%type% (`useruuid`, `timereward`, `questnumber`) VALUES (?,?,?);";
+				switch(type){
+				case "kill":
+					test = test.replace("%type%", "Kill");
+					update = update.replace("%type%", "Kill");
+					insert = insert.replace("%type%", "Kill");
+					break;
+				case "harvest":
+					test = test.replace("%type%", "Harvest");
+					update = update.replace("%type%", "Harvest");
+					insert = insert.replace("%type%", "Harvest");
+					break;
+				case "talkto":
+					test = test.replace("%type%", "Talkto");
+					update = update.replace("%type%", "Talkto");
+					insert = insert.replace("%type%", "Talkto");
+					break;
+				case "event":
+				case "eventharvest":
+				case "eventkill":
+					test = test.replace("%type%", "Event");
+					update = update.replace("%type%", "Event");
+					insert = insert.replace("%type%", "Event");
+					break;
+				}
+				PreparedStatement pst = null;
+				try {
+					pst = con.prepareStatement(test);
+					pst.setString(1, player.toString());
+					ResultSet rs = pst.executeQuery();
+					if(rs.next()){
+						pst.close();
+						pst = con.prepareStatement(update);
+						String numbers = "";
+						String time = "";
+						for(int number : p.getrewardednumber(type)){
+							numbers += number + "_";
+							time += p.getrewardedtime(type, number) + "_";
+						}
+						pst.setString(1, time);
+						pst.setString(2, numbers);
+						pst.setString(3, player.toString());
+						pst.execute();
+					}else{
+						pst.close();
+						pst = con.prepareStatement(insert);
+						String numbers = "";
+						String time = "";
+						for(int number : p.getrewardednumber(type)){
+							numbers += number + "_";
+							time += p.getrewardedtime(type, number) + "_";
+						}
+						pst.setString(2, time);
+						pst.setString(3, numbers);
+						pst.setString(1, player.toString());
+						pst.execute();
+					}
+				} catch (SQLException e) {
+					this.plugin.getLogger().severe(e.getMessage());
+					plugin.getLogger().info(
+							"There was a error during the savings of the data to the database: "
+									+ e.getMessage());
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
+				}
+
+				finally {
+					try {
+						if (pst != null) {
+							pst.close();
+						}
+					} catch (SQLException ex) {
+						System.out.println(ex.getStackTrace());
+					}
+				}
+			}
+		}
+	}
+
 	public void saveall() {
 		checkcon();
 
@@ -1268,6 +1596,9 @@ public class DbStuff {
 		saveharbors();
 		savetrips();
 		saveshops();
+		saveactivequest();
+		savecompleted();
+		saverewarded();
 		plugin.getLogger().info(
 				Ansi.ansi().fg(Ansi.Color.GREEN) + "SAVING COMPLETE"
 						+ Ansi.ansi().fg(Ansi.Color.WHITE));
@@ -1291,6 +1622,309 @@ public class DbStuff {
 	 * System.out.println(ex.getStackTrace()); } } }
 	 **/
 
+	
+	public void loadactive(){
+		String load = "SELECT * FROM Mist_QuestActive;";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(load);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
+				if(rs.getString("killquests") != null || !rs.getString("killquests").equals("")){
+					for(String quests : rs.getString("killquests").split("_")){
+						if(quests == ""){
+						continue;
+						}
+						String[] split = quests.split("-");
+						int id = Integer.parseInt(split[0]);
+						int prog  = Integer.parseInt(split[1]);
+						p.addactive("kill", id);
+						questers.addProgress(player, "kill", id, prog);
+					}
+				}
+				if(rs.getString("harvestquests") != null|| !rs.getString("harvestquests").equals("")){
+					for(String quests : rs.getString("harvestquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						String[] split = quests.split("-");
+						int id = Integer.parseInt(split[0]);
+						int prog  = Integer.parseInt(split[1]);
+						p.addactive("harvest", id);
+						questers.addProgress(player, "harvest", id, prog);
+					}
+				}
+				if(rs.getString("talktoquests") != null|| !rs.getString("talktoquests").equals("")){
+					for(String quests : rs.getString("talktoquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						int id = Integer.parseInt(quests);
+						p.addactive("talkto", id);
+					}
+					
+				}
+				if(rs.getString("eventquests") != null|| !rs.getString("eventquests").equals("")){
+					for(String quests : rs.getString("eventquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						String[] split = quests.split("-");
+						int id = Integer.parseInt(split[0]);
+						int prog  = Integer.parseInt(split[1]);
+						p.addactive("event", id);
+						questers.addProgress(player, "event", id, prog);
+					}
+				}
+				
+			}
+		}catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+	}
+	
+	public void loadcompleted(){
+		String comp = "SELECT * FROM Mist_QuestRewardable;";
+		PreparedStatement pst = null;
+		
+		try{
+			pst = con.prepareStatement(comp);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
+				if(rs.getString("killquests") != null || !rs.getString("killquests").equals("")){
+					for(String quests : rs.getString("killquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						int id = Integer.parseInt(quests);
+						p.addcompleted("kill", id);
+					}
+				}
+				if(rs.getString("harvestquests") != null || !rs.getString("harvestquests").equals("")){
+					for(String quests : rs.getString("harvestquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						int id = Integer.parseInt(quests);
+						p.addcompleted("harvest", id);
+					}
+				}
+				if(rs.getString("talktoquests") != null || !rs.getString("eventquests").equals("")){
+					for(String quests : rs.getString("talktoquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						int id = Integer.parseInt(quests);
+						p.addcompleted("talkto", id);
+					}
+				}
+				if(rs.getString("eventquests") != null || !rs.getString("eventquests").equals("")){
+					for(String quests : rs.getString("eventquests").split("_")){
+						if(quests == ""){
+							continue;
+							}
+						int id = Integer.parseInt(quests);
+						p.addcompleted("event", id);
+					}
+				}
+			}
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+	}
+
+	public void loadrewardedKill(){
+	String load = "SELECT * FROM Mist_QuestCompleteKill;";
+	PreparedStatement pst = null;
+	try{
+		pst = con.prepareStatement(load);
+		ResultSet rs = pst.executeQuery();
+		while(rs.next()){
+			if(rs.getString("questnumber") == null|| rs.getString("questnumber").equals("")){
+				continue;
+			}
+			UUID player = UUID.fromString(rs.getString("useruuid"));
+			Playerstats p = playerinfo.getplayer(player);
+			String[] quest = rs.getString("questnumber").split("_");
+			String[] rewards = rs.getString("timereward").split("_");
+			for(int i = 0; i < quest.length; i++){
+				int id = Integer.parseInt(quest[i]);
+				long r = Long.parseLong(rewards[i]);
+				p.addrewarded("kill", id, r);
+			}
+		}
+	} catch (SQLException e) {
+		e.printStackTrace();
+		try {
+			if (pst != null) {
+				pst.close();
+			}
+		} catch (SQLException ex) {
+			System.out.println(ex.getStackTrace());
+		}
+	} finally {
+		try {
+			if (pst != null) {
+				pst.close();
+			}
+		} catch (SQLException ex) {
+			System.out.println(ex.getStackTrace());
+		}
+	}
+	}
+	public void loadrewardedHarvest(){
+		String load = "SELECT * FROM Mist_QuestCompleteHarvest;";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(load);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				if(rs.getString("questnumber") == null|| rs.getString("questnumber").equals("")){
+					continue;
+				}
+				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
+				String[] quest = rs.getString("questnumber").split("_");
+				String[] rewards = rs.getString("timereward").split("_");
+				for(int i = 0; i < quest.length; i++){
+					int id = Integer.parseInt(quest[i]);
+					long r = Long.parseLong(rewards[i]);
+					p.addrewarded("harvest", id, r);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+		}
+	public void loadrewardedTalkto(){
+		String load = "SELECT * FROM Mist_QuestCompleteTalkto;";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(load);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				if(rs.getString("questnumber") == null|| rs.getString("questnumber").equals("")){
+					continue;
+				}
+				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
+				String[] quest = rs.getString("questnumber").split("_");
+				String[] rewards = rs.getString("timereward").split("_");
+				for(int i = 0; i < quest.length; i++){
+					int id = Integer.parseInt(quest[i]);
+					long r = Long.parseLong(rewards[i]);
+					p.addrewarded("talkto", id, r);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+		}
+	public void loadrewardedevent(){
+		String load = "SELECT * FROM Mist_QuestCompleteEvent;";
+		PreparedStatement pst = null;
+		try{
+			pst = con.prepareStatement(load);
+			ResultSet rs = pst.executeQuery();
+			while(rs.next()){
+				if(rs.getString("questnumber") == null || rs.getString("questnumber").equals("")){
+					continue;
+				}
+				UUID player = UUID.fromString(rs.getString("useruuid"));
+				Playerstats p = playerinfo.getplayer(player);
+				String[] quest = rs.getString("questnumber").split("_");
+				String[] rewards = rs.getString("timereward").split("_");
+				for(int i = 0; i < quest.length; i++){
+					int id = Integer.parseInt(quest[i]);
+					long r = Long.parseLong(rewards[i]);
+					p.addrewarded("event", id, r);
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		} finally {
+			try {
+				if (pst != null) {
+					pst.close();
+				}
+			} catch (SQLException ex) {
+				System.out.println(ex.getStackTrace());
+			}
+		}
+		}
+	
 	public void loadharbors() {
 		String loading = "SELECT * FROM Mist_Harbors;";
 		PreparedStatement pst = null;
@@ -1441,9 +2075,10 @@ public class DbStuff {
 					p.setDex(rs.getInt("dex"));
 					p.setLevel(rs.getInt("lvl"));
 					p.setLevelprog(rs.getInt("levelprog"));
-					if(rs.getString("library") != null || !rs.getString("library").equals("")){
+					if (rs.getString("library") != null
+							|| !rs.getString("library").equals("")) {
 						String[] books = rs.getString("library").split("-");
-						for(String in : books){
+						for (String in : books) {
 							p.addBook(in);
 						}
 					}
@@ -1793,6 +2428,15 @@ public class DbStuff {
 		loadpartydata();
 		loadplayerstats();
 
+		
+		loadactive();
+		loadcompleted();
+		loadrewardedevent();
+		loadrewardedHarvest();
+		loadrewardedKill();
+		loadrewardedTalkto();
+		
+		
 		loadeventboat();
 		loadeventcart();
 		loadeventdragon();

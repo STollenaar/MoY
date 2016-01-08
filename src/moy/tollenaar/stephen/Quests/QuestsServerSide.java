@@ -20,6 +20,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
+import org.bukkit.metadata.FixedMetadataValue;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
@@ -98,8 +99,9 @@ public class QuestsServerSide extends Quest {
 	// DYNAMIC NPC
 	public void npchear(final UUID npcuuid) {
 		NPCHandler handler = plugin.getNPCHandler();
-		final NPC npc = handler.getNPCByUUID(npcuuid);
-		int id = Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin,
+		final NPCEntity npc = handler.getNPCByUUID(npcuuid);
+		@SuppressWarnings("deprecation")
+		int id = Bukkit.getScheduler().scheduleAsyncRepeatingTask(plugin,
 				new Runnable() {
 					int tickdelay = 0;
 
@@ -114,6 +116,29 @@ public class QuestsServerSide extends Quest {
 								Location closest = null;
 
 								for (Player player : Bukkit.getOnlinePlayers()) {
+									if(tickdelay == 9){
+									if(player.hasMetadata("NPCRange")){
+										if(player.getLocation().distance(location) >= 46){
+											if(player.getMetadata("NPCRange").get(0).asBoolean()){
+												npc.playerJoinPacket(player, false);
+												player.setMetadata("NPCRange", new FixedMetadataValue(plugin, false));
+											}
+										}else{
+											if(!player.getMetadata("NPCRange").get(0).asBoolean()){
+												npc.playerJoinPacket(player, true);
+												player.setMetadata("NPCRange", new FixedMetadataValue(plugin, true));
+											}
+										}
+									}else{
+										if(player.getLocation().distance(location) >= 50){
+												npc.playerJoinPacket(player, false);
+												player.setMetadata("NPCRange", new FixedMetadataValue(plugin, false));
+										}else{
+												npc.playerJoinPacket(player, true);
+												player.setMetadata("NPCRange", new FixedMetadataValue(plugin, true));
+										}
+									}
+									}
 									if (player
 											.getWorld()
 											.getName()
@@ -125,7 +150,7 @@ public class QuestsServerSide extends Quest {
 
 										if (player.getLocation()
 												.distanceSquared(location) <= radiusSquared) {
-
+											
 											allclosep.add(player.getLocation());
 
 										}

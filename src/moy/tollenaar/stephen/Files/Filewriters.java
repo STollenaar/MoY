@@ -99,6 +99,11 @@ public class Filewriters {
 		if (!rewards.exists()) {
 			try {
 				rewards.createNewFile();
+				PrintWriter w = new PrintWriter(rewards);
+				w.println("skill");
+				w.println("eco");
+				w.println("give");
+				w.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -1396,4 +1401,5 @@ public class Filewriters {
 	public File[] getLibrary() {
 		return library.listFiles();
 	}
+
 }

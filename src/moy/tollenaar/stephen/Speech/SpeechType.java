@@ -81,7 +81,6 @@ public enum SpeechType {
 		decline.send(player);
 	
 	}
-	@SuppressWarnings("unchecked")
 	protected static void depthSpeech(Player player, List<String> command, List<String> message, int node){
 		List<FancyMessage> cases = new ArrayList<>();
 		for(int i =0; i < command.size(); i++){
@@ -89,6 +88,7 @@ public enum SpeechType {
 			temp.color(ChatColor.GRAY);
 			String cmd = command.get(i);
 			cmd = cmd.replace("%player%", player.getName());
+			cmd += " " + node;
 			temp.command(cmd);
 			cases.add(temp);
 		}

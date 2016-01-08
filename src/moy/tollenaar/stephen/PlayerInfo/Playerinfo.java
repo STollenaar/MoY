@@ -188,6 +188,7 @@ public class Playerinfo implements Listener {
 			t.add(Integer.toString(p.getEnchanting()));
 			t.add(Integer.toString(p.getEnchantingprog()) + "/"
 					+ Integer.toString(p.getEnchanting() * 10));
+			t.add("A mystical spell blocks this discription");
 			temp.setLore(t);
 			enchanting.setItemMeta(temp);
 			enchanting.addEnchantment(cenchant, 0);
@@ -200,6 +201,8 @@ public class Playerinfo implements Listener {
 			t.add(Integer.toString(p.getAlchemy()));
 			t.add(Integer.toString(p.getAlchemyprog()) + "/"
 					+ Integer.toString(p.getAlchemy() * 10));
+			t.add("A web of lies blocks your way");
+			t.add("into seeing what this does");
 			temp.setLore(t);
 			alchemy.setItemMeta(temp);
 		}

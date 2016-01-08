@@ -18,14 +18,17 @@ import moy.tollenaar.stephen.CEvents.QuestRewardEvent;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
+import moy.tollenaar.stephen.Util.RewardsFormatter;
 
 public class QuestClientSide {
 	private QuestsServerSide questers;
 	private MoY plugin;
-
+	private RewardsFormatter formatter;
+	
 	public QuestClientSide(MoY instance) {
 		this.questers = instance.qserver;
 		this.plugin = instance;
+		this.formatter = new RewardsFormatter(instance);
 	}
 
 	private HashMap<String, ArrayList<Integer>> tempav = new HashMap<String, ArrayList<Integer>>();
@@ -103,6 +106,9 @@ public class QuestClientSide {
 												.getQuestnumber()));
 								meta.setLore(lore);
 								killquest.setItemMeta(meta);
+								for(String reward : kill.getReward()){
+									killquest = formatter.formatReward(reward, killquest);
+								}
 								inv.addItem(killquest);
 							}
 						}
@@ -148,6 +154,9 @@ public class QuestClientSide {
 												.getQuestnumber()));
 								meta.setLore(lore);
 								harvestquest.setItemMeta(meta);
+								for(String reward : kill.getReward()){
+									harvestquest = formatter.formatReward(reward, harvestquest);
+								}
 								inv.addItem(harvestquest);
 							}
 						}
@@ -190,6 +199,9 @@ public class QuestClientSide {
 												.getQuestnumber()));
 								meta.setLore(lore);
 								talktoquest.setItemMeta(meta);
+								for(String reward : kill.getReward()){
+									talktoquest = formatter.formatReward(reward, talktoquest);
+								}
 								inv.addItem(talktoquest);
 							}
 						}
@@ -233,6 +245,9 @@ public class QuestClientSide {
 								lore.add("§" + event.getNumber());
 								meta.setLore(lore);
 								item.setItemMeta(meta);
+								for(String reward : event.getReward()){
+									item = formatter.formatReward(reward, item);
+								}
 								inv.addItem(item);
 							}
 						}

@@ -35,6 +35,7 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class Questinteracts implements Listener {
 	private Filewriters fw;
 	private MoY plugin;
+	private QuestsServerSide questers;
 	private Playerinfo playerinfo;
 	private Set<UUID> tempStored = new HashSet<UUID>();
 
@@ -247,7 +248,7 @@ public class Questinteracts implements Listener {
 	public void onReward(QuestRewardEvent event) {
 		String message = ChatColor.DARK_PURPLE + "[" + ChatColor.GOLD
 				+ event.getNpcname() + ChatColor.DARK_PURPLE + "] "
-				+ ChatColor.AQUA + "Enjoy your reward.";
+				+ ChatColor.AQUA + getmessage(event.getType(), event.getQuestnumber());
 		event.getPlayer().sendMessage(message);
 		System.out.println(Ansi.ansi().fg(Ansi.Color.RED) + "QUEST COMPLETE"
 				+ Ansi.ansi().fg(Ansi.Color.WHITE));
@@ -262,6 +263,22 @@ public class Questinteracts implements Listener {
 		this.fw = instance.fw;
 		this.plugin = instance;
 		this.playerinfo = instance.playerinfo;
+		this.questers = instance.qserver;
 	}
-
+	
+	
+	private String getmessage(String type, int number) {
+		switch (type) {
+		case "kill":
+			return questers.returnkill(number).getMessage();
+		case "harvest":
+			return questers.returnharvest(number).getMessage();
+		case "talkto":
+			return questers.returntalkto(number).getMessage();
+		case "event":
+			return questers.returneventquest(number).getMessage();
+		default:
+			return null;
+		}
+	}
 }

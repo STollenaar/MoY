@@ -2,12 +2,10 @@ package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -25,7 +23,6 @@ import moy.tollenaar.stephen.CEvents.QuestProgEvent;
 import moy.tollenaar.stephen.InventoryUtils.InventoryType;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPC.NPC;
-import moy.tollenaar.stephen.NPC.NPCEntity;
 import moy.tollenaar.stephen.NPC.NPCHandler;
 import moy.tollenaar.stephen.Speech.SpeechNode;
 import moy.tollenaar.stephen.Speech.SpeechTrait;
@@ -267,7 +264,7 @@ public class QuestInvClick implements Listener {
 						event.setCancelled(true);
 						player.closeInventory();
 						player.sendMessage("type the command withouth the /. use player for the players who will use it. if this is another reward use as first word add. if"
-								+ "it is replacing a reward set the line number counting from 0 in the purple texts.");
+								+ "it is replacing a reward set the line number counting from 0 in the purple texts. Type remove <line number> to remove that line counted from 0.");
 						ArrayList<String> temp = new ArrayList<String>();
 						temp.add(type);
 						temp.add(npcuuid.toString());
@@ -736,22 +733,7 @@ public class QuestInvClick implements Listener {
 		questers.AddActiveQuest(event.getPlayer(), event.getQuestnumber(),
 				event.getType());
 		if (!event.getType().equals("talkto")) {
-			if (questers.getProgress(event.getPlayer().getUniqueId()) != null) {
-				if (questers.getProgress(event.getPlayer().getUniqueId()).get(
-						event.getType()) != null) {
-					questers.getProgress(event.getPlayer().getUniqueId())
-							.get(event.getType())
-							.put(event.getQuestnumber(), 0);
-				} else {
-					HashMap<Integer, Integer> numberq = new HashMap<Integer, Integer>();
-					numberq.put(event.getQuestnumber(), 0);
-					questers.getProgress(event.getPlayer().getUniqueId()).put(
-							event.getType(), numberq);
-				}
-			} else {
-				questers.addProgress(event.getPlayer().getUniqueId(),
-						event.getType(), event.getQuestnumber());
-			}
+			questers.addProgress(event.getPlayer().getUniqueId(), event.getType(), event.getQuestnumber());
 			if (event.getType().equals("harvest")) {
 				for (ItemStack item : event.getPlayer().getInventory()
 						.getContents()) {
@@ -1276,20 +1258,7 @@ public class QuestInvClick implements Listener {
 
 	}
 
-	private String getmessage(String type, int number) {
-		switch (type) {
-		case "kill":
-			return questers.returnkill(number).getMessage();
-		case "harvest":
-			return questers.returnharvest(number).getMessage();
-		case "talkto":
-			return questers.returntalkto(number).getMessage();
-		case "event":
-			return questers.returneventquest(number).getMessage();
-		default:
-			return null;
-		}
-	}
+
 
 	private enum SpeechTypes {
 		NODE("SpeechNodes"), TRAIT("SpeechTrait"), ALL("AllNodes");

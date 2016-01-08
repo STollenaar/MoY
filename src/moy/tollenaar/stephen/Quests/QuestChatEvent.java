@@ -71,31 +71,42 @@ public class QuestChatEvent{
 			}
 			break;
 		case "reward":
-				if(typed.contains("add")){
-					typed = typed.replace("add", "");
-					event.setReward(typed);
-					pass = true;
-				}else {
-					try{
-						
-						int line = Integer.parseInt(Character.toString(typed.charAt(0)));
-						typed = typed.replaceFirst(Character.toString(typed.charAt(0)), "");
-						if(line >= 0){
+			if (typed.contains("add")) {
+				typed = typed.replace("add", "");
+				event.setReward(typed);
+			}else if(typed.contains("remove")){
+				try{
+					int line = Integer.parseInt(typed.split(" ")[1]);
+					event.removeReward(line);
+				}catch(NumberFormatException ex){
+					pass = false;
+				}
+			}
+			
+			else {
+				try {
+
+					int line = Integer.parseInt(Character
+							.toString(typed.charAt(0)));
+					typed = typed
+							.replaceFirst(Character.toString(typed
+									.charAt(0)), "");
+					if (line >= 0) {
 						List<String> rew = event.getReward();
-						if(rew.size()-1 <= line){
+						if (rew.size() - 1 >= line) {
 							rew.set(line, typed);
 							event.setReward(rew);
 							pass = true;
-						}else{
+						} else {
 							pass = false;
 						}
-						}else{
-							pass = false;
-						}
-					}catch(NumberFormatException ex){
+					} else {
 						pass = false;
 					}
+				} catch (NumberFormatException ex) {
+					pass = false;
 				}
+			}
 			break;
 		case "start":
 			if(typed.contains("/")){

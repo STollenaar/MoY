@@ -13,6 +13,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -176,6 +177,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	private void sendPacketsToListed(Iterable<? extends Player> recipients,
 			boolean spawn) {
 		for (Player players : recipients) {
+			players.setMetadata("NPCRange", new FixedMetadataValue(plugin, true));
 			playerJoinPacket(players, spawn);
 		}
 	}
@@ -290,11 +292,7 @@ public class NPCEntity extends EntityPlayer implements NPC {
 		this.spawned = true;
 		Bukkit.getPluginManager().callEvent(
 				new NPCSpawnEvent(this, location, reason));
-		if (reason != NPCSpawnReason.SHOP_SPAWN) {
 			plugin.qserver.resetHear(getUniqueId());
-		} else {
-			plugin.qserver.npchear(getUniqueId());
-		}
 	}
 
 	@Override

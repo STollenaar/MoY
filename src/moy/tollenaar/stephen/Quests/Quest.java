@@ -71,17 +71,14 @@ public class Quest {
 	public HashMap<String, HashMap<Integer, Integer>> getProgress(UUID player){
 		return progress.get(player);
 	}
-	public void changeProgress(){
-		
-	}
 	
-	public void addProgress(UUID player, String type, int quest){
+	public void addProgress(UUID player, String type, int quest, int prog){
 		if(progress.get(player) != null){
 			if(progress.get(player).get(type) != null){
-				progress.get(player).get(type).put(quest, 0);
+				progress.get(player).get(type).put(quest, prog);
 			}else{
 				HashMap<Integer, Integer> id = new HashMap<Integer, Integer>();
-				id.put(quest, 0);
+				id.put(quest, prog);
 				progress.get(player).put(type, id);
 			}
 		}else{
@@ -91,6 +88,10 @@ public class Quest {
 			t.put(type, id);
 			progress.put(player, t);
 		}
+	}
+	
+	public void addProgress(UUID player, String type, int quest){
+		addProgress(player, type, quest, 0);
 	}
 
 	public void removekill(int number) {

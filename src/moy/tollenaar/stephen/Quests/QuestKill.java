@@ -201,6 +201,9 @@ public class QuestKill {
 		this.message = message;
 	}
 
+	public void removeReward(int l){
+		reward.remove(l);
+	}
 
 	public Set<Integer> getNodes() {
 		return nodes;

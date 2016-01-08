@@ -114,7 +114,16 @@ public class QuestChat extends QuestInvClick implements Listener {
 						if (typed.contains("add")) {
 							typed = typed.replace("add", "");
 							kill.setReward(typed);
-						} else {
+						}else if(typed.contains("remove")){
+							try{
+								int line = Integer.parseInt(typed.split(" ")[1]);
+								kill.removeReward(line);
+							}catch(NumberFormatException ex){
+								pass = false;
+							}
+						}
+						
+						else {
 							try {
 
 								int line = Integer.parseInt(Character
@@ -124,8 +133,9 @@ public class QuestChat extends QuestInvClick implements Listener {
 												.charAt(0)), "");
 								if (line >= 0) {
 									List<String> rew = kill.getReward();
-									if (rew.size() - 1 <= line) {
+									if (rew.size() - 1 >= line) {
 										rew.set(line, typed);
+										System.out.println(rew);
 										kill.setReward(rew);
 										pass = true;
 									} else {
@@ -247,8 +257,16 @@ public class QuestChat extends QuestInvClick implements Listener {
 						if (typed.contains("add")) {
 							typed = typed.replace("add", "");
 							kill.setReward(typed);
-							pass = true;
-						} else {
+						}else if(typed.contains("remove")){
+							try{
+								int line = Integer.parseInt(typed.split(" ")[1]);
+								kill.removeReward(line);
+							}catch(NumberFormatException ex){
+								pass = false;
+							}
+						}
+						
+						else {
 							try {
 
 								int line = Integer.parseInt(Character
@@ -258,7 +276,7 @@ public class QuestChat extends QuestInvClick implements Listener {
 												.charAt(0)), "");
 								if (line >= 0) {
 									List<String> rew = kill.getReward();
-									if (rew.size() - 1 <= line) {
+									if (rew.size() - 1 >= line) {
 										rew.set(line, typed);
 										kill.setReward(rew);
 										pass = true;
@@ -270,7 +288,6 @@ public class QuestChat extends QuestInvClick implements Listener {
 								}
 							} catch (NumberFormatException ex) {
 								pass = false;
-								;
 							}
 						}
 						break;
@@ -408,8 +425,16 @@ public class QuestChat extends QuestInvClick implements Listener {
 						if (typed.contains("add")) {
 							typed = typed.replace("add", "");
 							talk.setReward(typed);
-							pass = true;
-						} else {
+						}else if(typed.contains("remove")){
+							try{
+								int line = Integer.parseInt(typed.split(" ")[1]);
+								talk.removeReward(line);
+							}catch(NumberFormatException ex){
+								pass = false;
+							}
+						}
+						
+						else {
 							try {
 
 								int line = Integer.parseInt(Character
@@ -419,21 +444,18 @@ public class QuestChat extends QuestInvClick implements Listener {
 												.charAt(0)), "");
 								if (line >= 0) {
 									List<String> rew = talk.getReward();
-									if (rew.size() - 1 <= line) {
+									if (rew.size() - 1 >= line) {
 										rew.set(line, typed);
 										talk.setReward(rew);
 										pass = true;
 									} else {
 										pass = false;
-										;
 									}
 								} else {
 									pass = false;
-									;
 								}
 							} catch (NumberFormatException ex) {
 								pass = false;
-								;
 							}
 						}
 						break;

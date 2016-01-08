@@ -185,7 +185,9 @@ public class QuestTalkto {
 	public Set<Integer> getNodes() {
 		return nodes;
 	}
-
+	public void removeReward(int l){
+		reward.remove(l);
+	}
 	public void AddNode(int node) {
 		this.nodes.add(node);
 	}

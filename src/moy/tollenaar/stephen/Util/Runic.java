@@ -1,6 +1,8 @@
 package moy.tollenaar.stephen.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bukkit.inventory.meta.BookMeta;
@@ -35,6 +37,21 @@ public class Runic {
 		return returning;
 	}
 
+	public List<String> translateToRunic(List<String> normal){
+		List<String> temp = new ArrayList<String>();
+		for(String in : normal){
+			temp.add(translateToRunic(in));
+		}
+		return temp;
+	}
+	public List<String> translateToNormal(List<String> runic){
+		List<String> temp = new ArrayList<String>();
+		for(String in : runic){
+			temp.add(translateToNormale(in));
+		}
+		return temp;
+	}
+	
 	public String translateToNormale(String runic) {
 		String returning = "";
 		for (int i = 0; i < runic.length(); i++) {

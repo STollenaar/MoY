@@ -67,17 +67,19 @@ public class CommandsPlayerinfo implements CommandExecutor {
 								p.setEnchanting(newlvl);
 							}else if(args[0].equalsIgnoreCase("alchemy")){
 								p.setAlchemy(newlvl);
-							}else if(args[0].equalsIgnoreCase("runic")){
-								ItemStack book = new AlchemyVol1(runic).makeBook();
-								player.getInventory().addItem(book);
 							}
 						} catch (NumberFormatException ex) {
 							player.sendMessage("last argument wasn't a number.  Please use /skill <wood/mining/fishing/cooking/smelting/enchant/alchemy/runic> <lvl>.");
 						}
 						return true;
-					}else if(args[0].equalsIgnoreCase("runic")){
-						ItemStack book = new AlchemyVol1(runic).makeBook();
-						player.getInventory().addItem(book);
+					}else if(args.length == 4 && args[0].equalsIgnoreCase("book")){
+								String title = args[1]  + " "+ args[2] + " " + args[3];
+								ItemStack item=  lib.getBook(title);
+								if(item == null){
+									item = new AlchemyVol1(runic).makeBook();
+								}
+								player.getInventory().addItem(item);
+								return true;
 					}else {
 						player.sendMessage("Please use /skill <wood/mining/fishing/cooking/smelting/enchant/alchemy/runic> <lvl>.");
 						return true;

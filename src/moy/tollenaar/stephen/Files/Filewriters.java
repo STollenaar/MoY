@@ -40,7 +40,8 @@ public class Filewriters {
 	private MoY plugin;
 	private QuestsServerSide quest;
 	private Playerinfo playerinfo;
-
+	private LibraryWriters libwriter;
+	
 	private File dummymessages;
 
 	private File TravelBoatnearmis;
@@ -86,6 +87,8 @@ public class Filewriters {
 		if (!library.exists()) {
 			library.mkdir();
 		}
+		this.libwriter = new LibraryWriters(library);
+		
 		speechTraits = new File(plugin.getDataFolder(), "speechTraits");
 		if (!speechTraits.exists()) {
 			speechTraits.mkdir();
@@ -1398,8 +1401,8 @@ public class Filewriters {
 		}
 	}
 
-	public File[] getLibrary() {
-		return library.listFiles();
+	public File getLibrary() {
+		return library;
 	}
 
 }

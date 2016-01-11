@@ -26,7 +26,8 @@ public class Book {
 		BookMeta meta = (BookMeta) book.getItemMeta();
 		meta.setTitle(runic.translateToRunic(title));
 		meta.setAuthor(runic.translateToRunic(author));
-		meta.setPages(pages);
+		meta.setPages(runic.translateToRunic(pages));
+		book.setItemMeta(meta);
 		return book;
 	}
 	public ItemStack getBook(){

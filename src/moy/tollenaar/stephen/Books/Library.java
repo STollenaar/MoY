@@ -2,11 +2,13 @@ package moy.tollenaar.stephen.Books;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
+
+
+
 
 
 import org.bukkit.Bukkit;
@@ -18,12 +20,13 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.Wool;
 
 import moy.tollenaar.stephen.Files.Filewriters;
+import moy.tollenaar.stephen.Files.LibraryWriters;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerstats;
 import moy.tollenaar.stephen.Util.Runic;
 
 public class Library {
-	private final static int MAX_NUMBER_OF_BOOKS = getMaxBooks();
+	private final static int MAX_NUMBER_OF_BOOKS = LibraryWriters.getMaxBooks();
 
 	private Filewriters fw;
 	private Runic runic;
@@ -35,14 +38,22 @@ public class Library {
 		this.runic = new Runic();
 		loadBooks();
 		if (LIBRARY.keySet().size() != MAX_NUMBER_OF_BOOKS) {
-			createBooks();
+			createBooks(fw.getLibrary());
 		}
 		this.plugin = instance;
 	}
-
+	public ItemStack getBook(String title){
+		if(LIBRARY.get(title) != null){
+			return LIBRARY.get(title).getBook();
+		}else{
+			return null;
+		}
+	}
+	
+	
 	private void loadBooks() {
 		if (fw.getLibrary() != null) {
-			for (File in : fw.getLibrary()) {
+			for (File in : fw.getLibrary().listFiles()) {
 				String title = in.getName().replace(".txt", "");
 				List<String> pages = new ArrayList<String>();
 				try {
@@ -70,11 +81,9 @@ public class Library {
 		}
 	}
 
-	private void createBooks() {
-		URL url = Library.class.getResource("libraryFiles");
-		File dir = new File(url.getFile());
-		;
-		for (File in : dir.listFiles()) {
+	private void createBooks(File lib) {
+		
+		for (File in : lib.listFiles()) {
 			String title = in.getName().replace(".txt", "");
 			if (LIBRARY.get(title) == null) {
 				List<String> pages = new ArrayList<String>();
@@ -103,15 +112,7 @@ public class Library {
 		}
 	}
 
-	private static int getMaxBooks() {
-		try {
-			URL url = Library.class.getResource("libraryFiles");
-			File dir = new File(url.getFile());
-			return dir.listFiles().length;
-		} catch (NullPointerException ex) {
-			return 0;
-		}
-	}
+	
 
 	public void makeLibrary(Player player) {
 		List<Book> hasRead = new ArrayList<Book>();

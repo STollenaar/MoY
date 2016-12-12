@@ -6,8 +6,8 @@ import java.lang.reflect.Field;
 import java.net.SocketAddress;
 
 
-import net.minecraft.server.v1_8_R3.EnumProtocolDirection;
-import net.minecraft.server.v1_8_R3.NetworkManager;
+import net.minecraft.server.v1_11_R1.EnumProtocolDirection;
+import net.minecraft.server.v1_11_R1.NetworkManager;
 
 public class NPCNetworkManager extends NetworkManager{
 	public NPCNetworkManager() {

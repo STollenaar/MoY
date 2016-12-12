@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
 
-import net.minecraft.server.v1_8_R3.Blocks;
-import net.minecraft.server.v1_8_R3.ItemFish.EnumFish;
-import net.minecraft.server.v1_8_R3.ItemStack;
-import net.minecraft.server.v1_8_R3.Items;
-import net.minecraft.server.v1_8_R3.PossibleFishingResult;
-import net.minecraft.server.v1_8_R3.WeightedRandom;
+import moy.tollenaar.stephen.Util.PossibleFishingResult;
+import net.minecraft.server.v1_11_R1.Blocks;
+import net.minecraft.server.v1_11_R1.ItemFish.EnumFish;
+import net.minecraft.server.v1_11_R1.ItemStack;
+import net.minecraft.server.v1_11_R1.Items;
+import net.minecraft.server.v1_11_R1.WeightedRandom;
 
 
 public class FishingSkill {

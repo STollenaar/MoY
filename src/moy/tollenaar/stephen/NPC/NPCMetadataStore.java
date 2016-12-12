@@ -1,7 +1,7 @@
 package moy.tollenaar.stephen.NPC;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_8_R3.metadata.PlayerMetadataStore;
+import org.bukkit.craftbukkit.v1_11_R1.metadata.PlayerMetadataStore;
 
 public class NPCMetadataStore extends PlayerMetadataStore{
 

@@ -13,14 +13,14 @@ import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.PlayerInfo.Playerinfo;
 import moy.tollenaar.stephen.Util.ParticleEffect;
 import moy.tollenaar.stephen.Util.Runic;
-import net.minecraft.server.v1_8_R3.ContainerEnchantTable;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_11_R1.ContainerEnchantTable;
+import net.minecraft.server.v1_11_R1.EntityPlayer;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

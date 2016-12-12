@@ -5,7 +5,7 @@ import java.net.URL;
 import java.util.UUID;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
-import net.minecraft.server.v1_8_R3.MinecraftServer;
+import net.minecraft.server.v1_11_R1.MinecraftServer;
 
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -28,10 +28,11 @@ public class SkinFetcher extends BukkitRunnable{
 	private MoY plugin;
 	private final SkinRunner runner;
 	
+	@SuppressWarnings("deprecation")
 	public SkinFetcher(UUID npcuuid, UUID skinuuid,String skin, MoY plugin, SkinRunner runner ){
 		this.npcuuid = npcuuid;
 		this.skinuuid = skinuuid;
-		this.server = MinecraftServer.getServer().aD();
+		this.server = MinecraftServer.getServer().az();
 		this.skin  = skin;
 		this.plugin = plugin;
 		this.runner = runner;

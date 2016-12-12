@@ -172,7 +172,7 @@ public class RandomEvents implements Listener {
 				Zombie zomb = (Zombie) player.getWorld().spawnEntity(loc, EntityType.ZOMBIE); 
 				zomb.setCustomName("Ribesal");
 				zomb.setCustomNameVisible(true);
-				player.getWorld().playSound(player.getLocation(), Sound.GHAST_SCREAM, 15, 1);
+				player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SCREAM, 15, 1);
 				player.getWorld().playEffect(player.getLocation(), Effect.EXPLOSION_HUGE, 10);
 				player.sendMessage(ChatColor.DARK_PURPLE
 								+ "["
@@ -195,7 +195,7 @@ public class RandomEvents implements Listener {
 					loc.setY(loc.getY() + 1);
 					final Location loc2 = loc;
 					npc.lookatEntity(player);
-					player.getWorld().playSound(loc, Sound.EXPLODE, 10, 1);
+					player.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 10, 1);
 					player.getWorld().playEffect(loc2, Effect.EXPLOSION_HUGE, 10);
 					Random f = new Random();
 					int d = f.nextInt(idlist.size() -1);
@@ -207,7 +207,7 @@ public class RandomEvents implements Listener {
 						@Override
 						public void run(){
 							player.getWorld().playEffect(loc2, Effect.EXPLOSION_HUGE, 10);
-							player.getWorld().playSound(loc2, Sound.EXPLODE, 10, 1);
+							player.getWorld().playSound(loc2, Sound.ENTITY_GENERIC_EXPLODE, 10, 1);
 							npc.despawn(NPCSpawnReason.DESPAWN);
 						}
 					}, 60);
@@ -306,7 +306,7 @@ public class RandomEvents implements Listener {
 				Zombie zomb = (Zombie) player.getWorld().spawnEntity(loc, EntityType.ZOMBIE); 
 				zomb.setCustomName("Ribesal");
 				zomb.setCustomNameVisible(true);
-				player.getWorld().playSound(player.getLocation(), Sound.GHAST_SCREAM, 15, 1);
+				player.getWorld().playSound(player.getLocation(), Sound.ENTITY_GHAST_SCREAM, 15, 1);
 				player.getWorld().playEffect(player.getLocation(), Effect.EXPLOSION_HUGE, 10);
 				player.sendMessage(ChatColor.DARK_PURPLE
 								+ "["

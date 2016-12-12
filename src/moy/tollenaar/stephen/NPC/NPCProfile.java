@@ -9,7 +9,7 @@ import com.mojang.authlib.properties.Property;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 import moy.tollenaar.stephen.NPCSkin.SkinRunner;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import net.minecraft.server.v1_11_R1.WorldServer;
 
 public class NPCProfile {
 

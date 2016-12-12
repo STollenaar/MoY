@@ -1,11 +1,11 @@
 package moy.tollenaar.stephen.NPC;
 
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.CraftServer;
+import org.bukkit.craftbukkit.v1_11_R1.CraftServer;
 
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.NetworkManager;
-import net.minecraft.server.v1_8_R3.PlayerConnection;
+import net.minecraft.server.v1_11_R1.EntityPlayer;
+import net.minecraft.server.v1_11_R1.NetworkManager;
+import net.minecraft.server.v1_11_R1.PlayerConnection;
 
 public class NPCPlayerConnection extends PlayerConnection{
     public NPCPlayerConnection(NetworkManager networkmanager, EntityPlayer entityplayer) {

@@ -5,12 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 
 public class ItemGenerator {
 	public static ItemStack InfoQuest(String name, int id, int type,
@@ -188,13 +186,13 @@ public class ItemGenerator {
 	}
 
 	public static ItemStack ActiveQuest(String state) {
-		Wool colored;
+		short colored;
 		if (state.equals("active")) {
-			colored = new Wool(DyeColor.LIME);
+			colored = 5;
 		} else {
-			colored = new Wool(DyeColor.RED);
+			colored = 14;
 		}
-		ItemStack item = new ItemStack(colored.toItemStack());
+		ItemStack item = new ItemStack(Material.WOOL, 1, colored);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName("Active Quest");
 		ArrayList<String> lore = new ArrayList<String>();

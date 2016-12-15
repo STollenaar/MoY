@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import moy.tollenaar.stephen.CEvents.QuestProcessEvent;
@@ -799,7 +797,7 @@ public class QuestInvClick implements Listener {
 
 		Inventory inv = Bukkit
 				.createInventory(null, 9, "Delete " + temp + " ?");
-		ItemStack confirm = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack confirm = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = confirm.getItemMeta();
 			meta.setDisplayName("Yes");
@@ -812,7 +810,7 @@ public class QuestInvClick implements Listener {
 			meta.setLore(lore);
 			confirm.setItemMeta(meta);
 		}
-		ItemStack decline = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack decline = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = decline.getItemMeta();
 			meta.setDisplayName("No");
@@ -850,7 +848,7 @@ public class QuestInvClick implements Listener {
 		}
 		Inventory inv = Bukkit
 				.createInventory(null, 9, "Delete " + temp + " ?");
-		ItemStack confirm = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack confirm = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = confirm.getItemMeta();
 			meta.setDisplayName("Yes");
@@ -865,7 +863,7 @@ public class QuestInvClick implements Listener {
 			meta.setLore(lore);
 			confirm.setItemMeta(meta);
 		}
-		ItemStack decline = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack decline = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = decline.getItemMeta();
 			meta.setDisplayName("No");

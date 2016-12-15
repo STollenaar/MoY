@@ -1,8 +1,10 @@
 package moy.tollenaar.stephen.Quests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -39,13 +41,15 @@ public class Questinteracts implements Listener {
 	private Playerinfo playerinfo;
 	private Set<UUID> tempStored = new HashSet<UUID>();
 
+	private Map<UUID, UUID> tempDouble = new HashMap<>();
+	
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onEvent(PlayerInteractEntityEvent event) {
 		if (event.getRightClicked() != null) {
 			if (event.getRightClicked() instanceof Entity) {
 				Player player = event.getPlayer();
 				Playerstats p = playerinfo.getplayer(player.getUniqueId());
-
 				PermissionUser user = PermissionsEx.getUser(player);
 				boolean dummy = true;
 				Entity entity = event.getRightClicked();
@@ -59,7 +63,7 @@ public class Questinteracts implements Listener {
 					}
 					NPCHandler handler = plugin.getNPCHandler();
 					NPCEntity npc = handler.getNPCByEntity(entity);
-					if (npc != null) {
+					if (npc != null && !doublFire(player.getUniqueId(), npc.getUniqueId())) {
 
 						/**
 						 * important to check if player isn't completing a
@@ -107,7 +111,7 @@ public class Questinteracts implements Listener {
 									if (player.getItemInHand().getItemMeta()
 											.getLore()
 											.contains("NPC adjustment Tool")) {
-										if (user.has("Ysir.npctool")) {
+										if (user.has("Mist.npctool")) {
 											plugin.qserver.npcsettingsmain(
 													npc.getUniqueId(), player);
 											dummy = false;
@@ -280,5 +284,25 @@ public class Questinteracts implements Listener {
 		default:
 			return null;
 		}
+	}
+	
+	private boolean doublFire(UUID player, UUID npc){
+		if(tempDouble.get(player) != null){
+			return tempDouble.get(player) == npc ? true : false;
+		}else{
+			tempDouble.put(player, npc);
+			delayedDelete(player);
+			return false;
+		}
+	}
+	@SuppressWarnings("deprecation")
+	private void delayedDelete(final UUID player){
+		Bukkit.getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable() {
+			
+			@Override
+			public void run() {
+				tempDouble.remove(player);
+			}
+		}, 20L);
 	}
 }

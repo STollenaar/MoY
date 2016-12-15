@@ -45,7 +45,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 				if (args.length == 0) {
 					playerinfo.playerstatsinv(player);
 					return true;
-				} else if(user.has("Ysir.stafflvl")){
+				} else if(user.has("Mist.stafflvl")){
 					if (args.length == 2) {
 						try {
 							int newlvl = Integer.parseInt(args[1]);
@@ -86,7 +86,7 @@ public class CommandsPlayerinfo implements CommandExecutor {
 					}
 				}
 			} else if (cmd.getName().equalsIgnoreCase("lvl")) {
-				if (user.has("Ysir.stafflvl")) {
+				if (user.has("Mist.stafflvl")) {
 					if (args.length != 0) {
 						if (args[0].equalsIgnoreCase("up")) {
 							p.setLevel(p.getLevel() + 1);

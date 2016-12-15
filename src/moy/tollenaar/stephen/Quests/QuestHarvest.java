@@ -8,13 +8,11 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 
 import moy.tollenaar.stephen.InventoryUtils.ItemGenerator;
 
@@ -69,8 +67,7 @@ public class QuestHarvest {
 				ItemStack speech = ItemGenerator.SpeechTrait(2, questnumber);
 		
 		// delete
-		Wool wool = new Wool(DyeColor.RED);
-		ItemStack delete = new ItemStack(wool.toItemStack());
+		ItemStack delete = new ItemStack(new ItemStack(Material.WOOL, 1, (short)5));
 		{
 			ItemMeta temp = delete.getItemMeta();
 			temp.setDisplayName("Delete Quest");

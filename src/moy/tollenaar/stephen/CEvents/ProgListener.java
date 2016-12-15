@@ -25,8 +25,9 @@ public final class ProgListener implements Listener {
 	public ProgListener(MoY instance) {
 		this.info = new InfoBar(instance);
 		this.playerinfo = instance.playerinfo;
-	} 
-//some test comments 
+	}
+
+	// some test comments
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void MiningListener(ProgEvent event) {
@@ -65,10 +66,10 @@ public final class ProgListener implements Listener {
 				currentprog = p.getLevelprog();
 				break;
 			case -1:
-				p.setStrength(p.getStrength()+xp);
+				p.setStrength(p.getStrength() + xp);
 				return;
 			case -2:
-				p.setDex(p.getDex()+xp);
+				p.setDex(p.getDex() + xp);
 				return;
 			case 7:
 				currentlvl = p.getEnchanting();
@@ -160,8 +161,7 @@ public final class ProgListener implements Listener {
 
 		if (!event.getQ()) {
 			if (currentlvl != 50 && event.getBlock() != null) {
-				info.makemessage(event.getPlayer(), event.getType(),
-						event.getBlock());
+				info.makemessage(event.getPlayer(), event.getType(), event.getBlock());
 			} else if (currentlvl != 50 || event.getType() == 6) {
 				info.makemessage(event.getPlayer(), event.getType());
 			}

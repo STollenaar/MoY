@@ -34,7 +34,7 @@ public class CommandsNPC implements CommandExecutor {
 			// QNPC HANDLER
 
 			if (cmd.getName().equalsIgnoreCase("qnpc")) {
-				if (user.has("Ysir.npcadjuster")) {
+				if (user.has("Mist.npcadjuster")) {
 					if (args.length >= 1) {
 						if (args[0].equalsIgnoreCase("create")) {
 							if (args.length == 3) {

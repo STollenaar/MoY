@@ -27,6 +27,7 @@ public class ProgressHarvest implements Listener {
 		this.playerinfo = playerinfo;
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onbucketFillBlock(PlayerInteractEvent event) {
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -73,6 +74,7 @@ public class ProgressHarvest implements Listener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onbucketFillEntity(PlayerInteractEntityEvent event) {
 		if (event.getRightClicked().getType() == EntityType.COW) {

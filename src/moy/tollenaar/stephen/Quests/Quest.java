@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_11_R1.inventory.CraftItemStack;
@@ -31,7 +30,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 
 import moy.tollenaar.stephen.InventoryUtils.ItemGenerator;
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
@@ -339,8 +337,7 @@ public class Quest {
 			}
 		}
 
-		Wool wool = new Wool(DyeColor.LIME);
-		ItemStack create = wool.toItemStack();
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create New");
@@ -382,8 +379,7 @@ public class Quest {
 			}
 		}
 
-		Wool wool = new Wool(DyeColor.LIME);
-		ItemStack create = wool.toItemStack();
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create New");
@@ -425,8 +421,7 @@ public class Quest {
 			}
 		}
 
-		Wool wool = new Wool(DyeColor.LIME);
-		ItemStack create = wool.toItemStack();
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create New");
@@ -453,8 +448,7 @@ public class Quest {
 				inv.addItem(title);
 			}
 		}
-		Wool wool = new Wool(DyeColor.LIME);
-		ItemStack create = wool.toItemStack();
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create New");
@@ -494,8 +488,7 @@ public class Quest {
 				}
 			}
 		}
-		Wool wool = new Wool(DyeColor.LIME);
-		ItemStack create = wool.toItemStack();
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create New");
@@ -1093,7 +1086,7 @@ public class Quest {
 			item.setItemMeta(meta);
 			inv.addItem(item);
 		}
-		ItemStack create = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create Node");
@@ -1136,14 +1129,14 @@ public class Quest {
 			item.setItemMeta(meta);
 			inv.addItem(item);
 		}
-		ItemStack trait = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack trait = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = trait.getItemMeta();
 			meta.setDisplayName("Add Trait");
 			meta.setLore(new ArrayList<String>(Arrays.asList(Integer.toString(type), Integer.toString(number))));
 			trait.setItemMeta(meta);
 		}
-		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack delete = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = delete.getItemMeta();
 			meta.setDisplayName("Delete");
@@ -1183,7 +1176,7 @@ public class Quest {
 					.getDepth()))));
 			depth.setItemMeta(meta);
 		}
-		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack delete = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = delete.getItemMeta();
 			meta.setDisplayName("Delete");

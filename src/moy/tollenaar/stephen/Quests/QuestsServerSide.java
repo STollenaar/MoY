@@ -11,7 +11,6 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
@@ -19,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.material.Wool;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
@@ -362,7 +360,6 @@ public class QuestsServerSide extends Quest {
 	public void npcsettingsmain(UUID npcuuid, Player player) {
 		NPCHandler handler = plugin.getNPCHandler();
 		NPC npc = handler.getNPCByUUID(npcuuid);
-
 		// npc name
 		ItemStack npcname = new ItemStack(Material.SKULL_ITEM);
 		{
@@ -403,8 +400,8 @@ public class QuestsServerSide extends Quest {
 		// active/passive
 		ItemStack activeorpassive;
 		if (activenpc.get(npcuuid) != null) {
-			Wool wool = new Wool(DyeColor.LIME);
-			activeorpassive = wool.toItemStack();
+//			activeorpassive = wool.toItemStack();
+			activeorpassive = new ItemStack(Material.WOOL, 1, (short)5);
 			ItemMeta activem = activeorpassive.getItemMeta();
 			activem.setDisplayName("Active/Passive");
 			List<String> at = new ArrayList<String>();
@@ -413,8 +410,8 @@ public class QuestsServerSide extends Quest {
 			activem.setLore(at);
 			activeorpassive.setItemMeta(activem);
 		} else {
-			Wool wool = new Wool(DyeColor.RED);
-			activeorpassive = wool.toItemStack();
+		//	activeorpassive = wool.toItemStack();
+			activeorpassive = new ItemStack(Material.WOOL, 1, (short)14);
 			ItemMeta activem = activeorpassive.getItemMeta();
 			activem.setDisplayName("Active/Passive");
 			List<String> at = new ArrayList<String>();
@@ -639,7 +636,7 @@ public class QuestsServerSide extends Quest {
 			item.setItemMeta(meta);
 			inv.addItem(item);
 		}
-		ItemStack create = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack create = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = create.getItemMeta();
 			meta.setDisplayName("Create Node");
@@ -683,7 +680,7 @@ public class QuestsServerSide extends Quest {
 			item.setItemMeta(meta);
 			inv.addItem(item);
 		}
-		ItemStack trait = new ItemStack(new Wool(DyeColor.LIME).toItemStack());
+		ItemStack trait = new ItemStack(Material.WOOL, 1, (short)5);
 		{
 			ItemMeta meta = trait.getItemMeta();
 			meta.setDisplayName("Add Trait");
@@ -691,7 +688,7 @@ public class QuestsServerSide extends Quest {
 					npcuuid.toString())));
 			trait.setItemMeta(meta);
 		}
-		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack delete = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = delete.getItemMeta();
 			meta.setDisplayName("Delete");
@@ -732,7 +729,7 @@ public class QuestsServerSide extends Quest {
 					.getDepth()))));
 			depth.setItemMeta(meta);
 		}
-		ItemStack delete = new ItemStack(new Wool(DyeColor.RED).toItemStack());
+		ItemStack delete = new ItemStack(Material.WOOL, 1, (short)14);
 		{
 			ItemMeta meta = delete.getItemMeta();
 			meta.setDisplayName("Delete");

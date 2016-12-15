@@ -33,7 +33,7 @@ public class CommandsEvent implements CommandExecutor{
 			 Player player = (Player)sender;
 				PermissionUser user = PermissionsEx.getUser(player);
 		if(cmd.getName().equalsIgnoreCase("event")){
-			if(user.has("Ysir.event")){
+			if(user.has("Mist.event")){
 			if(args.length == 2){
 				if(args[0].equalsIgnoreCase("boat")){
 					if(args[1].equalsIgnoreCase("create")){
@@ -71,7 +71,7 @@ public class CommandsEvent implements CommandExecutor{
 			return true;
 		}
 		}else if(cmd.getName().equalsIgnoreCase("Harbor")){
-			if(user.has("Ysir.event")){
+			if(user.has("Mist.event")){
 				if(args.length == 1){
 					if(args[0].equalsIgnoreCase("create")){
 						travel.GetHarbor(travel.createnewharbor()).information(player);
@@ -86,7 +86,7 @@ public class CommandsEvent implements CommandExecutor{
 			}
 			return true;
 		}else if(cmd.getName().equalsIgnoreCase("Trip")){
-			if(user.has("Ysir.event")){
+			if(user.has("Mist.event")){
 				if(args.length == 1){
 					if(args[0].equalsIgnoreCase("create")){
 						travel.GetTrip(travel.createnewtrip()).information(player);;

@@ -3,7 +3,7 @@ main: moy.tollenaar.stephen.MistsOfYsir.MoY
 version: B1.11
 authors: [guitargun]
 description: the ultimate plugin
-depend: [MistCore] 
+depend: [MistCore, Essentials] 
 
 commands: 
      party:

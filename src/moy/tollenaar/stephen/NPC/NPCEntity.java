@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_11_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
@@ -19,6 +20,10 @@ import org.bukkit.util.Vector;
 
 import moy.tollenaar.stephen.MistsOfYsir.MoY;
 
+import com.adamki11s.pathing.AStar;
+import com.adamki11s.pathing.AStar.InvalidPathException;
+import com.adamki11s.pathing.PathingResult;
+import com.adamki11s.pathing.Tile;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -26,6 +31,7 @@ import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_11_R1.Entity;
 import net.minecraft.server.v1_11_R1.EntityPlayer;
 import net.minecraft.server.v1_11_R1.EnumGamemode;
+import net.minecraft.server.v1_11_R1.EnumMoveType;
 import net.minecraft.server.v1_11_R1.Packet;
 import net.minecraft.server.v1_11_R1.PacketPlayOutAnimation;
 import net.minecraft.server.v1_11_R1.PacketPlayOutEntityDestroy;
@@ -43,7 +49,6 @@ public class NPCEntity extends EntityPlayer implements NPC {
 
 	private final Pathfinder pathfinder;
 	@SuppressWarnings("unused")
-	private NPCPath path;
 	private String skin;
 	private UUID uuid;
 	private boolean spawned;
@@ -132,11 +137,20 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	}
 
 	public boolean pathFinder(Location loc, double speed, double range) {
-		NPCPath path = NPCPath.find(this, loc, range, speed);
-		if ((this.path = path) != null) {
+//		NPCPath path = NPCPath.find(this, loc, range, speed);
+		AStar path;
+		try {
+			Location temp = this.getCurrentloc();
+			temp.setY(temp.getY()-1);
+			loc.setY(loc.getY());
+			path = new AStar(temp, loc, (int) range);
+		if (path.getPathingResult() == PathingResult.SUCCESS) {
 			lookatLocation(loc);
-			new Move(path).runTaskTimer(plugin, 0, (long) 1.5);
+			new Move(path, this).runTaskTimer(plugin, 0, (long) 1.5);
 			return true;
+		}
+		}catch (InvalidPathException e) {
+			System.out.println(loc + " " + this.getCurrentloc());
 		}
 		return false;
 
@@ -316,16 +330,30 @@ public class NPCEntity extends EntityPlayer implements NPC {
 	}
 
 	private static class Move extends BukkitRunnable {
-		private NPCPath path;
-
-		public Move(NPCPath path) {
-			this.path = path;
+		private List<Tile> path;
+		private final Location start;
+		private NPCEntity entity;
+		
+		public Move(AStar path, NPCEntity entity) {
+			this.path = path.iterate();
+			this.entity = entity;
+			this.start = entity.getCurrentloc();
+			
+			for(Tile t : path.iterate()){
+				t.getLocation(start).getBlock().setType(Material.DIAMOND_BLOCK);
+			}
 		}
 
 		@Override
 		public void run() {
-			if (!path.update()) {
+			cancel();
+			if (path.size() == 0) {
 				cancel();
+			}else if(entity.getCurrentloc() == path.get(0).getLocation(start)){
+				//move to next block
+				path.remove(0);
+				Location temp = path.get(0).getLocation(start);
+				entity.move(EnumMoveType.PLAYER, temp.getX(), temp.getY(), temp.getZ());
 			}
 		}
 

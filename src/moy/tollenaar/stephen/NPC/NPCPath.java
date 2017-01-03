@@ -4,7 +4,10 @@ import org.bukkit.Location;
 
 import net.minecraft.server.v1_11_R1.BlockPosition;
 import net.minecraft.server.v1_11_R1.ChunkCache;
+import net.minecraft.server.v1_11_R1.EntityHuman;
 import net.minecraft.server.v1_11_R1.EntityInsentient;
+import net.minecraft.server.v1_11_R1.EntityLiving;
+import net.minecraft.server.v1_11_R1.EntityPlayer;
 import net.minecraft.server.v1_11_R1.EnumMoveType;
 import net.minecraft.server.v1_11_R1.MathHelper;
 import net.minecraft.server.v1_11_R1.PathEntity;
@@ -77,8 +80,14 @@ public class NPCPath {
 			BlockPosition posTo = new BlockPosition(to.getX(), to.getY(), to.getZ());
 			int k = (int) (range + 8.0);
 			ChunkCache chunkCache = new ChunkCache(entity.world, posFrom.a(-k, -k, -k), posFrom.a(k, k, k), 0);
-			PathEntity path = entity.getPathfinder().a(chunkCache, (EntityInsentient) entity.bM(), posTo,
+			EntityInsentient n = new EntityInsentient(entity.getWorld()) {
+			};
+			n.spawnIn(entity.getWorld());
+			n.setLocation(entity.locX, entity.locY, entity.locZ, entity.yaw, entity.pitch);
+			n.noclip = false;
+			PathEntity path = entity.getPathfinder().a(chunkCache, n, posTo,
 					(float) range);
+			System.out.println(n);
 			if (path != null) {
 				return new NPCPath(entity, path, speed);
 			} else {

@@ -7,5 +7,6 @@
 	<classpathentry exported="true" kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/Essentials.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/HolographicDisplaysAPI_v2.1.3.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/ProtocolLib.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Stephen/Dropbox/plugin libraries/AStar Pathfinding.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

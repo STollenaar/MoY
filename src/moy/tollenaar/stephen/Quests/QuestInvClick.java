@@ -80,6 +80,7 @@ public class QuestInvClick implements Listener {
 							.getDisplayName().equals("Active/Passive")) {
 						if (questers.activenpc.get(npcuuid) != null) {
 							event.setCancelled(true);
+							
 							player.closeInventory();
 							questers.stop(npcuuid);
 							questers.npcsettingsmain(npcuuid, player);
